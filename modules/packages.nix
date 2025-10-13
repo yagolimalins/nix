@@ -9,7 +9,6 @@
     gnome-terminal
     gnome-tweaks
     virtualbox
-    virtualboxExtpack
     rustup
     vscode
     zed-editor
