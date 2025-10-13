@@ -8,7 +8,8 @@
     dconf-editor
     gnome-terminal
     gnome-tweaks
-    virtualboxWithExtpack
+    virtualbox
+    virtualboxExtpack
     rustup
     vscode
     zed-editor
