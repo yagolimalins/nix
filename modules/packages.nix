@@ -7,6 +7,7 @@
     whitesur-icon-theme
     dconf-editor
     gnome-terminal
+    gnome-boxes
     gnome-tweaks
     rustup
     vscode
