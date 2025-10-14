@@ -13,7 +13,7 @@
   boot.loader.systemd-boot.configurationLimit = 10;
 
   # Virtualisation
-  virtualisation.virtualbox.host.enable = true;
+  # virtualisation.virtualbox.host.enable = true;
 
   # Networking
   networking.hostName = "nixos";
