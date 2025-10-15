@@ -11,7 +11,7 @@
     };
 
     "org/gnome/desktop/wm/preferences" = {
-      num-workspaces = 6;
+      num-workspaces = 5;
     };
 
     "org/gnome/shell" = {
@@ -51,7 +51,10 @@
       switch-to-workspace-8 = [ "<Super>8" ];
       switch-to-workspace-9 = [ "<Super>9" ];
       switch-to-workspace-10 = [ "<Super>0" ];
+    };
 
+    "org/gnome/shell/keybindings" = {
+      show-screenshot-ui = [ "<Super>s" ];
       switch-to-application-1 = [ ];
       switch-to-application-2 = [ ];
       switch-to-application-3 = [ ];
@@ -61,10 +64,15 @@
       switch-to-application-7 = [ ];
       switch-to-application-8 = [ ];
       switch-to-application-9 = [ ];
-    };
-
-    "org/gnome/shell/keybindings" = {
-      show-screenshot-ui = [ "<Super>s" ];
+      open-new-window-application-1 = [ ];
+      open-new-window-application-2 = [ ];
+      open-new-window-application-3 = [ ];
+      open-new-window-application-4 = [ ];
+      open-new-window-application-5 = [ ];
+      open-new-window-application-6 = [ ];
+      open-new-window-application-7 = [ ];
+      open-new-window-application-8 = [ ];
+      open-new-window-application-9 = [ ];
       toggle-quick-settings = [ ];
     };
 
