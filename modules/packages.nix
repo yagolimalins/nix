@@ -11,9 +11,11 @@
     rustup
     vscode
     zed-editor
+    libreoffice-fresh
     dbeaver-bin
     github-desktop
     spotify
+    vlc
     git
     gh
   ];
