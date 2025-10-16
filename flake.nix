@@ -34,7 +34,8 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
+              home-manager.backupFileExtension = null;
+              # home-manager.overwriteBackup = true;
               home-manager.users.yago = import ./home.nix;
             }
           ];
