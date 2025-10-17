@@ -14,6 +14,7 @@
     libreoffice-fresh
     dbeaver-bin
     github-desktop
+    reaper
     spotify
     vlc
     git

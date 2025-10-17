@@ -11,6 +11,35 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 5;
+  boot.kernelPackages = pkgs.linuxPackages_rt_6_1;
+
+  # PAM limits for audio group
+  security.pam.loginLimits = [
+    {
+      domain = "@audio";
+      type = "-";
+      item = "rtprio";
+      value = "95";
+    }
+    {
+      domain = "@audio";
+      type = "-";
+      item = "memlock";
+      value = "unlimited";
+    }
+    {
+    domain = "@realtime";
+    type = "-";
+    item = "rtprio";
+    value = "95";
+  }
+  {
+    domain = "@realtime";
+    type = "-";
+    item = "memlock";
+    value = "unlimited";
+  }
+  ];
 
   # Automatic garbage collection
   nix.gc = {
@@ -19,7 +48,6 @@
     options = "--delete-older-than 3d";
   };
 
-  # Auto-optimize
   nix.settings.auto-optimise-store = true;
 
   # Clean /tmp on boot
@@ -43,9 +71,6 @@
     ];
     dates = "daily";
   };
-
-  # Virtualisation
-  # virtualisation.virtualbox.host.enable = true;
 
   # Networking
   networking.hostName = "nixos";
@@ -82,12 +107,34 @@
   # Audio
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    jack.enable = true;
+
+    extraConfig.pipewire = {
+      "10-audio-settings" = {
+        "context.properties" = {
+          "default.clock.rate" = 48000;
+          "default.clock.allowed-rates" = [
+            44100
+            48000
+            96000
+          ];
+          "default.clock.quantum" = 128;
+          "default.clock.min-quantum" = 128;
+          "default.clock.max-quantum" = 128;
+          "default.clock.quantum-limit" = 1024;
+        };
+      };
+    };
   };
+
+  # Power management
+  powerManagement.cpuFreqGovernor = "performance";
 
   # Users
   users.users.yago = {
@@ -96,6 +143,9 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "audio"
+      "video"
+      "realtime"
     ];
     packages = with pkgs; [ ];
   };
