@@ -10,7 +10,39 @@
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
+  boot.loader.systemd-boot.configurationLimit = 5;
+
+  # Automatic garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 3d";
+  };
+
+  # Auto-optimize
+  nix.settings.auto-optimise-store = true;
+
+  # Clean /tmp on boot
+  boot.tmp.cleanOnBoot = true;
+
+  # Clear journal logs periodically
+  services.journald.extraConfig = ''
+    SystemMaxUse=100M
+    SystemMaxFileSize=50M
+    MaxRetentionSec=7day
+  '';
+
+  # Automatic system updates
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/yago/.nix";
+    flags = [
+      "--update-input"
+      "nixpkgs"
+      "--commit-lock-file"
+    ];
+    dates = "daily";
+  };
 
   # Virtualisation
   # virtualisation.virtualbox.host.enable = true;
