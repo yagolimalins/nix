@@ -28,17 +28,17 @@
       value = "unlimited";
     }
     {
-    domain = "@realtime";
-    type = "-";
-    item = "rtprio";
-    value = "95";
-  }
-  {
-    domain = "@realtime";
-    type = "-";
-    item = "memlock";
-    value = "unlimited";
-  }
+      domain = "@realtime";
+      type = "-";
+      item = "rtprio";
+      value = "95";
+    }
+    {
+      domain = "@realtime";
+      type = "-";
+      item = "memlock";
+      value = "unlimited";
+    }
   ];
 
   # Automatic garbage collection
