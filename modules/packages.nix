@@ -17,6 +17,7 @@
     reaper
     spotify
     vlc
+    anki
     git
     gh
   ];
