@@ -20,7 +20,6 @@
     let
       system = "x86_64-linux";
 
-      # List all host folders under ./hosts
       hostDirs = builtins.attrNames (builtins.readDir ./hosts);
 
       mkHost =
@@ -32,10 +31,8 @@
             ./hosts/${hostName}/hardware-configuration.nix
             home-manager.nixosModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = null;
-              # home-manager.overwriteBackup = true;
               home-manager.users.yago = import ./home.nix;
             }
           ];

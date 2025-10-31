@@ -153,9 +153,6 @@
   # Applications
   programs.firefox.enable = true;
 
-  # Unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   # System-wide packages
   environment.systemPackages = with pkgs; [ ];
 
