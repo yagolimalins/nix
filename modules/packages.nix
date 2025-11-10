@@ -13,6 +13,7 @@
     zed-editor
     libreoffice-fresh
     dbeaver-bin
+    insomnia
     github-desktop
     reaper
     spotify
