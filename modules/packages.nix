@@ -15,6 +15,7 @@
     dbeaver-bin
     insomnia
     github-desktop
+    gnome-solanum
     reaper
     spotify
     vlc
