@@ -8,6 +8,7 @@
     dconf-editor
     gnome-terminal
     gnome-tweaks
+    jdk
     rustup
     vscode
     zed-editor
