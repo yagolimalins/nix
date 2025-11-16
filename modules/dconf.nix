@@ -48,9 +48,6 @@
         "spotify.desktop"
         "org.gnome.Solanum.desktop"
       ];
-    };
-
-    "org/gnome/shell" = {
       enabled-extensions = [
         "blur-my-shell@aunetx"
         "user-theme@gnome-shell-extensions.gcampax.github.com"
