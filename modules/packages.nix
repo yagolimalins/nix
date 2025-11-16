@@ -17,7 +17,6 @@
     dbeaver-bin
     insomnia
     github-desktop
-    google-chrome
     gnome-solanum
     reaper
     spotify
