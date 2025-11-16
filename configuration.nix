@@ -146,12 +146,34 @@
       "audio"
       "video"
       "realtime"
+      "docker"
     ];
     packages = with pkgs; [ ];
   };
 
   # Applications
   programs.firefox.enable = true;
+
+  # PostgreSQL
+  virtualisation.oci-containers = {
+    backend = "docker";
+
+    containers.postgres = {
+      image = "postgres:18";
+      environment = {
+        POSTGRES_USER = "postgres";
+        POSTGRES_PASSWORD = "postgres";
+        POSTGRES_DB = "postgres";
+      };
+      ports = [
+        "5432:5432"
+      ];
+      volumes = [
+        "/var/lib/postgres-docker:/var/lib/postgresql"
+      ];
+
+    };
+  };
 
   # System-wide packages
   environment.systemPackages = with pkgs; [ ];
