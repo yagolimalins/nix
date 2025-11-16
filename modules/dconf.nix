@@ -2,6 +2,16 @@
 
 {
   dconf.settings = {
+
+    "org/gnome/desktop/background" = {
+      picture-uri = "file:///home/yago/.nix/wallpaper.jpg";
+      picture-uri-dark = "file:///home/yago/.nix/wallpaper.jpg";
+    };
+
+    "org/gnome/desktop/screensaver" = {
+      picture-uri = "file:///home/yago/.nix/wallpaper.jpg";
+    };
+
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
     };
