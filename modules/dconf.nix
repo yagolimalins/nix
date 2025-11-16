@@ -29,11 +29,16 @@
         "org.gnome.Nautilus.desktop"
         "org.gnome.Terminal.desktop"
         "firefox.desktop"
+        "anki.desktop"
         "code.desktop"
         "dev.zed.Zed.desktop"
+        "idea-community.desktop"
+        "insomnia.desktop"
         "dbeaver.desktop"
         "github-desktop.desktop"
+        "cockos-reaper.desktop"
         "spotify.desktop"
+        "org.gnome.Solanum.desktop"
       ];
     };
 
