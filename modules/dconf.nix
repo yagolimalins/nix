@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   dconf.settings = {
@@ -14,6 +14,14 @@
 
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
+    };
+
+    "org/gnome/settings-daemon/plugins/color" = {
+      night-light-enabled = true;
+      night-light-schedule-automatic = false;
+      night-light-schedule-from = 17.0;
+      night-light-schedule-to = 5.0;
+      night-light-temperature = lib.hm.gvariant.mkUint32 3000;
     };
 
     "org/gnome/mutter" = {
@@ -40,6 +48,18 @@
         "spotify.desktop"
         "org.gnome.Solanum.desktop"
       ];
+    };
+
+    "org/gnome/shell" = {
+      enabled-extensions = [
+        "blur-my-shell@aunetx"
+        "user-theme@gnome-shell-extensions.gcampax.github.com"
+      ];
+      disabled-extensions = [ ];
+    };
+
+    "org/gnome/desktop/search-providers" = {
+      disable-external = true;
     };
 
     "org/gnome/desktop/wm/keybindings" = {
