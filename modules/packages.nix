@@ -9,6 +9,8 @@
     gnome-terminal
     gnome-tweaks
     jdk
+    spring-boot-cli
+    maven
     rustup
     vscode
     zed-editor
