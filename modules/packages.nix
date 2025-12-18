@@ -8,6 +8,8 @@
     dconf-editor
     gnome-terminal
     gnome-tweaks
+    nodejs
+    deno
     jdk
     spring-boot-cli
     maven
