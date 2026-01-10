@@ -6,20 +6,16 @@
   ...
 }:
 
-let
-  wallpaper = "file:///home/${username}/.nix/wallpaper.jpg";
-in
-
 {
   dconf.settings = {
 
     "org/gnome/desktop/background" = {
-      picture-uri = wallpaper;
-      picture-uri-dark = wallpaper;
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/gnome/curvy-l.jxl";
+      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/gnome/curvy-d.jxl";
     };
 
     "org/gnome/desktop/screensaver" = {
-      picture-uri = wallpaper;
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/gnome/curvy-d.jxl";
     };
 
     "org/gnome/desktop/interface" = {
