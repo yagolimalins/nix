@@ -18,6 +18,7 @@
     }:
 
     let
+      username = "yago";
       system = "x86_64-linux";
 
       hostDirs = builtins.attrNames (builtins.readDir ./hosts);
@@ -26,14 +27,23 @@
         hostName:
         nixpkgs.lib.nixosSystem {
           inherit system;
+
+          specialArgs = {
+            inherit username hostName;
+          };
+
           modules = [
             ./configuration.nix
             ./hosts/${hostName}/hardware-configuration.nix
             home-manager.nixosModules.home-manager
             {
+              home-manager.users.${username} = import ./home.nix;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = null;
-              home-manager.users.yago = import ./home.nix;
+              home-manager.extraSpecialArgs = {
+                inherit username hostName;
+              };
+
             }
           ];
         };

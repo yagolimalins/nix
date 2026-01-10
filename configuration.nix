@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  username,
+  ...
+}:
 
 {
   # Enable experimental Nix features
@@ -13,7 +18,7 @@
   boot.loader.systemd-boot.configurationLimit = 5;
   boot.kernelPackages = pkgs.linuxPackages_rt_6_1;
 
-  # PAM limits for audio group
+  # PAM limits for audio / realtime
   security.pam.loginLimits = [
     {
       domain = "@audio";
@@ -53,7 +58,7 @@
   # Clean /tmp on boot
   boot.tmp.cleanOnBoot = true;
 
-  # Clear journal logs periodically
+  # Journald limits
   services.journald.extraConfig = ''
     SystemMaxUse=100M
     SystemMaxFileSize=50M
@@ -63,7 +68,7 @@
   # Automatic system updates
   system.autoUpgrade = {
     enable = true;
-    flake = "/home/yago/.nix";
+    flake = "/home/${username}/.nix";
     flags = [
       "--update-input"
       "nixpkgs"
@@ -137,9 +142,9 @@
   powerManagement.cpuFreqGovernor = "performance";
 
   # Users
-  users.users.yago = {
+  users.users.${username} = {
     isNormalUser = true;
-    description = "Yago";
+    description = username;
     extraGroups = [
       "networkmanager"
       "wheel"
@@ -154,7 +159,7 @@
   # Applications
   programs.firefox.enable = true;
 
-  # PostgreSQL
+  # PostgreSQL container
   virtualisation.oci-containers = {
     backend = "docker";
 
@@ -165,13 +170,10 @@
         POSTGRES_PASSWORD = "postgres";
         POSTGRES_DB = "postgres";
       };
-      ports = [
-        "5432:5432"
-      ];
+      ports = [ "5432:5432" ];
       volumes = [
         "/var/lib/postgres-docker:/var/lib/postgresql"
       ];
-
     };
   };
 

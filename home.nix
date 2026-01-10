@@ -1,10 +1,10 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 
 {
-  home.username = "yago";
-  home.homeDirectory = "/home/yago";
+  home.username = username;
+  home.homeDirectory = "/home/${username}";
   home.stateVersion = "25.05";
-  
+
   nixpkgs.config.allowUnfree = true;
 
   xdg.configFile."gtk-3.0/settings.ini".force = true;

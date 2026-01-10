@@ -1,15 +1,25 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  username,
+  ...
+}:
+
+let
+  wallpaper = "file:///home/${username}/.nix/wallpaper.jpg";
+in
 
 {
   dconf.settings = {
 
     "org/gnome/desktop/background" = {
-      picture-uri = "file:///home/yago/.nix/wallpaper.jpg";
-      picture-uri-dark = "file:///home/yago/.nix/wallpaper.jpg";
+      picture-uri = wallpaper;
+      picture-uri-dark = wallpaper;
     };
 
     "org/gnome/desktop/screensaver" = {
-      picture-uri = "file:///home/yago/.nix/wallpaper.jpg";
+      picture-uri = wallpaper;
     };
 
     "org/gnome/desktop/interface" = {
@@ -29,7 +39,7 @@
     };
 
     "org/gnome/desktop/wm/preferences" = {
-      num-workspaces = 5;
+      num-workspaces = 3;
     };
 
     "org/gnome/shell" = {
@@ -49,10 +59,11 @@
         "org.gnome.Solanum.desktop"
       ];
       enabled-extensions = [
-        "blur-my-shell@aunetx"
         "user-theme@gnome-shell-extensions.gcampax.github.com"
       ];
-      disabled-extensions = [ ];
+      disabled-extensions = [
+        "blur-my-shell@aunetx"
+      ];
     };
 
     "org/gnome/desktop/search-providers" = {
