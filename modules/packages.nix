@@ -16,7 +16,7 @@
     rustup
     vscode
     zed-editor
-    jetbrains.idea-community-bin
+    jetbrains.idea
     libreoffice-fresh
     dbeaver-bin
     insomnia
