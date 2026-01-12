@@ -15,7 +15,7 @@
     maven
     rustup
     vscode
-    zed-editor
+    # zed-editor
     jetbrains.idea
     libreoffice-fresh
     dbeaver-bin
