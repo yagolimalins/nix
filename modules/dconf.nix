@@ -46,7 +46,7 @@
         "anki.desktop"
         "code.desktop"
         "dev.zed.Zed.desktop"
-        "idea-community.desktop"
+        "idea.desktop"
         "insomnia.desktop"
         "dbeaver.desktop"
         "github-desktop.desktop"
