@@ -22,6 +22,7 @@
     insomnia
     github-desktop
     gnome-solanum
+    google-chrome
     reaper
     spotify
     vlc
