@@ -17,6 +17,7 @@
     vscode
     # zed-editor
     jetbrains.idea
+    jetbrains-mono
     libreoffice-fresh
     dbeaver-bin
     insomnia
