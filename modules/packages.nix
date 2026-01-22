@@ -24,6 +24,7 @@
     github-desktop
     gnome-solanum
     google-chrome
+    zoom-us
     reaper
     spotify
     vlc
