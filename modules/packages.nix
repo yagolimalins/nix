@@ -23,7 +23,8 @@
     insomnia
     github-desktop
     gnome-solanum
-    google-chrome
+    # google-chrome
+    chromium
     zoom-us
     reaper
     spotify

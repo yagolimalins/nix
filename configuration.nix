@@ -6,19 +6,137 @@
 }:
 
 {
-  # Enable experimental Nix features
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  ############################################################
+  # Nix configuration
+  ############################################################
 
-  # Bootloader
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.systemd-boot.configurationLimit = 5;
-  boot.kernelPackages = pkgs.linuxPackages_rt_6_1;
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    auto-optimise-store = true;
+  };
 
-  # PAM limits for audio / realtime
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 3d";
+  };
+
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/${username}/.nix";
+    dates = "daily";
+    flags = [
+      "--update-input"
+      "nixpkgs"
+      "--commit-lock-file"
+    ];
+  };
+
+  ############################################################
+  # Bootloader, kernel & Plymouth
+  ############################################################
+
+  boot = {
+    loader.systemd-boot.enable = true;
+    loader.systemd-boot.configurationLimit = 5;
+    loader.efi.canTouchEfiVariables = true;
+
+    kernelPackages = pkgs.linuxPackages_rt_6_1;
+
+    kernelParams = [
+      "quiet"
+      "splash"
+      "loglevel=3"
+      "systemd.show_status=false"
+      "udev.log_level=3"
+    ];
+
+    plymouth = {
+      enable = true;
+      theme = "bgrt";
+    };
+
+    initrd = {
+      systemd.enable = true;
+      kernelModules = [ "amdgpu" ];
+    };
+
+    tmp.cleanOnBoot = true;
+  };
+
+  ############################################################
+  # Logging
+  ############################################################
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=100M
+    SystemMaxFileSize=50M
+    MaxRetentionSec=7day
+  '';
+
+  ############################################################
+  # Networking
+  ############################################################
+
+  networking = {
+    hostName = "nixos";
+    networkmanager.enable = true;
+  };
+
+  ############################################################
+  # Time & locale
+  ############################################################
+
+  time.timeZone = "America/Maceio";
+
+  i18n = {
+    defaultLocale = "en_US.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS = "pt_BR.UTF-8";
+      LC_IDENTIFICATION = "pt_BR.UTF-8";
+      LC_MEASUREMENT = "pt_BR.UTF-8";
+      LC_MONETARY = "pt_BR.UTF-8";
+      LC_NAME = "pt_BR.UTF-8";
+      LC_NUMERIC = "pt_BR.UTF-8";
+      LC_PAPER = "pt_BR.UTF-8";
+      LC_TELEPHONE = "pt_BR.UTF-8";
+      LC_TIME = "pt_BR.UTF-8";
+    };
+  };
+
+  ############################################################
+  # Display, desktop & input
+  ############################################################
+
+  services.xserver = {
+    enable = true;
+
+    xkb = {
+      layout = "br";
+      variant = "";
+    };
+
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
+  };
+
+  console.keyMap = "br-abnt2";
+
+  ############################################################
+  # Printing
+  ############################################################
+
+  services.printing.enable = true;
+
+  ############################################################
+  # Audio (PipeWire + realtime)
+  ############################################################
+
+  security.rtkit.enable = true;
+
   security.pam.loginLimits = [
     {
       domain = "@audio";
@@ -46,108 +164,51 @@
     }
   ];
 
-  # Automatic garbage collection
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-    options = "--delete-older-than 3d";
-  };
-
-  nix.settings.auto-optimise-store = true;
-
-  # Clean /tmp on boot
-  boot.tmp.cleanOnBoot = true;
-
-  # Journald limits
-  services.journald.extraConfig = ''
-    SystemMaxUse=100M
-    SystemMaxFileSize=50M
-    MaxRetentionSec=7day
-  '';
-
-  # Automatic system updates
-  system.autoUpgrade = {
-    enable = true;
-    flake = "/home/${username}/.nix";
-    flags = [
-      "--update-input"
-      "nixpkgs"
-      "--commit-lock-file"
-    ];
-    dates = "daily";
-  };
-
-  # Networking
-  networking.hostName = "nixos";
-  networking.networkmanager.enable = true;
-
-  # Timezone and locales
-  time.timeZone = "America/Maceio";
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "pt_BR.UTF-8";
-    LC_IDENTIFICATION = "pt_BR.UTF-8";
-    LC_MEASUREMENT = "pt_BR.UTF-8";
-    LC_MONETARY = "pt_BR.UTF-8";
-    LC_NAME = "pt_BR.UTF-8";
-    LC_NUMERIC = "pt_BR.UTF-8";
-    LC_PAPER = "pt_BR.UTF-8";
-    LC_TELEPHONE = "pt_BR.UTF-8";
-    LC_TIME = "pt_BR.UTF-8";
-  };
-
-  # X11 and GNOME
-  services.xserver.enable = true;
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
-  services.xserver.xkb.layout = "br";
-  services.xserver.xkb.variant = "";
-
-  # Console keymap
-  console.keyMap = "br-abnt2";
-
-  # Printing
-  services.printing.enable = true;
-
-  # Audio
   services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
 
   services.pipewire = {
     enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
+
+    alsa = {
+      enable = true;
+      support32Bit = true;
+    };
+
     pulse.enable = true;
     jack.enable = true;
 
-    extraConfig.pipewire = {
-      "10-audio-settings" = {
-        "context.properties" = {
-          "default.clock.rate" = 48000;
-          "default.clock.allowed-rates" = [
-            44100
-            48000
-            96000
-          ];
-          "default.clock.quantum" = 128;
-          "default.clock.min-quantum" = 128;
-          "default.clock.max-quantum" = 128;
-          "default.clock.quantum-limit" = 1024;
-        };
+    extraConfig.pipewire."10-audio-settings" = {
+      context.properties = {
+        default.clock.rate = 48000;
+        default.clock.allowed-rates = [
+          44100
+          48000
+          96000
+        ];
+        default.clock.quantum = 128;
+        default.clock.min-quantum = 128;
+        default.clock.max-quantum = 128;
+        default.clock.quantum-limit = 1024;
       };
     };
   };
 
+  ############################################################
   # Power management
+  ############################################################
+
   powerManagement.cpuFreqGovernor = "performance";
 
+  ############################################################
   # Users
+  ############################################################
+
   users.users.${username} = {
     isNormalUser = true;
     description = username;
     extraGroups = [
-      "networkmanager"
       "wheel"
+      "networkmanager"
       "audio"
       "video"
       "realtime"
@@ -156,10 +217,16 @@
     packages = with pkgs; [ ];
   };
 
+  ############################################################
   # Applications
+  ############################################################
+
   programs.firefox.enable = true;
 
-  # PostgreSQL container
+  ############################################################
+  # Containers (PostgreSQL)
+  ############################################################
+
   virtualisation.oci-containers = {
     backend = "docker";
 
@@ -177,9 +244,17 @@
     };
   };
 
-  # System-wide packages
-  environment.systemPackages = with pkgs; [ ];
+  ############################################################
+  # System packages
+  ############################################################
 
-  # System version
+  environment.systemPackages = with pkgs; [
+    plymouth
+  ];
+
+  ############################################################
+  # NixOS release compatibility
+  ############################################################
+
   system.stateVersion = "25.05";
 }
