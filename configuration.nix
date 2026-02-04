@@ -228,6 +228,11 @@
 
   programs.firefox.enable = true;
 
+  programs.java = {
+    enable = true;
+    package = pkgs.jdk25;
+  };
+
   ############################################################
   # Containers (PostgreSQL)
   ############################################################

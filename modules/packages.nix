@@ -10,8 +10,6 @@
     gnome-tweaks
     nodejs
     deno
-    jdk
-    spring-boot-cli
     maven
     rustup
     vscode
