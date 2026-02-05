@@ -13,7 +13,7 @@
     maven
     rustup
     vscode
-    # zed-editor
+    zed-editor
     jetbrains.idea
     jetbrains-mono
     libreoffice-fresh
