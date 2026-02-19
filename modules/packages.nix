@@ -16,6 +16,7 @@
     vscode
     zed-editor
     jetbrains.idea
+    jetbrains.rider
     jetbrains-mono
     libreoffice-fresh
     dbeaver-bin
