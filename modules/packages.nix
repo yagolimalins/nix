@@ -12,6 +12,7 @@
     deno
     maven
     rustup
+    dotnet-sdk_10
     vscode
     zed-editor
     jetbrains.idea
