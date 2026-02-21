@@ -263,6 +263,29 @@
   ];
 
   ############################################################
+  # Session variables
+  ############################################################
+
+  environment.sessionVariables = {
+    DOTNET_ROOT = "${pkgs.dotnet-sdk_10}";
+    PATH = [ "$HOME/.dotnet/tools" ];
+  };
+
+  ############################################################
+  # Nix-LD
+  ############################################################
+
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    dotnet-sdk_10
+    stdenv.cc.cc
+    openssl
+    zlib
+    curl
+    icu
+  ];
+
+  ############################################################
   # NixOS release compatibility
   ############################################################
 
