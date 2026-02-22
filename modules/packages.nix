@@ -13,6 +13,7 @@
     maven
     rustup
     dotnet-sdk_10
+    dotnet-ef
     vscode
     zed-editor
     jetbrains.idea
