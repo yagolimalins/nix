@@ -237,22 +237,22 @@
   # Containers (PostgreSQL)
   ############################################################
 
-  virtualisation.oci-containers = {
-    backend = "docker";
+  # virtualisation.oci-containers = {
+  #   backend = "docker";
 
-    containers.postgres = {
-      image = "postgres:18";
-      environment = {
-        POSTGRES_USER = "postgres";
-        POSTGRES_PASSWORD = "postgres";
-        POSTGRES_DB = "postgres";
-      };
-      ports = [ "5432:5432" ];
-      volumes = [
-        "/var/lib/postgres-docker:/var/lib/postgresql"
-      ];
-    };
-  };
+  #   containers.postgres = {
+  #     image = "postgres:18";
+  #     environment = {
+  #       POSTGRES_USER = "postgres";
+  #       POSTGRES_PASSWORD = "postgres";
+  #       POSTGRES_DB = "postgres";
+  #     };
+  #     ports = [ "5432:5432" ];
+  #     volumes = [
+  #       "/var/lib/postgres-docker:/var/lib/postgresql"
+  #     ];
+  #   };
+  # };
 
   ############################################################
   # System packages

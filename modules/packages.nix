@@ -17,7 +17,7 @@
     vscode
     zed-editor
     jetbrains.idea
-    jetbrains.rider
+    # jetbrains.rider
     jetbrains-mono
     libreoffice-fresh
     dbeaver-bin
@@ -28,6 +28,7 @@
     chromium
     zoom-us
     reaper
+    kdePackages.kdenlive
     spotify
     vlc
     anki
