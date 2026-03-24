@@ -14,6 +14,7 @@
     rustup
     dotnet-sdk_10
     dotnet-ef
+    claude-code
     vscode
     zed-editor
     jetbrains.idea
@@ -26,6 +27,7 @@
     gnome-solanum
     # google-chrome
     chromium
+    fragments
     zoom-us
     reaper
     kdePackages.kdenlive
