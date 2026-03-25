@@ -5,9 +5,13 @@
     nixfmt-rfc-style
     whitesur-gtk-theme
     whitesur-icon-theme
-    dconf-editor
-    gnome-terminal
-    gnome-tweaks
+    kitty
+    grim
+    slurp
+    wl-clipboard
+    playerctl
+    networkmanagerapplet
+    brightnessctl
     nodejs
     deno
     maven
@@ -20,11 +24,11 @@
     jetbrains.idea
     # jetbrains.rider
     jetbrains-mono
+    nerd-fonts.jetbrains-mono
     libreoffice-fresh
     dbeaver-bin
     insomnia
     github-desktop
-    gnome-solanum
     # google-chrome
     chromium
     fragments
@@ -36,5 +40,6 @@
     anki
     git
     gh
+    xfce.thunar
   ];
 }

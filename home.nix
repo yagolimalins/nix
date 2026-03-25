@@ -13,7 +13,6 @@
   imports = [
     ./modules/packages.nix
     ./modules/theme.nix
-    ./modules/gnome.nix
-    ./modules/dconf.nix
+    ./modules/hyprland.nix
   ];
 }

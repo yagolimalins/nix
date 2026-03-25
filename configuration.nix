@@ -116,16 +116,11 @@
   # Display, desktop & input
   ############################################################
 
-  services.xserver = {
+  programs.hyprland.enable = true;
+
+  services.displayManager.sddm = {
     enable = true;
-
-    xkb = {
-      layout = "br";
-      variant = "";
-    };
-
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
+    wayland.enable = true;
   };
 
   console.keyMap = "br-abnt2";
