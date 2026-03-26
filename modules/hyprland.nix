@@ -58,6 +58,7 @@ in
         "waybar"
         "mako"
         "nm-applet --indicator"
+        "blueman-applet"
         "gammastep"
         "hypridle"
       ];
@@ -93,7 +94,9 @@ in
         };
 
         blur = {
-          enabled = false;
+          enabled = true;
+          size = 6;
+          passes = 2;
         };
       };
 
@@ -214,8 +217,15 @@ in
         "$mod, mouse:273, resizewindow"
       ];
 
+      layerrule = [
+        "blur, wofi"
+        "dimaround, wofi"
+      ];
+
       windowrulev2 = [
         "suppressevent maximize, class:.*"
+        "noblur, class:.*"
+        "float, class:^(wofi)$"
         "float, title:^(Open File)(.*)$"
         "float, title:^(Save As)(.*)$"
         "float, title:^(Confirm)(.*)$"
@@ -308,19 +318,19 @@ in
 
       "custom/logout" = {
         format = "logout";
-        on-click = "hyprctl dispatch exit";
+        on-click = "echo -e 'Logout?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
         tooltip = false;
       };
 
       "custom/restart" = {
         format = "reboot";
-        on-click = "systemctl reboot";
+        on-click = "echo -e 'Reboot?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
         tooltip = false;
       };
 
       "custom/shutdown" = {
         format = "shutdown";
-        on-click = "systemctl poweroff";
+        on-click = "echo -e 'Shutdown?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
         tooltip = false;
       };
     }];
@@ -328,7 +338,7 @@ in
     style = ''
       * {
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 12px;
+        font-size: 14px;
         min-height: 0;
       }
 
@@ -449,6 +459,11 @@ in
 
   programs.wofi = {
     enable = true;
+    settings = {
+      width = 400;
+      height = 300;
+      hide_scroll = true;
+    };
     style = ''
       window {
         background-color: #0d0d0d;
@@ -465,7 +480,7 @@ in
         padding: 10px 14px;
         color: #dedede;
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 13px;
+        font-size: 14px;
         outline: none;
         caret-color: #cc2222;
       }
@@ -492,7 +507,7 @@ in
 
       #text {
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 13px;
+        font-size: 14px;
         color: #dedede;
       }
 
@@ -515,7 +530,7 @@ in
     enable = true;
     font = {
       name = "JetBrainsMono Nerd Font";
-      size = 12;
+      size = 14;
     };
     settings = {
       foreground           = "#dedede";
@@ -561,7 +576,7 @@ in
   services.mako = {
     enable = true;
     settings = {
-      font = "JetBrainsMono Nerd Font 12";
+      font = "JetBrainsMono Nerd Font 14";
       "background-color" = "#0d0d0d";
       "border-color" = "#cc2222";
       "text-color" = "#dedede";

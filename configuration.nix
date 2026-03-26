@@ -118,9 +118,23 @@
 
   programs.hyprland.enable = true;
 
-  services.displayManager.sddm = {
+  services.greetd = {
     enable = true;
-    wayland.enable = true;
+    settings = {
+      default_session = {
+        command = ''
+          ${pkgs.tuigreet}/bin/tuigreet \
+            --time \
+            --remember \
+            --remember-session \
+            --greeting "  ThinkPad" \
+            --asterisks \
+            --cmd "Hyprland &>/dev/null" \
+            --theme "border=#cc2222;text=#dedede;prompt=#7a7a7a;time=#dedede;action=#cc2222;button=#cc2222;container=#171717;input=#dedede"
+        '';
+        user = "greeter";
+      };
+    };
   };
 
   console.keyMap = "br-abnt2";
@@ -130,6 +144,11 @@
   ############################################################
 
   services.printing.enable = true;
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
 
   ############################################################
   # Audio (PipeWire + realtime)

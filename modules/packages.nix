@@ -11,6 +11,7 @@
     wl-clipboard
     playerctl
     networkmanagerapplet
+    blueman
     brightnessctl
     nodejs
     deno
