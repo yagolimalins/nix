@@ -52,7 +52,11 @@
       "loglevel=3"
       "systemd.show_status=false"
       "udev.log_level=3"
+      "rd.udev.log_level=3"
+      "vt.global_cursor_default=0"
     ];
+
+    consoleLogLevel = 0;
 
     plymouth = {
       enable = true;
@@ -60,6 +64,7 @@
     };
 
     initrd = {
+      verbose = false;
       systemd.enable = true;
       kernelModules = [ "amdgpu" ];
     };
@@ -130,7 +135,7 @@
             --greeting "  ThinkPad" \
             --asterisks \
             --cmd "Hyprland &>/dev/null" \
-            --theme "border=#cc2222;text=#dedede;prompt=#7a7a7a;time=#dedede;action=#cc2222;button=#cc2222;container=#171717;input=#dedede"
+            --theme "border=#cc2222;text=#dedede;prompt=#7a7a7a;time=#dedede;action=#7a7a7a;button=#171717;container=#171717;input=#dedede"
         '';
         user = "greeter";
       };

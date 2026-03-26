@@ -269,7 +269,8 @@ in
       clock = {
         format = "{:%H:%M}";
         format-alt = "{:%a, %b %d}";
-        tooltip-format = "<tt><small>{calendar}</small></tt>";
+        locale = "en_US.UTF-8";
+        tooltip-format = "<tt>{calendar}</tt>";
         calendar = {
           mode = "month";
           format = {
@@ -426,6 +427,19 @@ in
 
       #tray > .needs-attention {
         border-color: #cc2222;
+      }
+
+      /* Calendar tooltip */
+      tooltip {
+        background-color: #0d0d0d;
+        border: 1px solid #cc2222;
+        border-radius: 4px;
+        padding: 8px;
+      }
+
+      tooltip label {
+        font-size: 16px;
+        color: #dedede;
       }
 
       /* Power buttons */
