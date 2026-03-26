@@ -318,19 +318,19 @@ in
 
       "custom/logout" = {
         format = "logout";
-        on-click = "echo -e 'Logout?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
+        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Logout?' --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
         tooltip = false;
       };
 
       "custom/restart" = {
         format = "reboot";
-        on-click = "echo -e 'Reboot?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
+        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Reboot?' --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
         tooltip = false;
       };
 
       "custom/shutdown" = {
         format = "shutdown";
-        on-click = "echo -e 'Shutdown?\nYes\nNo' | wofi --dmenu --hide-search --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
+        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Shutdown?' --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
         tooltip = false;
       };
     }];
@@ -473,16 +473,17 @@ in
 
       #input {
         all: unset;
-        background-color: #171717;
+        background-color: #1a0000;
         border: none;
-        border-bottom: 1px solid #222222;
+        border-bottom: 1px solid #cc2222;
         border-radius: 3px 3px 0 0;
         padding: 10px 14px;
-        color: #dedede;
+        color: #cc2222;
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
         font-size: 14px;
+        font-weight: bold;
         outline: none;
-        caret-color: #cc2222;
+        caret-color: transparent;
       }
 
       #outer-box {
