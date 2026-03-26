@@ -23,8 +23,8 @@ in
   home.pointerCursor = {
     gtk.enable = true;
     x11.enable = true;
-    name = "WhiteSur-cursors";
-    package = pkgs.whitesur-icon-theme;
+    name = "Bibata-Modern-Classic";
+    package = pkgs.bibata-cursors;
     size = 24;
   };
 
@@ -64,7 +64,7 @@ in
       ];
 
       env = [
-        "XCURSOR_THEME,WhiteSur-cursors"
+        "XCURSOR_THEME,Bibata-Modern-Classic"
         "XCURSOR_SIZE,24"
         "GDK_BACKEND,wayland,x11,*"
         "QT_QPA_PLATFORM,wayland;xcb"
