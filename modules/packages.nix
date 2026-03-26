@@ -41,6 +41,8 @@
     anki
     git
     gh
+    lazygit
+    btop
     xfce.thunar
   ];
 }

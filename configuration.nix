@@ -134,7 +134,10 @@
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
+    settings.Policy.AutoEnable = true;
   };
+
+  services.blueman.enable = true;
 
   ############################################################
   # Audio (PipeWire + realtime)
@@ -173,6 +176,7 @@
 
   services.pipewire = {
     enable = true;
+    wireplumber.enable = true;
 
     alsa = {
       enable = true;
@@ -181,6 +185,17 @@
 
     pulse.enable = true;
     jack.enable = true;
+
+    wireplumber.extraConfig."10-bluetooth-autoswitch" = {
+      "monitor.bluez.rules" = [
+        {
+          matches = [{ "device.name" = "~bluez_card.*"; }];
+          actions.update-props = {
+            "bluez5.auto-connect" = [ "hfp_hf" "hsp_hs" "a2dp_sink" ];
+          };
+        }
+      ];
+    };
 
     extraConfig.pipewire."10-audio-settings" = {
       context.properties = {
