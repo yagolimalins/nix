@@ -261,7 +261,7 @@ in
 
       modules-left = [ "hyprland/workspaces" "hyprland/window" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "custom/cpugov" "tray" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
+      modules-right = [ "pulseaudio" "network" "battery" "cpu" "temperature" "tray" "custom/cpugov" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
 
       "hyprland/workspaces" = {
         disable-scroll = false;
@@ -292,31 +292,47 @@ in
       };
 
       pulseaudio = {
-        format = "vol {volume}%";
-        format-muted = "muted";
+        format = "{icon} {volume}%";
+        format-muted = "󰸈";
+        format-icons = { default = [ "󰕿" "󰖀" "󰕾" ]; };
         on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
         tooltip-format = "{desc} — {volume}%";
         scroll-step = 5;
       };
 
       network = {
-        format-wifi = "wifi {signalStrength}%";
-        format-ethernet = "eth";
-        format-disconnected = "offline";
+        format-wifi = "󰤨 {signalStrength}%";
+        format-ethernet = "󰈀";
+        format-disconnected = "󰤭";
         tooltip-format-wifi = "{essid}  {ipaddr}";
         tooltip-format-ethernet = "{ifname}: {ipaddr}";
       };
 
       battery = {
         states = { warning = 30; critical = 15; };
-        format = "bat {capacity}%";
-        format-charging = "chg {capacity}%";
-        format-full = "full";
+        format = "{icon} {capacity}%";
+        format-charging = "󰂄 {capacity}%";
+        format-full = "󰁹";
+        format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
         tooltip-format = "{time} remaining ({power:.1f}W)";
       };
 
+      cpu = {
+        format = "󰻠 {usage}%";
+        interval = 2;
+        tooltip = false;
+      };
+
+      temperature = {
+        format = "{icon} {temperatureC}°C";
+        format-icons = [ "󰜗" "󰜗" "󰜗" "󰸁" "󰸁" ];
+        critical-threshold = 80;
+        interval = 2;
+        tooltip = false;
+      };
+
       "custom/cpugov" = {
-        exec = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"cpu perf\",\"class\":\"perf\"}";; *) echo "{\"text\":\"cpu save\",\"class\":\"save\"}";; esac' '';
+        exec = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"performance\",\"class\":\"perf\"}";; *) echo "{\"text\":\"powersave\",\"class\":\"save\"}";; esac' '';
         return-type = "json";
         interval = 2;
         on-click = "/run/wrappers/bin/sudo /etc/cpugov-toggle";
@@ -413,6 +429,8 @@ in
       #pulseaudio,
       #network,
       #battery,
+      #cpu,
+      #temperature,
       #custom-cpugov,
       #tray {
         padding: 0 12px;
@@ -439,12 +457,13 @@ in
       #battery.critical     { color: #cc2222; }
       #battery.charging     { color: #5a9e5a; }
 
+      #cpu                  { color: #dedede; }
+
+      #temperature          { color: #dedede; }
+      #temperature.critical { color: #cc2222; }
+
       #custom-cpugov.perf   { color: #cc2222; }
       #custom-cpugov.save   { color: #5a9e5a; }
-
-      #tray {
-        margin-right: 6px;
-      }
 
       #tray > .needs-attention {
         border-color: #cc2222;
