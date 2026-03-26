@@ -3,8 +3,6 @@
 {
   home.packages = with pkgs; [
     nixfmt-rfc-style
-    whitesur-gtk-theme
-    whitesur-icon-theme
     kitty
     grim
     slurp

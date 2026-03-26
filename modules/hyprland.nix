@@ -59,7 +59,6 @@ in
         "mako"
         "nm-applet --indicator"
         "blueman-applet"
-        "gammastep"
         "hypridle"
       ];
 
@@ -207,7 +206,7 @@ in
 
         # Brightness (ThinkPad Fn keys)
         ", XF86MonBrightnessUp,   exec, brightnessctl s 5%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl -n 1 s 5%-"
+        ", XF86MonBrightnessDown, exec, brightnessctl s 5%-"
         ", XF86KbdBrightnessUp,   exec, brightnessctl -d *::kbd_backlight s 10%+"
         ", XF86KbdBrightnessDown, exec, brightnessctl -d *::kbd_backlight s 10%-"
 
@@ -261,7 +260,7 @@ in
 
       modules-left = [ "hyprland/workspaces" "hyprland/window" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "cpu" "temperature" "tray" "custom/cpugov" "custom/logout" "custom/restart" "custom/shutdown" ];
+      modules-right = [ "pulseaudio" "network" "battery" "cpu" "temperature" "custom/nightshift" "tray" "custom/cpugov" "custom/logout" "custom/restart" "custom/shutdown" ];
 
       "hyprland/workspaces" = {
         disable-scroll = false;
@@ -329,6 +328,14 @@ in
         format-icons = [ "󰜗" "󰜗" "󰜗" "󰸁" "󰸁" ];
         critical-threshold = 80;
         interval = 2;
+        tooltip = false;
+      };
+
+      "custom/nightshift" = {
+        exec = ''bash -c 'pgrep hyprsunset > /dev/null && echo "{\"text\":\"󰖔\",\"class\":\"on\"}" || echo "{\"text\":\"󰖙\",\"class\":\"off\"}"' '';
+        return-type = "json";
+        interval = 3;
+        on-click = "bash -c 'pgrep hyprsunset > /dev/null && pkill hyprsunset || hyprsunset -t 3000 &'";
         tooltip = false;
       };
 
@@ -426,6 +433,7 @@ in
       #battery,
       #cpu,
       #temperature,
+      #custom-nightshift,
       #custom-cpugov,
       #tray {
         padding: 0 12px;
@@ -456,6 +464,9 @@ in
 
       #temperature          { color: #dedede; }
       #temperature.critical { color: #cc2222; }
+
+      #custom-nightshift.on  { color: #e8a045; }
+      #custom-nightshift.off { color: #7a7a7a; }
 
       #custom-cpugov.perf   { color: #cc2222; }
       #custom-cpugov.save   { color: #5a9e5a; }
@@ -718,18 +729,43 @@ in
     };
   };
 
+  home.packages = [ pkgs.hyprsunset ];
+
   ############################################################
-  # Gammastep — night light
+  # Hyprsunset — night shift timers
   ############################################################
 
-  services.gammastep = {
-    enable = true;
-    provider = "manual";
-    latitude = -9.67;
-    longitude = -35.73;
-    temperature = {
-      day = 6500;
-      night = 3000;
+  systemd.user.services.hyprsunset-night = {
+    Unit.Description = "Activate night shift";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'pkill hyprsunset || true; ${pkgs.hyprsunset}/bin/hyprsunset -t 3000 &'";
     };
+  };
+
+  systemd.user.timers.hyprsunset-night = {
+    Unit.Description = "Activate night shift at 18:00";
+    Timer = {
+      OnCalendar = "*-*-* 18:00:00";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
+  systemd.user.services.hyprsunset-day = {
+    Unit.Description = "Deactivate night shift";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'pkill hyprsunset || true'";
+    };
+  };
+
+  systemd.user.timers.hyprsunset-day = {
+    Unit.Description = "Deactivate night shift at 06:00";
+    Timer = {
+      OnCalendar = "*-*-* 06:00:00";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 }
