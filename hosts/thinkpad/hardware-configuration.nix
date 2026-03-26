@@ -9,8 +9,9 @@
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.kernelModules = [ "i915" ];
   boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelParams = [ "i915.fastboot=1" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =

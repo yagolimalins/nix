@@ -22,8 +22,9 @@
     "usbhid"
     "sd_mod"
   ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelParams = [ "video=efifb:off" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {

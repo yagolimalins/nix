@@ -46,27 +46,8 @@
 
     kernelPackages = pkgs.linuxPackages_rt_6_1;
 
-    kernelParams = [
-      "quiet"
-      "splash"
-      "loglevel=3"
-      "systemd.show_status=false"
-      "udev.log_level=3"
-      "rd.udev.log_level=3"
-      "vt.global_cursor_default=0"
-    ];
-
-    consoleLogLevel = 0;
-
-    plymouth = {
-      enable = true;
-      theme = "bgrt";
-    };
-
     initrd = {
-      verbose = false;
       systemd.enable = true;
-      kernelModules = [ "amdgpu" ];
     };
 
     tmp.cleanOnBoot = true;
@@ -278,7 +259,7 @@
   ############################################################
 
   environment.systemPackages = with pkgs; [
-    plymouth
+
   ];
 
   ############################################################

@@ -19,8 +19,9 @@
     "xhci_pci"
     "usbhid"
   ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-amd" ];
+  boot.kernelParams = [ "video=efifb:off" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
