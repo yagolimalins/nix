@@ -261,7 +261,7 @@ in
 
       modules-left = [ "hyprland/workspaces" "hyprland/window" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "cpu" "temperature" "tray" "custom/cpugov" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
+      modules-right = [ "pulseaudio" "network" "battery" "cpu" "temperature" "tray" "custom/cpugov" "custom/logout" "custom/restart" "custom/shutdown" ];
 
       "hyprland/workspaces" = {
         disable-scroll = false;
@@ -324,6 +324,7 @@ in
       };
 
       temperature = {
+        thermal-zone = 5;
         format = "{icon} {temperatureC}°C";
         format-icons = [ "󰜗" "󰜗" "󰜗" "󰸁" "󰸁" ];
         critical-threshold = 80;
@@ -342,12 +343,6 @@ in
       tray = {
         spacing = 8;
         icon-size = 15;
-      };
-
-      "custom/lock" = {
-        format = "lock";
-        on-click = "hyprlock";
-        tooltip = false;
       };
 
       "custom/logout" = {
@@ -483,7 +478,6 @@ in
       }
 
       /* Power buttons */
-      #custom-lock,
       #custom-logout,
       #custom-restart,
       #custom-shutdown {
@@ -496,7 +490,6 @@ in
         transition: all 0.1s ease;
       }
 
-      #custom-lock:hover,
       #custom-logout:hover,
       #custom-restart:hover,
       #custom-shutdown:hover {
