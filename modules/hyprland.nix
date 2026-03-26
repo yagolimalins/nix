@@ -487,12 +487,11 @@ in
 
       #input {
         all: unset;
-        background-color: #1a0000;
         border: none;
         border-bottom: 1px solid #cc2222;
         border-radius: 3px 3px 0 0;
         padding: 10px 14px;
-        color: #cc2222;
+        color: #dedede;
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
         font-size: 14px;
         font-weight: bold;
