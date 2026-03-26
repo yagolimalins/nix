@@ -59,6 +59,7 @@ in
         "mako"
         "nm-applet --indicator"
         "gammastep"
+        "hypridle"
       ];
 
       env = [
@@ -192,6 +193,9 @@ in
         "$mod SHIFT, 0, movetoworkspace, 10"
 
         # Media keys
+        "$mod, L, exec, hyprlock"
+
+        # Media keys
         "$mod, bracketleft,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
         "$mod, bracketright, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
         "$mod, semicolon,    exec, playerctl play-pause"
@@ -238,7 +242,7 @@ in
 
       modules-left = [ "hyprland/workspaces" "hyprland/window" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "tray" ];
+      modules-right = [ "pulseaudio" "network" "battery" "tray" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
 
       "hyprland/workspaces" = {
         disable-scroll = false;
@@ -294,6 +298,30 @@ in
       tray = {
         spacing = 8;
         icon-size = 15;
+      };
+
+      "custom/lock" = {
+        format = "lock";
+        on-click = "hyprlock";
+        tooltip = false;
+      };
+
+      "custom/logout" = {
+        format = "logout";
+        on-click = "hyprctl dispatch exit";
+        tooltip = false;
+      };
+
+      "custom/restart" = {
+        format = "reboot";
+        on-click = "systemctl reboot";
+        tooltip = false;
+      };
+
+      "custom/shutdown" = {
+        format = "shutdown";
+        on-click = "systemctl poweroff";
+        tooltip = false;
       };
     }];
 
@@ -387,6 +415,29 @@ in
       }
 
       #tray > .needs-attention {
+        border-color: #cc2222;
+      }
+
+      /* Power buttons */
+      #custom-lock,
+      #custom-logout,
+      #custom-restart,
+      #custom-shutdown {
+        padding: 0 10px;
+        margin: 4px 1px;
+        background-color: #171717;
+        border: 1px solid #222222;
+        border-radius: 2px;
+        color: #7a7a7a;
+        transition: all 0.1s ease;
+      }
+
+      #custom-lock:hover,
+      #custom-logout:hover,
+      #custom-restart:hover,
+      #custom-shutdown:hover {
+        background-color: #1a0000;
+        color: #e63329;
         border-color: #cc2222;
       }
     '';
@@ -532,6 +583,77 @@ in
     initExtra = ''
       PS1='\[\e[1;31m\][\u@\h:\w]\$\[\e[0m\] '
     '';
+  };
+
+  ############################################################
+  # Hyprlock
+  ############################################################
+
+  programs.hyprlock = {
+    enable = true;
+    settings = {
+      general = {
+        disable_loading_bar = true;
+        hide_cursor = true;
+        grace = 0;
+      };
+
+      background = [{
+        path = wallpaper;
+        blur_passes = 0;
+        brightness = 0.4;
+      }];
+
+      input-field = [{
+        size = "300, 40";
+        position = "0, -60";
+        halign = "center";
+        valign = "center";
+        outline_thickness = 1;
+        outer_color = "rgb(cc2222)";
+        inner_color = "rgb(0d0d0d)";
+        font_color = "rgb(dedede)";
+        fade_on_empty = false;
+        placeholder_text = "";
+        rounding = 4;
+      }];
+
+      label = [{
+        text = "$TIME";
+        font_family = "JetBrains Mono";
+        font_size = 48;
+        color = "rgba(dedede, 1.0)";
+        position = "0, 80";
+        halign = "center";
+        valign = "center";
+      }];
+    };
+  };
+
+  ############################################################
+  # Hypridle
+  ############################################################
+
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        lock_cmd = "hyprlock";
+        before_sleep_cmd = "hyprlock";
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+      };
+
+      listener = [
+        {
+          timeout = 300;
+          on-timeout = "hyprlock";
+        }
+        {
+          timeout = 600;
+          on-timeout = "systemctl suspend";
+        }
+      ];
+    };
   };
 
   ############################################################
