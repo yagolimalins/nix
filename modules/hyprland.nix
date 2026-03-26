@@ -261,7 +261,7 @@ in
 
       modules-left = [ "hyprland/workspaces" "hyprland/window" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "battery" "tray" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
+      modules-right = [ "pulseaudio" "network" "battery" "custom/cpugov" "tray" "custom/lock" "custom/logout" "custom/restart" "custom/shutdown" ];
 
       "hyprland/workspaces" = {
         disable-scroll = false;
@@ -313,6 +313,14 @@ in
         format-charging = "chg {capacity}%";
         format-full = "full";
         tooltip-format = "{time} remaining ({power:.1f}W)";
+      };
+
+      "custom/cpugov" = {
+        exec = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"cpu perf\",\"class\":\"perf\"}";; *) echo "{\"text\":\"cpu save\",\"class\":\"save\"}";; esac' '';
+        return-type = "json";
+        interval = 2;
+        on-click = "/run/wrappers/bin/sudo /etc/cpugov-toggle";
+        tooltip = false;
       };
 
       tray = {
@@ -405,6 +413,7 @@ in
       #pulseaudio,
       #network,
       #battery,
+      #custom-cpugov,
       #tray {
         padding: 0 12px;
         margin: 4px 1px;
@@ -429,6 +438,9 @@ in
       #battery.warning      { color: #e8a045; }
       #battery.critical     { color: #cc2222; }
       #battery.charging     { color: #5a9e5a; }
+
+      #custom-cpugov.perf   { color: #cc2222; }
+      #custom-cpugov.save   { color: #5a9e5a; }
 
       #tray {
         margin-right: 6px;
