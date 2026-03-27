@@ -69,15 +69,17 @@ This setup is designed to be applied on top of a **minimal NixOS installation**.
 
 ### 1️⃣ Generate hardware configuration
 
-Create the hardware configuration for the target host:
+Each machine has its own hardware configuration that must be generated on that specific machine. The existing configs in `hosts/` are for the original author's machines — **you must generate your own**.
+
+Run on the target machine:
 
     ./hwgen.sh <host>
 
 Example:
 
-    ./hwgen.sh desktop
+    ./hwgen.sh thinkpad
 
-This will generate and place `hardware-configuration.nix` under `hosts/<host>/`.
+This will detect the current machine's hardware, generate `hardware-configuration.nix`, and automatically stage it with git so the flake can track it.
 
 ---
 
@@ -97,11 +99,13 @@ Apply the change by restarting your shell:
 
 Rebuild and switch to the new configuration:
 
-    sudo nixos-rebuild switch --flake .#<host>
+    sudo nixos-rebuild switch --flake .#<host> --impure
 
 Example:
 
-    sudo nixos-rebuild switch --flake .#desktop
+    sudo nixos-rebuild switch --flake .#desktop --impure
+
+> `--impure` is required so the flake can read `$SUDO_USER` to automatically detect the username of the user running the command.
 
 After this step, the system is fully managed by flakes.
 
@@ -112,7 +116,7 @@ After this step, the system is fully managed by flakes.
     ./hwgen.sh desktop
     ./flakes.sh
     exec $SHELL
-    sudo nixos-rebuild switch --flake .#desktop
+    sudo nixos-rebuild switch --flake .#desktop --impure
 
 ---
 

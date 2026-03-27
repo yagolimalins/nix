@@ -50,7 +50,7 @@ in
     settings = {
       "$mod" = "SUPER";
       "$terminal" = "kitty";
-      "$launcher" = "wofi --show drun";
+      "$launcher" = "pgrep wofi || wofi --show drun";
 
       monitor = ",preferred,auto,1";
 

@@ -18,7 +18,9 @@
     }:
 
     let
-      username = "yago";
+      sudo_user = builtins.getEnv "SUDO_USER";
+      user = builtins.getEnv "USER";
+      username = if sudo_user != "" then sudo_user else user;
       system = "x86_64-linux";
 
       hostDirs = builtins.attrNames (builtins.readDir ./hosts);

@@ -21,4 +21,6 @@ sudo cp -f /etc/nixos/hardware-configuration.nix \
 
 sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" hosts
 
+git add "$DIR/hardware-configuration.nix"
+
 echo "✅ Hardware configuration for '$HOST' updated in $DIR/hardware-configuration.nix"

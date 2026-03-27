@@ -2,6 +2,7 @@
   config,
   pkgs,
   username,
+  hostName,
   ...
 }:
 
@@ -68,7 +69,7 @@
   ############################################################
 
   networking = {
-    hostName = "nixos";
+    hostName = hostName;
     networkmanager = {
       enable = true;
       plugins = with pkgs; [
