@@ -114,19 +114,19 @@
 
       "custom/logout" = {
         format   = "logout";
-        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Logout?' --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
+        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Logout?' --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
         tooltip  = false;
       };
 
       "custom/restart" = {
-        format   = "reboot";
-        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Reboot?' --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
+        format   = "restart";
+        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Restart?' --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
         tooltip  = false;
       };
 
       "custom/shutdown" = {
         format   = "shutdown";
-        on-click = "echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Shutdown?' --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
+        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Shutdown?' --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
         tooltip  = false;
       };
     }];

@@ -39,7 +39,7 @@ in
     settings = {
       "$mod"      = "SUPER";
       "$terminal" = "kitty";
-      "$launcher" = "pgrep wofi || wofi --show drun";
+      "$launcher" = "pgrep wofi || j4-dmenu-desktop --dmenu='wofi --dmenu -i'";
 
       monitor = ",preferred,auto,1";
 

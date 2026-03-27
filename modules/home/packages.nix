@@ -42,5 +42,7 @@
     lazygit
     btop
     xfce.thunar
+    j4-dmenu-desktop
+    fastfetch
   ];
 }
