@@ -29,37 +29,56 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
 ## 🗂️ Repository Structure
 
     .
-    ├── flake.nix
+    ├── flake.nix                        # Entry point — defines all hosts
     ├── flake.lock
-    ├── configuration.nix
-    ├── home.nix
-    ├── flakes.sh
-    ├── hwgen.sh
+    ├── configuration.nix                # NixOS: imports modules/system/*
+    ├── home.nix                         # Home Manager: imports modules/home/*
+    ├── flakes.sh                        # Helper: enable flakes for the first time
+    ├── hwgen.sh                         # Helper: generate hardware-configuration.nix
     ├── hosts/
-    │   ├── desktop/
-    │   │   └── hardware-configuration.nix
-    │   └── laptop/
-    │       └── hardware-configuration.nix
+    │   ├── thinkpad/
+    │   │   └── hardware-configuration.nix   # ThinkPad T480 (i915, TLP thresholds)
+    │   ├── laptop/
+    │   │   └── hardware-configuration.nix   # AMD laptop (amdgpu)
+    │   └── desktop/
+    │       └── hardware-configuration.nix   # AMD desktop (amdgpu)
     └── modules/
-        ├── gnome.nix
-        ├── dconf.nix
-        ├── packages.nix
-        └── theme.nix
+        ├── system/                      # NixOS (system-level) modules
+        │   ├── boot.nix                 #   Nix settings, bootloader, kernel, journald
+        │   ├── networking.nix           #   Hostname, NetworkManager, timezone, locale
+        │   ├── audio.nix                #   PipeWire, WirePlumber, realtime limits
+        │   ├── bluetooth.nix            #   Bluetooth hardware + Blueman
+        │   ├── security.nix             #   CPU governor toggle script + sudo rule
+        │   └── users.nix               #   User account, greetd, power, programs
+        └── home/                        # Home Manager (user-level) modules
+            ├── packages.nix             #   All user packages
+            ├── theme.nix                #   GTK theme, icons, cursor (Graphite + Papirus)
+            ├── hyprland.nix             #   Hyprland WM settings, keybinds, hyprpaper
+            ├── waybar.nix               #   Status bar config + CSS
+            ├── terminals.nix            #   Kitty terminal + Bash prompt
+            ├── launchers.nix            #   Wofi launcher + CSS
+            └── services.nix             #   Mako, Hyprlock, Hypridle, Hyprsunset timers
 
 ---
 
 ## 🧠 Design Overview
 
-- **hosts/**  
-  Hardware-specific configuration per machine. Everything else is shared.
+- **`flake.nix`**
+  Auto-discovers all hosts from the `hosts/` directory. Passes `username` (read from the environment) and `hostName` as `specialArgs` to every module.
 
-- **modules/**  
-  Reusable building blocks for system features and user experience.
+- **`configuration.nix` / `home.nix`**
+  Thin import lists. Neither contains logic — they just wire up the modules.
 
-- **Home Manager**  
-  Integrated directly as a NixOS module — no separate installation.
+- **`modules/system/`**
+  NixOS modules for system-level concerns: boot, networking, audio, bluetooth, security, and users. Imported by `configuration.nix`.
 
-This layout scales naturally as new machines or features are added.
+- **`modules/home/`**
+  Home Manager modules for user-level concerns: packages, theming, desktop environment, and services. Imported by `home.nix`.
+
+- **`hosts/<name>/hardware-configuration.nix`**
+  Machine-specific hardware config (GPU drivers, TLP battery thresholds, kernel params). Generated per-machine with `hwgen.sh`.
+
+This layout scales naturally: adding a new machine means creating a `hosts/<name>/` directory; adding a new feature means creating a module file and adding it to the relevant import list.
 
 ---
 
