@@ -124,8 +124,8 @@ in
       input = {
         kb_layout = "br";
         follow_mouse = 1;
-        sensitivity = 1;
-        accel_profile = "flat";
+        sensitivity = 0.75;
+        accel_profile = "adaptive";
         touchpad = {
           natural_scroll = true;
           tap-to-click = true;
