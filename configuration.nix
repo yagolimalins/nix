@@ -240,7 +240,7 @@
   # Power management
   ############################################################
 
-  powerManagement.cpuFreqGovernor = "performance";
+  powerManagement.cpuFreqGovernor = "powersave";
 
   services.upower.enable = true;
 
