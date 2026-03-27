@@ -71,7 +71,7 @@
         format-charging = "󰂄 {capacity}%";
         format-full     = "󰁹";
         format-icons    = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
-        tooltip-format  = "{time} remaining\n{power:.1f}W · {capacity}%";
+        tooltip-format  = "{time} remaining";
         bat-compatibility = true;
       };
 
