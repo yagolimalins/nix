@@ -69,6 +69,16 @@
     ];
   };
 
+  zramSwap.enable = true;
+  powerManagement.powertop.enable = true;
+  services.acpid.enable = true;
+  programs.light.enable = true;
+  services.earlyoom.enable = true;
+  services.fstrim = {
+    enable = true;
+    interval = "weekly";
+  };
+
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
