@@ -242,6 +242,8 @@
 
   powerManagement.cpuFreqGovernor = "performance";
 
+  services.upower.enable = true;
+
   ############################################################
   # Users
   ############################################################
