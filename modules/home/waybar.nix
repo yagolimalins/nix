@@ -66,12 +66,13 @@
       };
 
       battery = {
-        states        = { warning = 30; critical = 15; };
-        format        = "{icon} {capacity}%";
+        states          = { warning = 30; critical = 15; };
+        format          = "{icon} {capacity}%";
         format-charging = "󰂄 {capacity}%";
-        format-full   = "󰁹";
-        format-icons  = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
-        tooltip-format = "{time} remaining ({power:.1f}W)";
+        format-full     = "󰁹";
+        format-icons    = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+        tooltip-format  = "{time} remaining\n{power:.1f}W · {capacity}%";
+        bat-compatibility = true;
       };
 
       cpu = {
