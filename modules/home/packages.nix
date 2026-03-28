@@ -41,6 +41,8 @@
     lazygit
     btop
     xfce.tumbler
+    xfce.ristretto
+    zathura
     j4-dmenu-desktop
     fastfetch
   ];
