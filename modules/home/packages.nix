@@ -42,6 +42,8 @@
     lazygit
     btop
     xfce.thunar
+    xfce.thunar-volman
+    gvfs
     j4-dmenu-desktop
     fastfetch
   ];
