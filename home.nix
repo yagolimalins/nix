@@ -7,6 +7,16 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  home.file."Desktop/.keep".text           = "";
+  home.file."Development/.keep".text      = "";
+  home.file."Documents/.keep".text        = "";
+  home.file."Downloads/.keep".text        = "";
+  home.file."Music/.keep".text            = "";
+  home.file."Pictures/screenshots/.keep".text = "";
+  home.file."Public/.keep".text           = "";
+  home.file."Templates/.keep".text        = "";
+  home.file."Videos/.keep".text           = "";
+
   xdg.configFile."gtk-3.0/settings.ini".force = true;
   xdg.configFile."gtk-4.0/settings.ini".force = true;
 

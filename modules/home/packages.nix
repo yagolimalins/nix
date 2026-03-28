@@ -4,8 +4,7 @@
   home.packages = with pkgs; [
     nixfmt-rfc-style
     kitty
-    grim
-    slurp
+    grimblast
     wl-clipboard
     playerctl
     networkmanagerapplet
