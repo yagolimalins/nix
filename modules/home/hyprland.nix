@@ -137,8 +137,8 @@ in
       bind = [
         "$mod, Q, killactive"
         "$mod, Return, exec, $terminal"
-        "$mod, S, exec, grimblast copysave area ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
-        "$mod SHIFT, S, exec, grimblast copysave output ~/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png"
+        "$mod, S, exec, grimblast copysave area ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png"
+        "$mod SHIFT, S, exec, grimblast copysave output ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png"
         "$mod, Space, exec, $launcher"
 
         # Window management

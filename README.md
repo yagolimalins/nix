@@ -6,6 +6,14 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
 
 ---
 
+## 📸 Screenshots
+
+![Desktop](screenshots/desktop.png)
+![Fastfetch](screenshots/fastfetch.png)
+![Btop](screenshots/btop.png)
+
+---
+
 ## 🚀 Why this setup?
 
 - Declarative system configuration

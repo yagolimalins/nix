@@ -12,7 +12,7 @@
   home.file."Documents/.keep".text        = "";
   home.file."Downloads/.keep".text        = "";
   home.file."Music/.keep".text            = "";
-  home.file."Pictures/screenshots/.keep".text = "";
+  home.file."Pictures/Screenshots/.keep".text = "";
   home.file."Public/.keep".text           = "";
   home.file."Templates/.keep".text        = "";
   home.file."Videos/.keep".text           = "";
