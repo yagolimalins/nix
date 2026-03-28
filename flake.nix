@@ -35,6 +35,7 @@
           };
 
           modules = [
+            { nixpkgs.config.allowUnfree = true; }
             ./configuration.nix
             ./hosts/${hostName}/hardware-configuration.nix
             home-manager.nixosModules.home-manager

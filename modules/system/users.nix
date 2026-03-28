@@ -32,8 +32,28 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
+  environment.systemPackages = with pkgs; [ mate.engrampa zip unzip ];
+
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-volman
+      thunar-archive-plugin
+      thunar-media-tags-plugin
+    ];
+  };
+
   services.udisks2.enable = true;
   services.gvfs.enable = true;
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.tuigreet.enableGnomeKeyring = true;
+
+  virtualisation.docker.enable = true;
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+  };
 
   ############################################################
   # User account
