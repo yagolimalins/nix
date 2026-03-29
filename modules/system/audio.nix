@@ -44,14 +44,45 @@
       ];
     };
 
+    wireplumber.extraConfig."12-disable-builtin-mic" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [{ "node.name" = "~alsa_input.pci-.*"; }];
+          actions.update-props = {
+            "node.disabled" = true;
+          };
+        }
+      ];
+    };
+
+    wireplumber.extraConfig."11-usb-audio-priority" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [{ "device.name" = "~alsa_card.usb-.*"; }];
+          actions.update-props = {
+            "device.profile" = "pro-audio";
+          };
+        }
+        {
+          matches = [
+            { "node.name" = "~alsa_output.usb-.*"; }
+            { "node.name" = "~alsa_input.usb-.*"; }
+          ];
+          actions.update-props = {
+            "priority.session" = 2000;
+          };
+        }
+      ];
+    };
+
     extraConfig.pipewire."10-audio-settings" = {
-      context.properties = {
-        default.clock.rate          = 48000;
-        default.clock.allowed-rates = [ 44100 48000 96000 ];
-        default.clock.quantum       = 128;
-        default.clock.min-quantum   = 128;
-        default.clock.max-quantum   = 128;
-        default.clock.quantum-limit = 1024;
+      "context.properties" = {
+        "default.clock.rate"          = 44100;
+        "default.clock.allowed-rates" = [ 44100 48000 96000 ];
+        "default.clock.quantum"       = 128;
+        "default.clock.min-quantum"   = 128;
+        "default.clock.max-quantum"   = 128;
+        "default.clock.quantum-limit" = 128;
       };
     };
   };

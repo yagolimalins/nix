@@ -213,14 +213,23 @@ in
       windowrulev2 = [
         "suppressevent maximize, class:.*"
         "noblur, class:.*"
-        "float, class:^(wofi)$"
-        "float, title:^(Open File)(.*)$"
-        "float, title:^(Save As)(.*)$"
-        "float, title:^(Confirm)(.*)$"
-        "float, title:^(Warning)(.*)$"
-        "float, title:^(Error)(.*)$"
+        "float,  class:^(wofi)$"
+        "center, class:^(wofi)$"
+        "float,  title:^(Open File)(.*)$"
+        "center, title:^(Open File)(.*)$"
+        "float,  title:^(Save As)(.*)$"
+        "center, title:^(Save As)(.*)$"
+        "float,  title:^(Confirm)(.*)$"
+        "center, title:^(Confirm)(.*)$"
+        "float,  title:^(Warning)(.*)$"
+        "center, title:^(Warning)(.*)$"
+        "float,  title:^(Error)(.*)$"
+        "center, title:^(Error)(.*)$"
         "opacity 0.95 0.90, class:^(kitty)$"
-        "center, floating:1"
+
+        # Reaper — tile main window, let dialogs float at their own position
+        "tile,    class:^(REAPER)$, title:.*REAPER v.*"
+        "noanim,  class:^(REAPER)$"
       ];
     };
   };
