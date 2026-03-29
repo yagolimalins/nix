@@ -40,12 +40,7 @@
     loader.efi.canTouchEfiVariables = true;
 
     kernelPackages = pkgs.linuxPackages_rt_6_1;
-    kernelParams = [ "quiet" "splash" "loglevel=3" ];
-
-    plymouth = {
-      enable = true;
-      theme = "bgrt";
-    };
+    kernelParams = [ "quiet" "loglevel=3" ];
 
     initrd.systemd.enable = true;
 
