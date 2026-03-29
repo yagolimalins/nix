@@ -23,7 +23,7 @@
         padding: 10px 14px;
         color: #dedede;
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
         outline: none;
         caret-color: transparent;
@@ -49,7 +49,7 @@
 
       #text {
         font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 14px;
+        font-size: 16px;
         color: #dedede;
       }
 

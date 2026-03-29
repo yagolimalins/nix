@@ -44,7 +44,8 @@ in
       monitor = ",preferred,auto,1";
 
       exec-once = [
-        "waybar"
+        "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+        "systemctl --user start waybar"
         "mako"
         "nm-applet --indicator"
         "blueman-applet"

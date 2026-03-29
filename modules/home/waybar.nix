@@ -7,10 +7,10 @@
     settings = [{
       layer    = "top";
       position = "top";
-      height   = 36;
+      height   = 40;
       spacing  = 0;
 
-      modules-left   = [ "hyprland/workspaces" "hyprland/window" ];
+      modules-left   = [ "hyprland/workspaces" "custom/cava" "mpris" ];
       modules-center = [ "clock" ];
       modules-right  = [
         "pulseaudio" "network" "battery"
@@ -27,9 +27,21 @@
         on-click       = "activate";
       };
 
-      "hyprland/window" = {
-        max-length       = 60;
-        separate-outputs = true;
+      "custom/cava" = {
+        exec    = "${config.home.homeDirectory}/.local/bin/cava-waybar";
+        format  = "{}";
+        tooltip = false;
+      };
+
+      mpris = {
+        format         = "{status_icon} {title} — {artist}";
+        format-paused  = "{status_icon} {title} — {artist}";
+        format-stopped = "";
+        status-icons   = { playing = "󰐊"; paused = "󰏤"; stopped = ""; };
+        max-length     = 50;
+        on-click       = "playerctl play-pause";
+        on-click-right = "playerctl next";
+        on-click-middle = "playerctl previous";
       };
 
       clock = {
@@ -114,19 +126,19 @@
       };
 
       "custom/logout" = {
-        format   = "logout";
+        format   = "󰍃";
         on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Logout?' --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
         tooltip  = false;
       };
 
       "custom/restart" = {
-        format   = "restart";
+        format   = "󰜉";
         on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Restart?' --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
         tooltip  = false;
       };
 
       "custom/shutdown" = {
-        format   = "shutdown";
+        format   = "󰐥";
         on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Shutdown?' --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
         tooltip  = false;
       };
@@ -134,8 +146,8 @@
 
     style = ''
       * {
-        font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
-        font-size: 14px;
+        font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
+        font-size: 16px;
         min-height: 0;
       }
 
@@ -179,8 +191,26 @@
         border-color: #e63329;
       }
 
-      /* ── Window title ───────────────────────────────── */
-      #window { padding: 0 10px; color: #7a7a7a; }
+      /* ── Cava visualizer ───────────────────────────── */
+      #custom-cava {
+        padding: 0 10px;
+        margin: 4px 1px;
+        color: #cc2222;
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+
+      /* ── Media player ──────────────────────────────── */
+      #mpris {
+        padding: 0 12px;
+        margin: 4px 1px;
+        background-color: #171717;
+        border: 1px solid #222222;
+        border-radius: 2px;
+        color: #dedede;
+        font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
+      }
+      #mpris.paused { color: #7a7a7a; }
 
       /* ── Shared module base ─────────────────────────── */
       #clock,
