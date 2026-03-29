@@ -28,9 +28,10 @@
       };
 
       "custom/cava" = {
-        exec    = "${config.home.homeDirectory}/.local/bin/cava-waybar";
-        format  = "{}";
-        tooltip = false;
+        exec        = "${config.home.homeDirectory}/.local/bin/cava-waybar";
+        format      = "{}";
+        return-type = "json";
+        tooltip     = false;
       };
 
       mpris = {
@@ -198,6 +199,11 @@
         color: #cc2222;
         font-size: 12px;
         letter-spacing: 1px;
+      }
+      #custom-cava.silent {
+        padding: 0;
+        margin: 0;
+        min-width: 0;
       }
 
       /* ── Media player ──────────────────────────────── */

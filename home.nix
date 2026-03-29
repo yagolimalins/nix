@@ -54,7 +54,11 @@
             8) out+="█"  ;;
           esac
         done
-        echo "$out"
+        if [[ "$out" =~ ^[[:space:]]*$ ]]; then
+          echo '{"text":"","class":"silent"}'
+        else
+          echo "{\"text\":\"$out\",\"class\":\"active\"}"
+        fi
       done
     '';
   };
