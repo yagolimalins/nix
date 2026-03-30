@@ -91,7 +91,6 @@
     reaper
     qpwgraph
     carla
-    cava
     alsa-utils
     (pkgs.lsp-plugins.overrideAttrs (old: {
       postInstall = (old.postInstall or "") + ''

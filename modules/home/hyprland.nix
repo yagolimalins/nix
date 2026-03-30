@@ -44,8 +44,7 @@ in
       monitor = ",preferred,auto,1";
 
       exec-once = [
-        "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
-        "systemctl --user start waybar"
+        "bash -c 'systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY && systemctl --user restart waybar'"
         "mako"
         "nm-applet --indicator"
         "blueman-applet"
@@ -179,7 +178,7 @@ in
         "$mod, L, exec, hyprlock"
 
         # Volume (mod keys)
-        "$mod, bracketleft,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+        "$mod, bracketleft,  exec, wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"
         "$mod, bracketright, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
         "$mod, semicolon,    exec, playerctl play-pause"
         "$mod, period,       exec, playerctl next"
@@ -192,7 +191,7 @@ in
         ", XF86KbdBrightnessDown, exec, brightnessctl -d *::kbd_backlight s 10%-"
 
         # Media keys (XF86)
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+        ", XF86AudioRaiseVolume, exec, wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"
         ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
         ", XF86AudioMute,        exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute,     exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"

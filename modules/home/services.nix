@@ -10,11 +10,14 @@ in
   ############################################################
 
   systemd.user.services.waybar = {
-    Unit.Description = "Waybar status bar";
+    Unit = {
+      Description          = "Waybar status bar";
+      StartLimitIntervalSec = 0;
+    };
     Service = {
       ExecStart  = "${pkgs.waybar}/bin/waybar";
-      Restart    = "on-failure";
-      RestartSec = "1s";
+      Restart    = "always";
+      RestartSec = "2s";
     };
   };
 

@@ -10,14 +10,14 @@
       height   = 40;
       spacing  = 0;
 
-      modules-left   = [ "hyprland/workspaces" "custom/cava" "mpris" ];
+      modules-left   = [ "hyprland/workspaces" "mpris" ];
       modules-center = [ "clock" ];
       modules-right  = [
+        "custom/nightshift"
         "pulseaudio" "network" "battery"
         "cpu" "temperature"
-        "custom/nightshift"
         "tray" "custom/cpugov"
-        "custom/logout" "custom/restart" "custom/shutdown"
+        "custom/power"
       ];
 
       "hyprland/workspaces" = {
@@ -27,18 +27,12 @@
         on-click       = "activate";
       };
 
-      "custom/cava" = {
-        exec        = "${config.home.homeDirectory}/.local/bin/cava-waybar";
-        format      = "{}";
-        return-type = "json";
-        tooltip     = false;
-      };
-
       mpris = {
-        format         = "{status_icon} {title} — {artist}";
-        format-paused  = "{status_icon} {title} — {artist}";
+        format         = "{status_icon} {position} {title} — {artist}";
+        format-paused  = "{status_icon} {position} {title} — {artist}";
         format-stopped = "";
         status-icons   = { playing = "󰐊"; paused = "󰏤"; stopped = ""; };
+        interval       = 1;
         max-length     = 50;
         on-click       = "playerctl play-pause";
         on-click-right = "playerctl next";
@@ -68,6 +62,7 @@
         on-click      = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
         tooltip-format = "{desc} — {volume}%";
         scroll-step   = 5;
+        max-volume    = 100;
       };
 
       network = {
@@ -92,6 +87,7 @@
         format   = "󰻠 {usage}%";
         interval = 2;
         tooltip  = false;
+        on-click = "kitty btop";
       };
 
       temperature = {
@@ -101,6 +97,7 @@
         critical-threshold = 80;
         interval           = 2;
         tooltip            = false;
+        on-click           = "kitty btop";
       };
 
       # Night shift toggle — starts/stops hyprsunset
@@ -114,11 +111,18 @@
 
       # CPU governor toggle — calls /etc/cpugov-toggle via sudo (NOPASSWD)
       "custom/cpugov" = {
-        exec        = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"performance\",\"class\":\"perf\"}";; *) echo "{\"text\":\"powersave\",\"class\":\"save\"}";; esac' '';
+        exec        = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"󰓅\",\"class\":\"perf\"}";; *) echo "{\"text\":\"󰾅\",\"class\":\"save\"}";; esac' '';
         return-type = "json";
         interval    = 2;
         on-click    = "/run/wrappers/bin/sudo /etc/cpugov-toggle";
         tooltip     = false;
+      };
+
+      # Power menu — single button with wofi
+      "custom/power" = {
+        format   = "󰐥";
+        on-click = ''bash -c 'pgrep wofi && exit; choice=$(echo -e "Logout\nRestart\nShutdown" | wofi --dmenu --prompt "Power" --width 140 --height 135); case "$choice" in Logout) hyprctl dispatch exit;; Restart) systemctl reboot;; Shutdown) systemctl poweroff;; esac' '';
+        tooltip  = false;
       };
 
       tray = {
@@ -192,21 +196,7 @@
         border-color: #e63329;
       }
 
-      /* ── Cava visualizer ───────────────────────────── */
-      #custom-cava {
-        padding: 0 10px;
-        margin: 4px 1px;
-        color: #cc2222;
-        font-size: 12px;
-        letter-spacing: 1px;
-      }
-      #custom-cava.silent {
-        padding: 0;
-        margin: 0;
-        min-width: 0;
-      }
-
-      /* ── Media player ──────────────────────────────── */
+/* ── Media player ──────────────────────────────── */
       #mpris {
         padding: 0 12px;
         margin: 4px 1px;
@@ -272,10 +262,8 @@
 
       tooltip label { font-size: 16px; color: #dedede; }
 
-      /* ── Power buttons ──────────────────────────────── */
-      #custom-logout,
-      #custom-restart,
-      #custom-shutdown {
+      /* ── Power button ───────────────────────────────── */
+      #custom-power {
         padding: 0 10px;
         margin: 4px 1px;
         background-color: #171717;
@@ -285,9 +273,7 @@
         transition: all 0.1s ease;
       }
 
-      #custom-logout:hover,
-      #custom-restart:hover,
-      #custom-shutdown:hover {
+      #custom-power:hover {
         background-color: #1a0000;
         color: #e63329;
         border-color: #cc2222;

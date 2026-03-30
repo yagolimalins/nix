@@ -53,7 +53,7 @@
     };
 
 
-    wireplumber.extraConfig."12-disable-builtin-mic" = {
+wireplumber.extraConfig."12-disable-builtin-mic" = {
       "monitor.alsa.rules" = [
         {
           matches = [{ "node.name" = "~alsa_input.pci-.*"; }];
