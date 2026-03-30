@@ -11,6 +11,7 @@
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ "i915" ];
   boot.kernelModules = [ "kvm-intel" ];
+  boot.extraModprobeConfig = "options btusb enable_autosuspend=0";
   boot.kernelParams = [
     "i915.fastboot=1"
     "i915.enable_psr=1"
@@ -49,6 +50,7 @@
       RUNTIME_PM_ON_AC = "on";
       RUNTIME_PM_ON_BAT = "auto";
       USB_AUTOSUSPEND = 1;
+      USB_DENYLIST = "8087:0a2b";
       PCIE_ASPM_ON_BAT = "powersupersave";
     };
   };

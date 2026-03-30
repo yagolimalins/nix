@@ -44,6 +44,15 @@
       ];
     };
 
+    wireplumber.extraConfig."10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.msbc-support"   = true;
+        "bluez5.sbc-xq-support" = true;
+        "bluez5.codecs"         = [ "sbc_xq" "sbc" "aac" "msbc" ];
+      };
+    };
+
+
     wireplumber.extraConfig."12-disable-builtin-mic" = {
       "monitor.alsa.rules" = [
         {
@@ -80,9 +89,9 @@
         "default.clock.rate"          = 44100;
         "default.clock.allowed-rates" = [ 44100 48000 96000 ];
         "default.clock.quantum"       = 128;
-        "default.clock.min-quantum"   = 128;
-        "default.clock.max-quantum"   = 128;
-        "default.clock.quantum-limit" = 128;
+        "default.clock.min-quantum"   = 32;
+        "default.clock.max-quantum"   = 8192;
+        "default.clock.quantum-limit" = 8192;
       };
     };
   };
