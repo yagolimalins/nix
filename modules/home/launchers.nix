@@ -4,9 +4,12 @@
   programs.wofi = {
     enable   = true;
     settings = {
-      width       = 400;
-      height      = 300;
-      hide_scroll = true;
+      width        = 400;
+      height       = 300;
+      hide_scroll  = true;
+      allow_images = true;
+      image_size   = 24;
+      hide_actions = true;
     };
     style = ''
       window {

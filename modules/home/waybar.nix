@@ -29,7 +29,7 @@
 
       mpris = {
         format         = "{status_icon} {position} {title} — {artist}";
-        format-paused  = "{status_icon} {position} {title} — {artist}";
+        format-paused  = "{status_icon} {title} — {artist}";
         format-stopped = "";
         status-icons   = { playing = "󰐊"; paused = "󰏤"; stopped = ""; };
         interval       = 1;
