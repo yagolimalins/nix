@@ -70,6 +70,10 @@ xfce.tumbler
     nerd-fonts.jetbrains-mono
 
     # ── Editors & IDEs ───────────────────────────────────────
+    neovim
+    ripgrep
+    fd
+    gcc
     claude-code
     vscode
     zed-editor
