@@ -2,11 +2,15 @@
 
 {
   xdg.desktopEntries.spotify-player = {
-    name      = "Spotify";
-    exec      = "kitty spotify_player";
-    icon      = "spotify";
-    comment   = "Terminal Spotify client";
-    categories = [ "Audio" "Music" "Player" ];
+    name = "Spotify";
+    exec = "kitty spotify_player";
+    icon = "spotify";
+    comment = "Terminal Spotify client";
+    categories = [
+      "Audio"
+      "Music"
+      "Player"
+    ];
   };
 
   xdg.configFile."spotify-player/app.toml".text = ''
@@ -59,7 +63,7 @@
     brightnessctl
     networkmanagerapplet
     blueman
-xfce.tumbler
+    xfce.tumbler
 
     # ── File viewers ─────────────────────────────────────────
     xfce.ristretto
@@ -78,7 +82,6 @@ xfce.tumbler
     vscode
     zed-editor
     jetbrains.idea
-    # jetbrains.rider
 
     # ── Version control ──────────────────────────────────────
     git
