@@ -8,11 +8,39 @@
   networking = {
     hostName = hostName;
     networkmanager = {
-      enable = true;
+      enable  = true;
+      dns     = "systemd-resolved";
       plugins = with pkgs; [
         networkmanager-openvpn
       ];
     };
+  };
+
+  ############################################################
+  # AdGuard Home — system-wide DNS ad blocker
+  ############################################################
+
+  services.adguardhome = {
+    enable          = true;
+    mutableSettings = true;
+    host            = "127.0.0.1";
+    port            = 9000;
+    settings = {
+      dns = {
+        bind_host     = "127.0.0.1";
+        port          = 5335;
+        bootstrap_dns = [ "1.1.1.1" "9.9.9.9" ];
+        upstream_dns  = [ "https://dns.cloudflare.com/dns-query" "https://dns10.quad9.net/dns-query" ];
+      };
+    };
+  };
+
+  services.resolved = {
+    enable    = true;
+    dnssec    = "false";
+    extraConfig = ''
+      DNS=127.0.0.1:5335
+    '';
   };
 
   ############################################################
