@@ -10,6 +10,21 @@
     ./modules/system/users.nix
   ];
 
+  ############################################################
+  # Input method — Chinese (fcitx5 + Pinyin)
+  ############################################################
+
+  i18n.inputMethod = {
+    enable = true;
+    type   = "fcitx5";
+    fcitx5.addons = with pkgs; [
+      qt6Packages.fcitx5-chinese-addons
+      fcitx5-mozc
+      fcitx5-gtk
+      libsForQt5.fcitx5-qt
+    ];
+  };
+
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [

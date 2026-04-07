@@ -45,6 +45,7 @@ in
 
       exec-once = [
         "bash -c 'systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY && systemctl --user restart waybar'"
+        "fcitx5 -d"
         "mako"
         "nm-applet --indicator"
         "blueman-applet"
@@ -53,6 +54,9 @@ in
       ];
 
       env = [
+        "GTK_IM_MODULE,fcitx"
+        "QT_IM_MODULE,fcitx"
+        "XMODIFIERS,@im=fcitx"
         "XCURSOR_THEME,Bibata-Modern-Classic"
         "XCURSOR_SIZE,24"
         "GDK_BACKEND,wayland,x11,*"
