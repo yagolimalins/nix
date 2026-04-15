@@ -19,17 +19,6 @@
     options = "--delete-older-than 3d";
   };
 
-  system.autoUpgrade = {
-    enable = true;
-    flake = "/home/${username}/.nix";
-    dates = "daily";
-    flags = [
-      "--update-input"
-      "nixpkgs"
-      "--commit-lock-file"
-    ];
-  };
-
   ############################################################
   # Bootloader & kernel
   ############################################################
