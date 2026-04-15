@@ -124,6 +124,7 @@
     spotify-player
 
     # ── Video ────────────────────────────────────────────────
+    obs-studio
     vlc
     kdePackages.kdenlive
 
