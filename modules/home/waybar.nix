@@ -16,7 +16,7 @@
         "custom/nightshift"
         "pulseaudio" "network" "battery"
         "cpu" "temperature"
-        "tray" "custom/cpugov"
+        "custom/vpn" "tray" "custom/cpugov"
         "custom/power"
       ];
 
@@ -66,11 +66,19 @@
       };
 
       network = {
-        format-wifi       = "󰤨 {signalStrength}%";
-        format-ethernet   = "󰈀";
-        format-disconnected = "󰤭";
+        interface             = "wlp*";
+        format-wifi           = "󰤨 {signalStrength}%";
+        format-ethernet       = "󰈀";
+        format-disconnected   = "󰤭";
         tooltip-format-wifi     = "{essid}  {ipaddr}";
         tooltip-format-ethernet = "{ifname}: {ipaddr}";
+      };
+
+      "custom/vpn" = {
+        exec        = ''bash -c 'VPN=$(nmcli -t -f TYPE,NAME con show --active 2>/dev/null | grep -E "(wireguard:ProtonVPN|^vpn:)" | cut -d: -f2); [ -n "$VPN" ] && echo "{\"text\":\"󰒃\",\"class\":\"connected\",\"tooltip\":\"$VPN\"}" || echo "{\"text\":\"\",\"class\":\"off\"}"' '';
+        return-type = "json";
+        interval    = 5;
+        tooltip     = true;
       };
 
       battery = {
@@ -212,6 +220,7 @@
       #clock,
       #pulseaudio,
       #network,
+      #custom-vpn,
       #battery,
       #cpu,
       #temperature,
@@ -243,6 +252,9 @@
 
       #temperature          { color: #dedede; }
       #temperature.critical { color: #cc2222; }
+
+      #custom-vpn.connected { color: #5a9e5a; }
+      #custom-vpn.off       { color: transparent; padding: 0; margin: 0; min-width: 0; border: none; }
 
       #custom-nightshift.on  { color: #e8a045; }
       #custom-nightshift.off { color: #7a7a7a; }

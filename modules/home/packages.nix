@@ -54,18 +54,19 @@
     btop
     fastfetch
 
-    # ── Screenshots & clipboard ──────────────────────────────
-    grimblast
-    wl-clipboard
-
     # ── Desktop utilities ────────────────────────────────────
     playerctl
     brightnessctl
     networkmanagerapplet
     blueman
+    seahorse
     xfce.tumbler
 
-    # ── File viewers ─────────────────────────────────────────
+    # ── Screenshots & clipboard ──────────────────────────────
+    grimblast
+    wl-clipboard
+
+    # ── File management ──────────────────────────────────────
     xfce.ristretto
     zathura
 
@@ -75,13 +76,15 @@
 
     # ── Editors & IDEs ───────────────────────────────────────
     neovim
+    vscode
+    zed-editor
+    jetbrains.idea
+
+    # ── Dev tools ────────────────────────────────────────────
     ripgrep
     fd
     gcc
     claude-code
-    vscode
-    zed-editor
-    jetbrains.idea
 
     # ── Version control ──────────────────────────────────────
     git
@@ -116,6 +119,10 @@
     # ── Browsers ─────────────────────────────────────────────
     # google-chrome
     chromium
+
+    # ── Security & privacy ───────────────────────────────────
+    protonvpn-gui
+    proton-pass
 
     # ── Communication ────────────────────────────────────────
     zoom-us
