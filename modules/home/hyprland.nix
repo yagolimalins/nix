@@ -48,6 +48,7 @@ in
         "fcitx5 -d"
         "mako"
         "nm-applet --indicator"
+        "protonvpn-app"
         "blueman-applet"
         "hypridle"
         "tumblerd"
