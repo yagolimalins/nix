@@ -50,6 +50,8 @@
 
   virtualisation.docker.enable = true;
 
+  services.teamviewer.enable = true;
+
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];

@@ -126,6 +126,8 @@
 
     # ── Communication ────────────────────────────────────────
     zoom-us
+    anydesk
+    teamviewer
 
     # ── Music ────────────────────────────────────────────────
     spotify-player
