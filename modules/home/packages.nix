@@ -85,6 +85,7 @@
     fd
     gcc
     claude-code
+    uv
 
     # ── Version control ──────────────────────────────────────
     git
