@@ -45,7 +45,7 @@
   home.packages = with pkgs; [
 
     # ── Nix ──────────────────────────────────────────────────
-    nixfmt-rfc-style
+    nixfmt
 
     # ── Terminal ─────────────────────────────────────────────
     kitty
@@ -60,14 +60,14 @@
     networkmanagerapplet
     blueman
     seahorse
-    xfce.tumbler
+    tumbler
 
     # ── Screenshots & clipboard ──────────────────────────────
     grimblast
     wl-clipboard
 
     # ── File management ──────────────────────────────────────
-    xfce.ristretto
+    ristretto
     zathura
 
     # ── Fonts ────────────────────────────────────────────────
@@ -122,7 +122,7 @@
     chromium
 
     # ── Security & privacy ───────────────────────────────────
-    protonvpn-gui
+    proton-vpn
     proton-pass
 
     # ── Communication ────────────────────────────────────────

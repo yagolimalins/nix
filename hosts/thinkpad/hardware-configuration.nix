@@ -74,7 +74,6 @@
   zramSwap.enable = true;
   powerManagement.powertop.enable = true;
   services.acpid.enable = true;
-  programs.light.enable = true;
   services.earlyoom.enable = true;
   services.fstrim = {
     enable = true;

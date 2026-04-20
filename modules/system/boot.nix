@@ -28,7 +28,7 @@
     loader.systemd-boot.configurationLimit = 5;
     loader.efi.canTouchEfiVariables = true;
 
-    kernelPackages = pkgs.linuxPackages-rt_latest;
+    kernelPackages = pkgs.linuxPackages_latest;
     kernelParams = [ "quiet" "loglevel=3" ];
 
     initrd.systemd.enable = true;

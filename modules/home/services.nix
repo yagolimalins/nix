@@ -6,22 +6,6 @@ in
 
 {
   ############################################################
-  # Waybar — status bar (auto-restarts on crash)
-  ############################################################
-
-  systemd.user.services.waybar = {
-    Unit = {
-      Description          = "Waybar status bar";
-      StartLimitIntervalSec = 0;
-    };
-    Service = {
-      ExecStart  = "${pkgs.waybar}/bin/waybar";
-      Restart    = "always";
-      RestartSec = "2s";
-    };
-  };
-
-  ############################################################
   # Mako — desktop notifications
   ############################################################
 

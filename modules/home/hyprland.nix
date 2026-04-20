@@ -21,14 +21,11 @@ in
   # Wallpaper daemon
   ############################################################
 
-  services.hyprpaper = {
-    enable   = true;
-    settings = {
-      ipc       = false;
-      preload   = [ wallpaper ];
-      wallpaper = [ ",${wallpaper}" ];
-    };
-  };
+  xdg.configFile."hypr/hyprpaper.conf".text = ''
+    ipc = false
+    preload = ${wallpaper}
+    wallpaper = ,${wallpaper}
+  '';
 
   ############################################################
   # Hyprland window manager
@@ -45,6 +42,7 @@ in
 
       exec-once = [
         "bash -c 'systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY && systemctl --user restart waybar'"
+        "hyprpaper"
         "fcitx5 -d"
         "mako"
         "nm-applet --indicator"
@@ -112,7 +110,6 @@ in
       dwindle = {
         pseudotile     = true;
         preserve_split = true;
-        smart_split    = true;
       };
 
       input = {
@@ -126,9 +123,6 @@ in
         };
       };
 
-      gestures = {
-        "gesture" = "3, horizontal, workspace";
-      };
 
       misc = {
         force_default_wallpaper = 0;
@@ -137,6 +131,10 @@ in
         enable_swallow          = true;
         swallow_regex           = "^(kitty)$";
         focus_on_activate       = true;
+      };
+
+      debug = {
+        disable_logs = false;
       };
 
       bind = [
@@ -218,30 +216,27 @@ in
       ];
 
       layerrule = [
-        "blur, wofi"
-        "dimaround, wofi"
+        "blur on, match:namespace wofi"
       ];
 
-      windowrulev2 = [
-        "suppressevent maximize, class:.*"
-        "noblur, class:.*"
-        "float,  class:^(wofi)$"
-        "center, class:^(wofi)$"
-        "float,  title:^(Open File)(.*)$"
-        "center, title:^(Open File)(.*)$"
-        "float,  title:^(Save As)(.*)$"
-        "center, title:^(Save As)(.*)$"
-        "float,  title:^(Confirm)(.*)$"
-        "center, title:^(Confirm)(.*)$"
-        "float,  title:^(Warning)(.*)$"
-        "center, title:^(Warning)(.*)$"
-        "float,  title:^(Error)(.*)$"
-        "center, title:^(Error)(.*)$"
-        "opacity 0.95 0.90, class:^(kitty)$"
+      windowrule = [
+        "float on,  match:class wofi"
+        "center on, match:class wofi"
+        "float on,  match:title Open File"
+        "center on, match:title Open File"
+        "float on,  match:title Save As"
+        "center on, match:title Save As"
+        "float on,  match:title Confirm"
+        "center on, match:title Confirm"
+        "float on,  match:title Warning"
+        "center on, match:title Warning"
+        "float on,  match:title Error"
+        "center on, match:title Error"
+        "opacity 0.95 0.90, match:class kitty"
 
         # Reaper — tile main window, let dialogs float at their own position
-        "tile,    class:^(REAPER)$, title:.*REAPER v.*"
-        "noanim,  class:^(REAPER)$"
+        "tile on,   match:class REAPER, match:title REAPER v"
+        "no_anim on, match:class REAPER"
       ];
     };
   };

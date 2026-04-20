@@ -36,11 +36,9 @@
   };
 
   services.resolved = {
-    enable    = true;
-    dnssec    = "false";
-    extraConfig = ''
-      DNS=127.0.0.1:5335
-    '';
+    enable = true;
+    settings.Resolve.DNS    = "127.0.0.1:5335";
+    settings.Resolve.DNSSEC = "false";
   };
 
   ############################################################

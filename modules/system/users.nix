@@ -17,7 +17,7 @@
           --remember-session \
           --greeting "  ThinkPad" \
           --asterisks \
-          --cmd "Hyprland &>/dev/null" \
+          --cmd "start-hyprland &>/dev/null" \
           --theme "border=#cc2222;text=#dedede;prompt=#7a7a7a;time=#dedede;action=#7a7a7a;button=#171717;container=#171717;input=#dedede"
       '';
       user = "greeter";
@@ -32,11 +32,11 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
   services.upower.enable = true;
-  environment.systemPackages = with pkgs; [ mate.engrampa zip unzip ];
+  environment.systemPackages = with pkgs; [ engrampa zip unzip ];
 
   programs.thunar = {
     enable = true;
-    plugins = with pkgs.xfce; [
+    plugins = with pkgs; [
       thunar-volman
       thunar-archive-plugin
       thunar-media-tags-plugin
