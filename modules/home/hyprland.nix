@@ -38,7 +38,7 @@ in
 
       exec-once = [
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
-        "waybar"
+        "${pkgs.waybar}/bin/waybar"
         "swaybg -i ${wallpaper} -m fill"
         "fcitx5 -d"
         "mako"
@@ -49,7 +49,6 @@ in
       ];
 
       env = [
-        "GTK_IM_MODULE,fcitx"
         "QT_IM_MODULE,fcitx"
         "XMODIFIERS,@im=fcitx"
         "XCURSOR_THEME,Bibata-Modern-Classic"
