@@ -18,14 +18,10 @@ in
   };
 
   ############################################################
-  # Wallpaper daemon
+  # Wallpaper
   ############################################################
 
-  xdg.configFile."hypr/hyprpaper.conf".text = ''
-    ipc = false
-    preload = ${wallpaper}
-    wallpaper = ,${wallpaper}
-  '';
+  home.packages = [ pkgs.swaybg ];
 
   ############################################################
   # Hyprland window manager
@@ -41,8 +37,9 @@ in
       monitor = ",preferred,auto,1";
 
       exec-once = [
-        "bash -c 'systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY && systemctl --user restart waybar'"
-        "hyprpaper"
+        "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+        "waybar"
+        "swaybg -i ${wallpaper} -m fill"
         "fcitx5 -d"
         "mako"
         "nm-applet --indicator"
