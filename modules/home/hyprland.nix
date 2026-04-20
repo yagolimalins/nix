@@ -91,16 +91,22 @@ in
       animations = {
         enabled = true;
         bezier = [
-          "ease,   0.25, 0.1, 0.25, 1.0"
-          "linear, 0.0,  0.0, 1.0,  1.0"
+          "snap,    0.19, 1.0,  0.22, 1.0"
+          "linear,  0.0,  0.0,  1.0,  1.0"
+          "easeOut, 0.0,  0.0,  0.2,  1.0"
         ];
         animation = [
-          "windows,     1, 3, ease, slide"
-          "windowsOut,  1, 2, ease, popin 90%"
-          "windowsMove, 1, 3, ease"
-          "border,      1, 4, linear"
-          "fade,        1, 3, ease"
-          "workspaces,  1, 3, ease, slide"
+          "windows,         1, 3,  snap,    popin 90%"
+          "windowsOut,      1, 2,  easeOut, popin 90%"
+          "windowsMove,     1, 3,  snap"
+          "fade,            1, 3,  easeOut"
+          "fadeSwitch,      1, 2,  easeOut"
+          "fadeDim,         1, 3,  easeOut"
+
+          "workspaces,      1, 4,  snap,    slidefade 20%"
+          "workspacesOut,   1, 3,  easeOut, slidefade 20%"
+          "layers,          1, 3,  snap,    popin 80%"
+          "layersOut,       1, 2,  easeOut, popin 90%"
         ];
       };
 
