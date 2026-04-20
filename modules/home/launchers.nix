@@ -4,7 +4,7 @@
   programs.wofi = {
     enable   = true;
     settings = {
-      width        = 400;
+      width        = 380;
       height       = 300;
       hide_scroll  = true;
       allow_images = true;
