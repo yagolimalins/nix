@@ -49,8 +49,9 @@
       WIFI_PWR_ON_BAT = 5;
       RUNTIME_PM_ON_AC = "on";
       RUNTIME_PM_ON_BAT = "auto";
-      USB_AUTOSUSPEND = 0;
-      USB_DENYLIST = "8087:0a2b";
+      USB_AUTOSUSPEND = 1;
+      USB_DENYLIST = "1532:006e 320f:5000";
+      USB_EXCLUDE_BTUSB = 1;
       PCIE_ASPM_ON_BAT = "powersupersave";
     };
   };
