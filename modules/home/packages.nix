@@ -109,6 +109,7 @@
 
     # ── Databases ────────────────────────────────────────────
     dbeaver-bin
+    beekeeper-studio
 
     # ── API testing ──────────────────────────────────────────
     insomnia
@@ -136,9 +137,6 @@
     obs-studio
     vlc
     kdePackages.kdenlive
-
-    # ── Torrents ─────────────────────────────────────────────
-    fragments
 
     # ── Audio production ─────────────────────────────────────
     reaper
