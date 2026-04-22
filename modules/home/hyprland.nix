@@ -38,7 +38,7 @@ in
 
       exec-once = [
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
-        "${pkgs.waybar}/bin/waybar"
+        "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
         "swaybg -i ${wallpaper} -m fill"
         "fcitx5 -d"
         "mako"
