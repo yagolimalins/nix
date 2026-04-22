@@ -48,9 +48,7 @@
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.tuigreet.enableGnomeKeyring = true;
 
-  virtualisation.docker.enable = true;
-
-  services.teamviewer.enable = true;
+  virtualisation.docker.enable = false;
 
   services.ollama.enable = true;
 
