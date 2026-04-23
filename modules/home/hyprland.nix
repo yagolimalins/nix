@@ -191,8 +191,8 @@ in
       # Works even on locked screen (l = locked)
       bindl = [
         # Lid switch — disable/enable built-in display
-        ", switch:on:Lid Switch,  exec, hyprctl keyword monitor eDP-1,disable"
-        ", switch:off:Lid Switch, exec, hyprctl keyword monitor eDP-1,preferred,auto,1"
+        ", switch:on:Lid Switch,  exec, hyprctl dispatch dpms off eDP-1"
+        ", switch:off:Lid Switch, exec, hyprctl dispatch dpms on eDP-1"
 
         "$mod, semicolon,    exec, playerctl play-pause"
         "$mod, period,       exec, playerctl next"

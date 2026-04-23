@@ -7,6 +7,11 @@
 
   programs.hyprland.enable = true;
 
+  services.logind = {
+    lidSwitch = "suspend";
+    lidSwitchDocked = "ignore";
+  };
+
   services.greetd = {
     enable = true;
     settings.default_session = {
