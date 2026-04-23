@@ -78,6 +78,7 @@
     neovim
     vscode
     zed-editor
+    code-cursor
     jetbrains.idea
 
     # ── Dev tools ────────────────────────────────────────────
