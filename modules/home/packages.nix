@@ -126,6 +126,8 @@
     # ── Security & privacy ───────────────────────────────────
     proton-vpn
     proton-pass
+    protonmail-bridge
+    thunderbird
 
     # ── Communication ────────────────────────────────────────
     zoom-us

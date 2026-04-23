@@ -98,6 +98,20 @@ in
 
   home.packages = [ pkgs.hyprsunset ];
 
+  systemd.user.services.protonmail-bridge = {
+    Unit = {
+      Description = "Proton Mail Bridge";
+      After = [ "network-online.target" "gnome-keyring-daemon.service" ];
+      Wants = [ "gnome-keyring-daemon.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --noninteractive";
+      Restart   = "on-failure";
+      RestartSec = "5";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   systemd.user.services.hyprsunset-night = {
     Unit.Description = "Activate night shift";
     Service = {
