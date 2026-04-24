@@ -41,8 +41,7 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     ├── flake.lock
     ├── configuration.nix                # NixOS: imports modules/system/*
     ├── home.nix                         # Home Manager: imports modules/home/*
-    ├── flakes.sh                        # Helper: enable flakes for the first time
-    ├── hwgen.sh                         # Helper: generate hardware-configuration.nix
+    ├── install.sh                       # Interactive installer (hardware config, flakes, rebuild)
     ├── hosts/
     │   ├── thinkpad/
     │   │   └── hardware-configuration.nix   # ThinkPad T480 (i915, TLP thresholds)
@@ -94,56 +93,23 @@ This layout scales naturally: adding a new machine means creating a `hosts/<name
 
 This setup is designed to be applied on top of a **minimal NixOS installation**.
 
-### 1️⃣ Generate hardware configuration
+Run the interactive installer on the target machine:
 
-Each machine has its own hardware configuration that must be generated on that specific machine. The existing configs in `hosts/` are for the original author's machines — **you must generate your own**.
+    ./install.sh
 
-Run on the target machine:
+It will walk you through three steps:
 
-    ./hwgen.sh <host>
-
-Example:
-
-    ./hwgen.sh thinkpad
-
-This will detect the current machine's hardware, generate `hardware-configuration.nix`, and automatically stage it with git so the flake can track it.
-
----
-
-### 2️⃣ Enable flakes for the user
-
-Enable the required experimental features (`nix-command` and `flakes`):
-
-    ./flakes.sh
-
-Apply the change by restarting your shell:
-
-    exec $SHELL
-
----
-
-### 3️⃣ Apply the system configuration
-
-Rebuild and switch to the new configuration:
-
-    sudo nixos-rebuild switch --flake .#<host> --impure
-
-Example:
-
-    sudo nixos-rebuild switch --flake .#desktop --impure
+1. **Generate hardware configuration** — detects the current machine's hardware and writes `hosts/<host>/hardware-configuration.nix`
+2. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
+3. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host> --impure`
 
 > `--impure` is required so the flake can read `$SUDO_USER` to automatically detect the username of the user running the command.
-
-After this step, the system is fully managed by flakes.
 
 ---
 
 ## ⚡ Quick Start (TL;DR)
 
-    ./hwgen.sh desktop
-    ./flakes.sh
-    exec $SHELL
-    sudo nixos-rebuild switch --flake .#desktop --impure
+    ./install.sh
 
 ---
 
