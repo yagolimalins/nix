@@ -2,6 +2,24 @@
 
 let
   wallpaper = "${pkgs.nixos-artwork.wallpapers.nineish-dark-gray}/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
+
+  # On lid close: move workspace 1 to the external monitor (if connected), then blank eDP-1.
+  # On lid open: restore eDP-1 and bring workspace 1 back.
+  lidClose = pkgs.writeShellScript "hypr-lid-close" ''
+    EXTERNAL=$(hyprctl monitors | awk '/^Monitor/{print $2}' | grep -v 'eDP-1' | head -1)
+    if [[ -n "$EXTERNAL" ]]; then
+      hyprctl dispatch moveworkspacetomonitor 1 "$EXTERNAL"
+    fi
+    hyprctl dispatch dpms off eDP-1
+  '';
+
+  lidOpen = pkgs.writeShellScript "hypr-lid-open" ''
+    hyprctl dispatch dpms on eDP-1
+    EXTERNAL=$(hyprctl monitors | awk '/^Monitor/{print $2}' | grep -v 'eDP-1' | head -1)
+    if [[ -n "$EXTERNAL" ]]; then
+      hyprctl dispatch moveworkspacetomonitor 1 eDP-1
+    fi
+  '';
 in
 
 {
@@ -190,9 +208,9 @@ in
 
       # Works even on locked screen (l = locked)
       bindl = [
-        # Lid switch — disable/enable built-in display
-        ", switch:on:Lid Switch,  exec, hyprctl dispatch dpms off eDP-1"
-        ", switch:off:Lid Switch, exec, hyprctl dispatch dpms on eDP-1"
+        # Lid switch — move workspace 1 to external monitor (if any) and blank eDP-1
+        ", switch:on:Lid Switch,  exec, ${lidClose}"
+        ", switch:off:Lid Switch, exec, ${lidOpen}"
 
         "$mod, semicolon,    exec, playerctl play-pause"
         "$mod, period,       exec, playerctl next"
