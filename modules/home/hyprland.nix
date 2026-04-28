@@ -52,7 +52,10 @@ in
       "$terminal" = "kitty";
       "$launcher" = "pgrep wofi || wofi --show drun --hide-actions";
 
-      monitor = ",preferred,auto,1";
+      monitor = [
+        "HDMI-A-1, 2560x1080@60, 0x0, 1"
+        "eDP-1, 1920x1080@60, 320x1080, 1"
+      ];
 
       exec-once = [
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
