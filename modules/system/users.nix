@@ -8,8 +8,9 @@
   programs.hyprland.enable = true;
 
   services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
+    HandleLidSwitch       = "ignore";
     HandleLidSwitchDocked = "ignore";
+    HandlePowerKey        = "suspend";
   };
 
   services.greetd = {
