@@ -138,6 +138,7 @@
 
     # ── Video ────────────────────────────────────────────────
     obs-studio
+    popcorntime
     vlc
     kdePackages.kdenlive
 
