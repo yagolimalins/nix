@@ -52,8 +52,7 @@
       };
     };
 
-
-wireplumber.extraConfig."12-disable-builtin-mic" = {
+    wireplumber.extraConfig."12-disable-builtin-mic" = {
       "monitor.alsa.rules" = [
         {
           matches = [{ "node.name" = "~alsa_input.pci-.*"; }];
@@ -84,14 +83,36 @@ wireplumber.extraConfig."12-disable-builtin-mic" = {
       ];
     };
 
+    # Global Audio Engine Settings (Optimized for 44.1kHz Hardware)
     extraConfig.pipewire."10-audio-settings" = {
       "context.properties" = {
-        "default.clock.rate"          = 44100;
+        "default.clock.rate"          = 44100; 
         "default.clock.allowed-rates" = [ 44100 48000 96000 ];
-        "default.clock.quantum"       = 128;
-        "default.clock.min-quantum"   = 32;
-        "default.clock.max-quantum"   = 8192;
+        "default.clock.quantum"       = 128;   
+        "default.clock.min-quantum"   = 32;    
+        "default.clock.max-quantum"   = 2048;  
         "default.clock.quantum-limit" = 8192;
+      };
+      "context.modules" = [
+        {
+          name = "libpipewire-module-rt";
+          args = {
+            "nice.level"   = -11;
+            "rt.prio"      = 88;
+          };
+          flags = [ "ifexists" "nofail" ];
+        }
+      ];
+      "settings" = {
+        "settings.check-quantum" = true; 
+      };
+    };
+
+    # FIXED: Replaced extraConfig.pipewire-jack with extraConfig.jack
+    extraConfig.jack."10-jack-settings" = {
+      "jack.properties" = {
+        "node.latency"       = "128/44100";
+        "node.force-quantum" = 128;
       };
     };
   };
