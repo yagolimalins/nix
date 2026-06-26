@@ -8,6 +8,7 @@
     ./modules/system/bluetooth.nix
     ./modules/system/security.nix
     ./modules/system/users.nix
+    ./modules/system/postgresql.nix
   ];
 
   ############################################################

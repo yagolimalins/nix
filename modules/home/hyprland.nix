@@ -60,6 +60,7 @@ in
         "GDK_BACKEND,wayland,x11,*"
         "QT_QPA_PLATFORM,wayland;xcb"
         "MOZ_ENABLE_WAYLAND,1"
+        "PRISMA_SCHEMA_ENGINE_BINARY,${pkgs.prisma-engines}/bin/schema-engine"
       ];
 
       general = {
