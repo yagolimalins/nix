@@ -102,7 +102,11 @@
     maven
 
     # ── Rust ─────────────────────────────────────────────────
-    rustup
+    rustc
+    cargo
+    rustfmt
+    clippy
+    rust-analyzer
 
     # ── .NET ─────────────────────────────────────────────────
     dotnet-sdk_10
