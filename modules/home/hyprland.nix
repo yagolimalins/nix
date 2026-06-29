@@ -29,7 +29,8 @@ in
   ############################################################
 
   wayland.windowManager.hyprland = {
-    enable   = true;
+    enable     = true;
+    configType = "hyprlang";
     settings = {
       "$mod"      = "SUPER";
       "$terminal" = "kitty";
@@ -115,7 +116,6 @@ in
       };
 
       dwindle = {
-        pseudotile     = true;
         preserve_split = true;
       };
 
@@ -155,7 +155,7 @@ in
         "$mod, F, fullscreen"
         "$mod, V, togglefloating"
         "$mod, P, pseudo"
-        "$mod, J, togglesplit"
+        "$mod, J, layoutmsg, togglesplit"
 
         # Focus
         "$mod, left,  movefocus, l"
