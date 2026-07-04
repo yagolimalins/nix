@@ -95,6 +95,7 @@
     github-desktop
 
     # ── JavaScript / TypeScript ──────────────────────────────
+    typescript
     nodejs
     deno
     tsx
