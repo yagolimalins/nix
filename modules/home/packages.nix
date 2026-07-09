@@ -110,6 +110,7 @@
     clippy
     rust-analyzer
     sqlx-cli
+    sea-orm-cli
 
     # ── .NET ─────────────────────────────────────────────────
     dotnet-sdk_10
