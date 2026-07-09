@@ -109,6 +109,7 @@
     rustfmt
     clippy
     rust-analyzer
+    sqlx-cli
 
     # ── .NET ─────────────────────────────────────────────────
     dotnet-sdk_10
