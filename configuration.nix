@@ -27,6 +27,8 @@
     ];
   };
 
+  services.logind.lidSwitch = "ignore";
+
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [
