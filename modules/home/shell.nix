@@ -23,6 +23,20 @@
       enable  = true;
       plugins = [ "git" "docker" "rust" "npm" ];
     };
+
+    initContent = ''
+      # Print a blank line before each prompt except the very first one,
+      # so new terminals start clean but commands stay visually separated.
+      _first_prompt=1
+      precmd_newline() {
+        if (( _first_prompt )); then
+          _first_prompt=0
+        else
+          print ""
+        fi
+      }
+      precmd_functions+=( precmd_newline )
+    '';
   };
 
   programs.starship = {
