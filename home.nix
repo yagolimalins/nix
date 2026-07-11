@@ -49,6 +49,7 @@
     ./modules/home/mail.nix
 
     # ── Applications ─────────────────────────────────────────
+    ./modules/home/thunar.nix
     ./modules/home/spotify.nix
   ];
 }
