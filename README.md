@@ -51,20 +51,37 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     │       └── hardware-configuration.nix   # AMD desktop (amdgpu)
     └── modules/
         ├── system/                      # NixOS (system-level) modules
-        │   ├── boot.nix                 #   Nix settings, bootloader, kernel, journald
-        │   ├── networking.nix           #   Hostname, NetworkManager, timezone, locale
+        │   ├── nix.nix                  #   Nix daemon, GC, stateVersion
+        │   ├── boot.nix                 #   Bootloader, kernel, tmpfs, sysctls, firmware
+        │   ├── logging.nix              #   journald limits
+        │   ├── networking.nix           #   Hostname + NetworkManager
+        │   ├── dns.nix                  #   AdGuard Home + systemd-resolved
+        │   ├── locale.nix               #   Timezone, locale, console keymap
+        │   ├── fonts.nix                #   System fonts
+        │   ├── input-method.nix         #   fcitx5 (Chinese + Japanese)
         │   ├── audio.nix                #   PipeWire, WirePlumber, realtime limits
         │   ├── bluetooth.nix            #   Bluetooth hardware + Blueman
-        │   ├── security.nix             #   CPU governor toggle script + sudo rule
-        │   └── users.nix               #   User account, greetd, power, programs
+        │   ├── printing.nix             #   CUPS
+        │   ├── power.nix                #   CPU governor + toggle script
+        │   ├── display.nix              #   Hyprland, greetd, logind, XDG portal
+        │   ├── desktop.nix              #   Thunar, keyring, dconf, file services
+        │   ├── programs.nix             #   Firefox, JDK, nix-ld
+        │   ├── virtualisation.nix       #   Docker + Ollama
+        │   ├── postgresql.nix           #   Postgres dev container
+        │   └── users.nix                #   User account + session env
         └── home/                        # Home Manager (user-level) modules
-            ├── packages.nix             #   All user packages
-            ├── theme.nix                #   GTK theme, icons, cursor (Graphite + Papirus)
-            ├── hyprland.nix             #   Hyprland WM settings, keybinds, hyprpaper
+            ├── packages.nix             #   User packages + direnv
+            ├── theme.nix                #   GTK theme, icons, cursor (WhiteSur)
+            ├── hyprland.nix             #   Hyprland WM settings + keybinds
             ├── waybar.nix               #   Status bar config + CSS
-            ├── terminals.nix            #   Kitty terminal + Bash prompt
             ├── launchers.nix            #   Wofi launcher + CSS
-            └── services.nix             #   Mako, Hyprlock, Hypridle, Hyprsunset timers
+            ├── kitty.nix                #   Kitty terminal
+            ├── shell.nix                #   Bash prompt
+            ├── notifications.nix        #   Mako
+            ├── lockscreen.nix           #   Hyprlock + Hypridle
+            ├── nightshift.nix           #   Hyprsunset timers
+            ├── mail.nix                 #   Proton Mail Bridge
+            └── spotify.nix              #   spotify-player + theme
 
 ---
 
@@ -77,10 +94,10 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
   Thin import lists. Neither contains logic — they just wire up the modules.
 
 - **`modules/system/`**
-  NixOS modules for system-level concerns: boot, networking, audio, bluetooth, security, and users. Imported by `configuration.nix`.
+  Small, single-concern NixOS modules (one topic per file: nix, boot, dns, locale, audio, power, display, …). Imported by `configuration.nix`.
 
 - **`modules/home/`**
-  Home Manager modules for user-level concerns: packages, theming, desktop environment, and services. Imported by `home.nix`.
+  Small, single-concern Home Manager modules (packages, theming, compositor, bar, terminal, per-service files). Imported by `home.nix`.
 
 - **`hosts/<name>/hardware-configuration.nix`**
   Machine-specific hardware config (GPU drivers, TLP battery thresholds, kernel params). Generated per-machine with `hwgen.sh`.

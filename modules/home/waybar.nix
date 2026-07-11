@@ -1,3 +1,10 @@
+#
+# waybar.nix — Status bar
+#
+# Top bar with workspaces, media, clock, and a right-hand cluster of
+# system indicators (audio, network, battery, CPU/temp, VPN, night-shift
+# and CPU-governor toggles, tray, power menu).
+#
 { config, pkgs, ... }:
 
 {
@@ -139,23 +146,6 @@
         icon-size = 15;
       };
 
-      "custom/logout" = {
-        format   = "󰍃";
-        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Logout?' --width 140 --height 110 | grep -qx 'Yes' && hyprctl dispatch exit";
-        tooltip  = false;
-      };
-
-      "custom/restart" = {
-        format   = "󰜉";
-        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Restart?' --width 140 --height 110 | grep -qx 'Yes' && systemctl reboot";
-        tooltip  = false;
-      };
-
-      "custom/shutdown" = {
-        format   = "󰐥";
-        on-click = "pgrep wofi || echo -e 'Yes\nNo' | wofi --dmenu --prompt 'Shutdown?' --width 140 --height 110 | grep -qx 'Yes' && systemctl poweroff";
-        tooltip  = false;
-      };
     }];
 
     style = ''

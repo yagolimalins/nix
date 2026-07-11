@@ -1,11 +1,14 @@
+#
+# power.nix — CPU power policy
+#
+# Defaults to the 'powersave' governor and ships a small setuid-free
+# toggle script (flipped between powersave/performance) that the Waybar
+# button invokes through a passwordless sudo rule.
+#
 { config, pkgs, username, ... }:
 
 {
-  ############################################################
-  # CPU governor toggle script
-  # Toggles between 'performance' and 'powersave'.
-  # Called by Waybar via sudo (passwordless rule below).
-  ############################################################
+  powerManagement.cpuFreqGovernor = "powersave";
 
   environment.etc."cpugov-toggle" = {
     mode = "0755";
@@ -23,7 +26,7 @@
   };
 
   security.sudo.extraRules = [{
-    users = [ username ];
+    users    = [ username ];
     commands = [{
       command = "/etc/cpugov-toggle";
       options = [ "NOPASSWD" ];

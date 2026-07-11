@@ -1,3 +1,9 @@
+#
+# hyprland.nix — Hyprland compositor config
+#
+# Monitors, look & feel, input, autostart, and all keybindings. Lid-close
+# suspend is bound here so the behaviour is shared across every host.
+#
 { config, pkgs, ... }:
 
 let

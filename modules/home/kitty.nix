@@ -1,10 +1,12 @@
-{ config, pkgs, ... }:
+#
+# kitty.nix — Kitty terminal
+#
+# JetBrains Mono at 14pt with a tango-dark palette recoloured around the
+# system red (#cc2222) accent.
+#
+{ ... }:
 
 {
-  ############################################################
-  # Kitty terminal
-  ############################################################
-
   programs.kitty = {
     enable = true;
     font   = {
@@ -47,16 +49,5 @@
       inactive_tab_foreground = "#444444";
       inactive_tab_background = "#0d0d0d";
     };
-  };
-
-  ############################################################
-  # Bash prompt
-  ############################################################
-
-  programs.bash = {
-    enable    = true;
-    initExtra = ''
-      PS1='\[\e[1;31m\][\u@\h:\w]\$\[\e[0m\] '
-    '';
   };
 }

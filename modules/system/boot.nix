@@ -1,54 +1,29 @@
-{ config, pkgs, username, ... }:
+#
+# boot.nix — Bootloader, kernel and low-level tuning
+#
+# systemd-boot, the kernel package/params, tmpfs /tmp, kernel sysctls and
+# redistributable firmware (which also pulls in CPU microcode updates).
+#
+{ config, pkgs, ... }:
 
 {
-  ############################################################
-  # Nix store & flake settings
-  ############################################################
-
-  nix.settings = {
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-    auto-optimise-store = true;
-  };
-
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-    options = "--delete-older-than 3d";
-  };
-
-  ############################################################
-  # Bootloader & kernel
-  ############################################################
-
   boot = {
-    loader.systemd-boot.enable = true;
-    loader.systemd-boot.configurationLimit = 5;
-    loader.efi.canTouchEfiVariables = true;
+    loader.systemd-boot.enable             = true;
+    loader.systemd-boot.configurationLimit = 5; # keep the last 5 generations in the menu
+    loader.efi.canTouchEfiVariables        = true;
 
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [ "quiet" "loglevel=3" ];
+    kernelParams   = [ "quiet" "loglevel=3" ];
 
     initrd.systemd.enable = true;
 
-    tmp.cleanOnBoot = true;
+    tmp.useTmpfs = true; # /tmp in RAM: faster builds, auto-cleared on reboot
   };
 
-  ############################################################
-  # Journald limits
-  ############################################################
+  # Prefer zram over disk swap aggressively (paired with zramSwap on hosts).
+  boot.kernel.sysctl."vm.swappiness" = 180;
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=100M
-    SystemMaxFileSize=50M
-    MaxRetentionSec=7day
-  '';
-
-  ############################################################
-  # NixOS release compatibility
-  ############################################################
-
-  system.stateVersion = "25.05";
+  # Wi-Fi/Bluetooth firmware; also enables hardware.cpu.*.updateMicrocode
+  # via the mkDefault in hardware-configuration.nix.
+  hardware.enableRedistributableFirmware = true;
 }

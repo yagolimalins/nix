@@ -1,3 +1,8 @@
+#
+# theme.nix — GTK theme, icons and cursor
+#
+# WhiteSur (dark) GTK3/4 theme + icons, Bibata cursor at 24px.
+#
 { config, pkgs, ... }:
 
 {

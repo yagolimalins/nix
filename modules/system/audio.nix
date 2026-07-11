@@ -1,3 +1,10 @@
+#
+# audio.nix — PipeWire audio + realtime privileges
+#
+# Low-latency PipeWire (ALSA/Pulse/JACK) tuned for 44.1 kHz hardware,
+# Bluetooth codec preferences, USB-audio prioritisation, and the RT
+# scheduling limits pro-audio (@audio/@realtime groups) needs.
+#
 { config, pkgs, ... }:
 
 {

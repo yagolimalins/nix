@@ -1,3 +1,9 @@
+#
+# launchers.nix — Wofi application launcher
+#
+# drun launcher styled to match the system red/charcoal palette; also
+# used as a dmenu for the Waybar power menu.
+#
 { config, pkgs, ... }:
 
 {
