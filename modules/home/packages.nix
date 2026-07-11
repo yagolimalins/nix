@@ -7,6 +7,20 @@
 { config, pkgs, ... }:
 
 {
+  xdg.desktopEntries.reaper = {
+    name       = "REAPER";
+    exec       = "pw-jack reaper %U";
+    icon       = "cockos-reaper";
+    comment    = "Digital Audio Workstation";
+    categories = [ "Audio" "AudioVideo" ];
+  };
+
+  xdg.desktopEntries."cockos-reaper" = {
+    name      = "REAPER";
+    exec      = "pw-jack reaper %U";
+    noDisplay = true;
+  };
+
   home.packages = with pkgs; [
 
     # ── Nix ──────────────────────────────────────────────────

@@ -146,6 +146,11 @@ in
         focus_on_activate       = true;
       };
 
+      cursor = {
+        # Don't warp the cursor when focus changes (e.g. Reaper dialogs opening)
+        no_warps = true;
+      };
+
       debug = {
         disable_logs = false;
       };
@@ -247,9 +252,16 @@ in
         "center on, match:title Error"
         "opacity 0.95 0.90, match:class kitty"
 
-        # Reaper — tile main window, let dialogs float at their own position
-        "tile on,   match:class REAPER, match:title REAPER v"
+        # Reaper (XWayland) — tile main window, center known dialogs.
+        # Titles use .* wildcards for partial/version-independent matching.
+        "tile on,    match:class REAPER, match:title ^REAPER v"
         "no_anim on, match:class REAPER"
+        "center on,  match:class REAPER, match:title REAPER Query"
+        "center on,  match:class REAPER, match:title .*Add FX.*"
+        "center on,  match:class REAPER, match:title Insert tracks"
+        "center on,  match:class REAPER, match:title Customize menus/toolbars"
+        "center on,  match:class REAPER, match:title About REAPER"
+        "center on,  match:class REAPER, match:title Insert Virtual Instrument on New Track..."
       ];
     };
   };

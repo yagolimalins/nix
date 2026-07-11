@@ -8,6 +8,8 @@
 { config, pkgs, username, ... }:
 
 {
+  users.groups.realtime = {};
+
   users.users.${username} = {
     isNormalUser = true;
     description  = username;

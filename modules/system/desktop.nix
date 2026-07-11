@@ -27,5 +27,5 @@
     ];
   };
 
-  environment.systemPackages = with pkgs; [ engrampa zip unzip ];
+  environment.systemPackages = with pkgs; [ engrampa zip unzip pipewire.jack ];
 }
