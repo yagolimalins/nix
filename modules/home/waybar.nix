@@ -48,9 +48,8 @@
       };
 
       clock = {
-        format     = "{:%H:%M}";
-        format-alt = "{:%a, %b %d}";
-        locale     = "en_US.UTF-8";
+        format  = "{:%H:%M}";
+        locale  = "en_US.UTF-8";
         tooltip-format = "<tt>{calendar}</tt>";
         calendar = {
           mode   = "month";
