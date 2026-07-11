@@ -25,16 +25,21 @@
     };
 
     initContent = ''
-      # Print a blank line before each prompt except the very first one,
-      # so new terminals start clean but commands stay visually separated.
+      # Print a blank line before each prompt except after opening the
+      # terminal or running `clear`.
       _first_prompt=1
+      _last_cmd=""
+
+      preexec_track() { _last_cmd="$1"; }
       precmd_newline() {
         if (( _first_prompt )); then
           _first_prompt=0
-        else
+        elif [[ "$_last_cmd" != "clear" ]]; then
           print ""
         fi
       }
+
+      preexec_functions+=( preexec_track )
       precmd_functions+=( precmd_newline )
     '';
   };
