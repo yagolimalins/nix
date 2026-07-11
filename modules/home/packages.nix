@@ -114,11 +114,6 @@
     qpwgraph
     carla
     alsa-utils
-    (pkgs.lsp-plugins.overrideAttrs (old: {
-      postInstall = (old.postInstall or "") + ''
-        rm -rf $out/share/applications
-      '';
-    }))
 
   ];
 
