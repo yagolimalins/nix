@@ -1,15 +1,48 @@
 #
-# shell.nix — Bash configuration
+# shell.nix — Zsh + Starship
 #
-# Minimal red [user@host:cwd]$ prompt.
+# oh-my-zsh for plugins, zsh-autosuggestions and zsh-syntax-highlighting
+# for inline completions/colouring, and Starship as the prompt.
+# direnv hooks are injected automatically by the programs.direnv module.
+#
+# Colour palette — matches the system ThinkPad theme:
+#   #cc2222  accent red       #dedede  primary text
+#   #e63329  bright red       #aaaaaa  secondary text
+#   #5a9e5a  green (positive) #7a7a7a  muted text
 #
 { ... }:
 
 {
-  programs.bash = {
-    enable    = true;
-    initExtra = ''
-      PS1='\[\e[1;31m\][\u@\h:\w]\$\[\e[0m\] '
-    '';
+  programs.zsh = {
+    enable                    = true;
+    enableCompletion          = true;
+    autosuggestion.enable     = true;
+    syntaxHighlighting.enable = true;
+
+    oh-my-zsh = {
+      enable  = true;
+      plugins = [ "git" "docker" "rust" "npm" ];
+    };
+  };
+
+  programs.starship = {
+    enable   = true;
+    settings = {
+      add_newline = false;
+
+      directory    = { style = "bold #cc2222"; };
+      git_branch   = { style = "bold #dedede"; };
+      git_status   = { style = "bold #cc2222"; };
+      cmd_duration = { style = "#7a7a7a"; };
+      username     = { style_user = "bold #dedede"; style_root = "bold #e63329"; };
+      hostname     = { style = "bold #aaaaaa"; };
+      nix_shell    = { style = "bold #5a9e5a"; };
+
+      # character has colors embedded in the symbol strings.
+      character = {
+        success_symbol = "[❯](bold #5a9e5a)";
+        error_symbol   = "[❯](bold #e63329)";
+      };
+    };
   };
 }

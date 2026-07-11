@@ -123,6 +123,7 @@
 
   programs.direnv = {
     enable            = true;
+    silent            = true; # suppress all direnv/nix-direnv log output
     nix-direnv.enable = true;
   };
 }

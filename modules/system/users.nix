@@ -11,6 +11,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description  = username;
+    shell        = pkgs.zsh;
     extraGroups  = [ "wheel" "networkmanager" "audio" "video" "realtime" "docker" ];
     packages     = [ ];
   };
