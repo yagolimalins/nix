@@ -260,7 +260,7 @@ in
         "center on,  match:class REAPER, match:title .*Add FX.*"
         "center on,  match:class REAPER, match:title Insert tracks"
         "center on,  match:class REAPER, match:title Customize menus/toolbars"
-        "center on,  match:class REAPER, match:title About REAPER"
+        "center on,  match:class REAPER, match:title .*About REAPER.*"
         "center on,  match:class REAPER, match:title Insert Virtual Instrument on New Track..."
       ];
     };
