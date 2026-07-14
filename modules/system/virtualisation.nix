@@ -13,7 +13,6 @@
 
   services.ollama.enable = true;
 
-  # Do not autostart on boot — start manually when needed to save battery.
-  systemd.services.docker.wantedBy = lib.mkForce [];
+  # Ollama does not autostart on boot — start manually when needed.
   systemd.services.ollama.wantedBy = lib.mkForce [];
 }
