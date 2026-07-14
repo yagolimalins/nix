@@ -3,10 +3,9 @@
 {
   boot.initrd.availableKernelModules = [ "usbhid" ];
   boot.initrd.kernelModules = [ "i915" ];
-  boot.extraModprobeConfig = "options btusb enable_autosuspend=0";
   boot.kernelParams = [
     "i915.fastboot=1"
-    "i915.enable_psr=1"
+    "i915.enable_psr=2"
     "i915.enable_fbc=1"
     "mem_sleep_default=deep"
     "nvme_core.default_ps_max_latency_us=5500"
@@ -16,14 +15,28 @@
   services.tlp = {
     enable = true;
     settings = {
-      CPU_SCALING_GOVERNOR_ON_AC  = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+      CPU_SCALING_GOVERNOR_ON_AC    = "performance";
+      CPU_SCALING_GOVERNOR_ON_BAT   = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC  = "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
+      # Cap CPU at 60% on battery — prevents boost from hitting 3.5 GHz at idle
+      CPU_MAX_PERF_ON_BAT       = 60;
+      CPU_HWP_DYN_BOOST_ON_BAT  = 0;
+      SCHED_POWERSAVE_ON_BAT    = 1;
+
+      # Intel iGPU frequency cap on battery (valid range: 300–1100 MHz)
+      INTEL_GPU_MIN_FREQ_ON_BAT = 300;
+      INTEL_GPU_MAX_FREQ_ON_BAT = 500;
+
+      # Less frequent disk writeback
+      MAX_LOST_WORK_SECS_ON_BAT = 60;
+
       START_CHARGE_THRESH_BAT0 = 75;
       STOP_CHARGE_THRESH_BAT0  = 80;
       START_CHARGE_THRESH_BAT1 = 75;
       STOP_CHARGE_THRESH_BAT1  = 80;
+
       WIFI_PWR_ON_BAT    = 5;
       RUNTIME_PM_ON_AC   = "on";
       RUNTIME_PM_ON_BAT  = "auto";

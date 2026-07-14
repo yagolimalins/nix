@@ -2,13 +2,18 @@
 # virtualisation.nix — Containers and local AI
 #
 # Docker as the container runtime (also the OCI-containers backend used by
-# postgresql.nix) plus a local Ollama service.
+# postgresql.nix) plus a local Ollama service. Both are installed but not
+# started on boot — start on demand with `sudo systemctl start docker|ollama`.
 #
-{ ... }:
+{ lib, ... }:
 
 {
   virtualisation.docker.enable          = true;
   virtualisation.oci-containers.backend = "docker";
 
   services.ollama.enable = true;
+
+  # Do not autostart on boot — start manually when needed to save battery.
+  systemd.services.docker.wantedBy = lib.mkForce [];
+  systemd.services.ollama.wantedBy = lib.mkForce [];
 }
