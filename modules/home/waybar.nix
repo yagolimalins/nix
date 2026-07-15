@@ -22,7 +22,7 @@
       modules-center = [ "clock" ];
       modules-right  = [
         "custom/nightshift"
-        "pulseaudio" "network" "battery"
+        "pulseaudio" "network" "battery#bat0" "battery#bat1"
         "cpu" "temperature"
         "custom/vpn" "tray" "custom/cpugov"
         "custom/power"
@@ -88,14 +88,24 @@
         tooltip     = true;
       };
 
-      battery = {
+      "battery#bat0" = {
+        bat             = "BAT0";
         states          = { warning = 30; critical = 15; };
         format          = "{icon} {capacity}%";
         format-charging = "󰂄 {capacity}%";
         format-full     = "󰁹";
         format-icons    = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
-        tooltip-format  = "{time} remaining";
-        bat-compatibility = true;
+        tooltip-format  = "BAT0: {time} remaining";
+      };
+
+      "battery#bat1" = {
+        bat             = "BAT1";
+        states          = { warning = 30; critical = 15; };
+        format          = "{icon} {capacity}%";
+        format-charging = "󰂄 {capacity}%";
+        format-full     = "󰁹";
+        format-icons    = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+        tooltip-format  = "BAT1: {time} remaining";
       };
 
       cpu = {
@@ -233,10 +243,18 @@
       #network              { color: #dedede; }
       #network.disconnected { color: #cc2222; }
 
-      #battery          { color: #dedede; }
-      #battery.warning  { color: #e8a045; }
-      #battery.critical { color: #cc2222; }
-      #battery.charging { color: #5a9e5a; }
+      #battery,
+      #battery-bat0,
+      #battery-bat1     { color: #dedede; }
+      #battery.warning,
+      #battery-bat0.warning,
+      #battery-bat1.warning  { color: #e8a045; }
+      #battery.critical,
+      #battery-bat0.critical,
+      #battery-bat1.critical { color: #cc2222; }
+      #battery.charging,
+      #battery-bat0.charging,
+      #battery-bat1.charging { color: #5a9e5a; }
 
       #cpu { color: #dedede; }
 
