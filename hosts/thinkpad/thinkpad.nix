@@ -21,7 +21,7 @@
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
 
       # Cap CPU at 60% on battery — prevents boost from hitting 3.5 GHz at idle
-      CPU_MAX_PERF_ON_BAT       = 60;
+      CPU_MAX_PERF_ON_BAT       = 50;
       CPU_HWP_DYN_BOOST_ON_BAT  = 0;
       SCHED_POWERSAVE_ON_BAT    = 1;
 
