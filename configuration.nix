@@ -16,6 +16,7 @@
     # ── Networking ───────────────────────────────────────────
     ./modules/system/networking.nix
     ./modules/system/dns.nix
+    ./modules/system/tailscale.nix
 
     # ── Localisation ─────────────────────────────────────────
     ./modules/system/locale.nix
