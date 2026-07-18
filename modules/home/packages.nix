@@ -90,6 +90,8 @@
     rust-analyzer
     sqlx-cli
     sea-orm-cli
+    pkg-config
+    openssl
 
     # ── .NET ─────────────────────────────────────────────────
     dotnet-sdk_10
@@ -132,6 +134,12 @@
     alsa-utils
 
   ];
+
+  home.sessionVariables = {
+    OPENSSL_LIB_DIR     = "${pkgs.openssl.out}/lib";
+    OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
+    PKG_CONFIG_PATH     = "${pkgs.openssl.dev}/lib/pkgconfig";
+  };
 
   programs.direnv = {
     enable            = true;
