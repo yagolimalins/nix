@@ -92,6 +92,8 @@
     sea-orm-cli
     pkg-config
     openssl
+    mold
+    sccache
 
     # ── .NET ─────────────────────────────────────────────────
     dotnet-sdk_10
@@ -146,7 +148,14 @@
       pkgs.vulkan-loader
       pkgs.libGL
     ];
+
+    RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
   };
+
+  home.file.".cargo/config.toml".text = ''
+    [target.x86_64-unknown-linux-gnu]
+    rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-B${pkgs.mold}/bin"]
+  '';
 
   programs.direnv = {
     enable            = true;

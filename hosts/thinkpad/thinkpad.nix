@@ -15,35 +15,55 @@
   services.tlp = {
     enable = true;
     settings = {
+      # ── CPU ──────────────────────────────────────────────────
       CPU_SCALING_GOVERNOR_ON_AC    = "performance";
       CPU_SCALING_GOVERNOR_ON_BAT   = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC  = "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+      CPU_MAX_PERF_ON_AC            = 100;
+      CPU_MIN_PERF_ON_AC            = 20;
+      CPU_MAX_PERF_ON_BAT           = 50;
+      CPU_MIN_PERF_ON_BAT           = 0;
+      CPU_HWP_DYN_BOOST_ON_AC       = 1;
+      CPU_HWP_DYN_BOOST_ON_BAT      = 0;
+      SCHED_POWERSAVE_ON_AC         = 0;
+      SCHED_POWERSAVE_ON_BAT        = 1;
 
-      # Cap CPU at 60% on battery — prevents boost from hitting 3.5 GHz at idle
-      CPU_MAX_PERF_ON_BAT       = 50;
-      CPU_HWP_DYN_BOOST_ON_BAT  = 0;
-      SCHED_POWERSAVE_ON_BAT    = 1;
-
-      # Intel iGPU frequency cap on battery (valid range: 300–1100 MHz)
+      # ── GPU ──────────────────────────────────────────────────
+      INTEL_GPU_MIN_FREQ_ON_AC  = 300;
+      INTEL_GPU_MAX_FREQ_ON_AC  = 1100;
       INTEL_GPU_MIN_FREQ_ON_BAT = 300;
       INTEL_GPU_MAX_FREQ_ON_BAT = 500;
 
-      # Less frequent disk writeback
+      # ── PCIe / runtime PM ────────────────────────────────────
+      PCIE_ASPM_ON_AC   = "performance";
+      PCIE_ASPM_ON_BAT  = "powersupersave";
+      RUNTIME_PM_ON_AC  = "on";
+      RUNTIME_PM_ON_BAT = "auto";
+
+      # ── USB ──────────────────────────────────────────────────
+      USB_AUTOSUSPEND   = 1;
+      USB_DENYLIST      = "1532:006e 320f:5000";
+      USB_EXCLUDE_BTUSB = 1;
+
+      # ── Audio ────────────────────────────────────────────────
+      SOUND_POWER_SAVE_ON_AC      = 0;
+      SOUND_POWER_SAVE_ON_BAT     = 1;
+      SOUND_POWER_SAVE_CONTROLLER = "Y";
+
+      # ── Disk ─────────────────────────────────────────────────
+      MAX_LOST_WORK_SECS_ON_AC  = 15;
       MAX_LOST_WORK_SECS_ON_BAT = 60;
 
+      # ── Wi-Fi ────────────────────────────────────────────────
+      WIFI_PWR_ON_AC  = "off";
+      WIFI_PWR_ON_BAT = "on";
+
+      # ── Battery charge thresholds ────────────────────────────
       START_CHARGE_THRESH_BAT0 = 75;
       STOP_CHARGE_THRESH_BAT0  = 80;
       START_CHARGE_THRESH_BAT1 = 75;
       STOP_CHARGE_THRESH_BAT1  = 80;
-
-      WIFI_PWR_ON_BAT    = 5;
-      RUNTIME_PM_ON_AC   = "on";
-      RUNTIME_PM_ON_BAT  = "auto";
-      USB_AUTOSUSPEND    = 1;
-      USB_DENYLIST       = "1532:006e 320f:5000";
-      USB_EXCLUDE_BTUSB  = 1;
-      PCIE_ASPM_ON_BAT   = "powersupersave";
     };
   };
 
