@@ -139,6 +139,13 @@
     OPENSSL_LIB_DIR     = "${pkgs.openssl.out}/lib";
     OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
     PKG_CONFIG_PATH     = "${pkgs.openssl.dev}/lib/pkgconfig";
+
+    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+      pkgs.wayland
+      pkgs.libxkbcommon
+      pkgs.vulkan-loader
+      pkgs.libGL
+    ];
   };
 
   programs.direnv = {
