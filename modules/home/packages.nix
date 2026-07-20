@@ -8,16 +8,19 @@
 
 {
   xdg.desktopEntries.reaper = {
-    name       = "REAPER";
-    exec       = "pw-jack reaper %U";
-    icon       = "cockos-reaper";
-    comment    = "Digital Audio Workstation";
-    categories = [ "Audio" "AudioVideo" ];
+    name = "REAPER";
+    exec = "pw-jack reaper %U";
+    icon = "cockos-reaper";
+    comment = "Digital Audio Workstation";
+    categories = [
+      "Audio"
+      "AudioVideo"
+    ];
   };
 
   xdg.desktopEntries."cockos-reaper" = {
-    name      = "REAPER";
-    exec      = "pw-jack reaper %U";
+    name = "REAPER";
+    exec = "pw-jack reaper %U";
     noDisplay = true;
   };
 
@@ -108,6 +111,7 @@
 
     # ── Productivity ─────────────────────────────────────────
     libreoffice-fresh
+    marktext
     anki
 
     # ── Browsers ─────────────────────────────────────────────
@@ -138,9 +142,9 @@
   ];
 
   home.sessionVariables = {
-    OPENSSL_LIB_DIR     = "${pkgs.openssl.out}/lib";
+    OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
     OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
-    PKG_CONFIG_PATH     = "${pkgs.openssl.dev}/lib/pkgconfig";
+    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
 
     LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
       pkgs.wayland
@@ -158,8 +162,8 @@
   '';
 
   programs.direnv = {
-    enable            = true;
-    silent            = true; # suppress all direnv/nix-direnv log output
+    enable = true;
+    silent = true; # suppress all direnv/nix-direnv log output
     nix-direnv.enable = true;
   };
 }
