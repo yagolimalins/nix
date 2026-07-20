@@ -111,6 +111,7 @@
 
     # ── Productivity ─────────────────────────────────────────
     libreoffice-fresh
+    marktext
     glow
     anki
 
