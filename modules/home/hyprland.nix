@@ -4,10 +4,34 @@
 # Monitors, look & feel, input, autostart, and all keybindings. Lid-close
 # suspend is bound here so the behaviour is shared across every host.
 #
-{ config, pkgs, ... }:
+{ config, pkgs, hostName, ... }:
 
 let
   wallpaper = "${pkgs.nixos-artwork.wallpapers.nineish-dark-gray}/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
+
+  monitors = {
+    thinkpad = [
+      "HDMI-A-2, 2560x1080@60, 0x0, 1"
+      "eDP-1, 1920x1080@60, 320x1080, 1"
+    ];
+  };
+  monitorConfig = monitors.${hostName} or [ ", preferred, auto, 1" ];
+
+  workspaces = {
+    thinkpad = [
+      "1, monitor:HDMI-A-2, default:true"
+      "2, monitor:HDMI-A-2"
+      "3, monitor:HDMI-A-2"
+      "4, monitor:HDMI-A-2"
+      "5, monitor:HDMI-A-2"
+      "6, monitor:HDMI-A-2"
+      "7, monitor:HDMI-A-2"
+      "8, monitor:HDMI-A-2"
+      "9, monitor:HDMI-A-2"
+      "10, monitor:eDP-1, default:true"
+    ];
+  };
+  workspaceConfig = workspaces.${hostName} or [ ];
 
 in
 
@@ -42,10 +66,8 @@ in
       "$terminal" = "kitty";
       "$launcher" = "pgrep wofi || wofi --show drun --hide-actions";
 
-      monitor = [
-        "HDMI-A-1, 2560x1080@60, 0x0, 1"
-        "eDP-1, 1920x1080@60, 320x1080, 1"
-      ];
+      monitor   = monitorConfig;
+      workspace = workspaceConfig;
 
       exec-once = [
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
@@ -206,10 +228,6 @@ in
 
       # Works even on locked screen (l = locked)
       bindl = [
-        # Lid switch — suspend on close, wake turns display back on
-        ", switch:on:Lid Switch,  exec, systemctl suspend"
-        ", switch:off:Lid Switch, exec, hyprctl dispatch dpms on eDP-1"
-
         "$mod, semicolon,    exec, playerctl play-pause"
         "$mod, period,       exec, playerctl next"
         "$mod, comma,        exec, playerctl previous"
