@@ -19,13 +19,6 @@
       padding             = "10,14";
       width               = 320;
       icons               = true;
-      "on-button-left"    = "invoke";
-      "on-button-right"   = "dismiss";
-
-      "urgency=critical" = {
-        "default-timeout" = 0;
-        "border-color"    = "#ffaa00";
-      };
     };
   };
 }
