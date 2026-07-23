@@ -51,5 +51,6 @@
     # ── Applications ─────────────────────────────────────────
     ./modules/home/thunar.nix
     ./modules/home/spotify.nix
+    ./modules/home/input-remapper.nix
   ];
 }
