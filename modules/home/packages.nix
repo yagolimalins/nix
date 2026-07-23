@@ -62,7 +62,6 @@
     zed-editor
     code-cursor
     jetbrains.idea
-    jetbrains.rust-rover
 
     # ── Dev tools ────────────────────────────────────────────
     ripgrep
@@ -156,6 +155,10 @@
     ];
 
     RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+
+    # Nix's rustc has no rustup-style toolchain dir, so tools like
+    # rust-analyzer can't auto-discover the stdlib sources without this.
+    RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
   };
 
   home.file.".cargo/config.toml".text = ''
