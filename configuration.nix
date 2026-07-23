@@ -28,6 +28,7 @@
     ./modules/system/bluetooth.nix
     ./modules/system/printing.nix
     ./modules/system/power.nix
+    ./modules/system/input-remapper.nix
 
     # ── Desktop ──────────────────────────────────────────────
     ./modules/system/display.nix

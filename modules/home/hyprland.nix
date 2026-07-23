@@ -68,7 +68,7 @@ in
   # Wallpaper
   ############################################################
 
-  home.packages = [ pkgs.swaybg ];
+  home.packages = [ pkgs.swaybg pkgs.hyprpolkitagent ];
 
   ############################################################
   # Hyprland window manager
@@ -87,6 +87,7 @@ in
 
       exec-once = [
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+        "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
         "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
         "swaybg -i ${wallpaper} -m fill"
         "fcitx5 -d"
@@ -95,6 +96,7 @@ in
         "blueman-applet"
         "hypridle"
         "tumblerd"
+        "input-remapper-control --command autoload"
       ];
 
       env = [
