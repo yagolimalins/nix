@@ -62,6 +62,7 @@
     zed-editor
     code-cursor
     jetbrains.idea
+    jetbrains.rust-rover
 
     # ── Dev tools ────────────────────────────────────────────
     ripgrep
