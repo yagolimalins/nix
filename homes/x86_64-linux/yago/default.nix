@@ -14,9 +14,11 @@
 # resolving `home-manager.extraSpecialArgs` (where `namespace` comes
 # from), so forcing `namespace` here wants `config`, which wants this
 # file's own result first. `--impure` doesn't change this — it's a
-# structural module-system cycle, not an impurity issue. `yago` stays
-# a literal here; every module *imported* from ./modules/home still
-# reads/writes `config.${namespace}.*` dynamically without any issue.
+# structural module-system cycle, not an impurity issue. The namespace
+# (`snowfall.namespace` in flake.nix, currently "mine") has to be
+# spelled out literally right here; every module *imported* from
+# ./modules/home still reads/writes `config.${namespace}.*` dynamically
+# without any issue.
 { lib, ... }:
 
 {
@@ -37,7 +39,7 @@
   xdg.configFile."gtk-3.0/settings.ini".force = true;
   xdg.configFile."gtk-4.0/settings.ini".force = true;
 
-  yago = lib.yago.enable-modules [
+  mine = lib.mine.enable-modules [
     "hyprland"
     "waybar"
     "launchers"

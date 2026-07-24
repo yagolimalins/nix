@@ -4,7 +4,7 @@
 # Monitors, look & feel, input, autostart, and all keybindings. Lid-close
 # suspend is bound here so the behaviour is shared across every host.
 # `host` is provided by Snowfall Lib and matches the system this home is
-# attached to (see homes/x86_64-linux/yago).
+# attached to (see homes/x86_64-linux/<user>).
 #
 {
   config,

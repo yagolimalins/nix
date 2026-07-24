@@ -1,5 +1,5 @@
 {
-  description = "Yago's multi-host NixOS flake";
+  description = "Multi-host NixOS flake, built with Snowfall Lib";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -23,7 +23,11 @@
       inherit inputs;
       src = ./.;
 
-      snowfall.namespace = "yago";
+      # Prefix for every custom option this flake declares (config.mine.*,
+      # lib.mine.*, …) — deliberately not tied to any specific username, so
+      # this repo stays easy to fork: add your own systems/<host> and
+      # homes/<user>, and everything under modules/ just works.
+      snowfall.namespace = "mine";
 
       # Passed straight to nixpkgs when Snowfall Lib instantiates `pkgs` —
       # do this here instead of a `nixpkgs.config` module (that option
