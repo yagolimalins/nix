@@ -86,7 +86,6 @@ in
       git
       gh
       lazygit
-      github-desktop
 
       # ── JavaScript / TypeScript ──────────────────────────────
       typescript
