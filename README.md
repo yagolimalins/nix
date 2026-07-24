@@ -39,6 +39,8 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     .
     ├── flake.nix                        # Entry point — a thin snowfall-lib.mkFlake call
     ├── flake.lock
+    ├── .githooks/
+    │   └── pre-commit                   # Formats staged .nix files before commit
     ├── install.sh                       # Interactive installer (hardware config, flakes, rebuild)
     ├── lib/
     │   └── default.nix                  # Shared helper, merged into lib.mine.*
@@ -138,6 +140,18 @@ This layout scales naturally: adding a new machine means creating a `systems/x86
 
 ---
 
+## 🎨 Formatting
+
+[`treefmt`](https://github.com/numtide/treefmt) (via [`treefmt-nix`](https://github.com/numtide/treefmt-nix)) wraps [`nixfmt`](https://github.com/NixOS/nixfmt) (RFC 166). Config lives inline in `flake.nix`'s `outputs-builder`; run it repo-wide with:
+
+    nix fmt
+
+A tracked pre-commit hook in `.githooks/` formats any staged `.nix` files the same way. `./install.sh` enables it for the clone automatically (`git config core.hooksPath .githooks`); to do it by hand:
+
+    git config core.hooksPath .githooks
+
+---
+
 ## 🧪 Installation (NixOS Minimal)
 
 This setup is designed to be applied on top of a **minimal NixOS installation**.
@@ -146,11 +160,12 @@ Run the interactive installer on the target machine:
 
     ./install.sh
 
-It will walk you through three steps:
+It will walk you through four steps:
 
 1. **Generate hardware configuration** — detects the current machine's hardware, writes `systems/x86_64-linux/<host>/hardware-configuration.nix`, and scaffolds a `default.nix` the first time a host is configured
 2. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
-3. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
+3. **Enable git hooks** — sets `core.hooksPath` to `.githooks` so pre-commit runs `nix fmt`
+4. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
 
 ---
 

@@ -15,6 +15,13 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs"; # keep home-manager on the same nixpkgs
     };
+
+    # Wraps treefmt around per-language formatters (nixfmt here) so
+    # `nix fmt` can grow beyond Nix without changing the flake wiring.
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -37,5 +44,15 @@
       # Applied to every NixOS host automatically, so systems/x86_64-linux/*
       # don't each have to repeat the same enable-modules list.
       systems.modules.nixos = [ ./systems/common.nix ];
+
+      # Snowfall Lib defaults `formatter` to alejandra — replace it with a
+      # treefmt wrapper that runs nixfmt (RFC 166). Enables `nix fmt`
+      # (and the pre-commit hook in .githooks/).
+      outputs-builder = channels: {
+        formatter = inputs.treefmt-nix.lib.mkWrapper channels.nixpkgs {
+          projectRootFile = "flake.nix";
+          programs.nixfmt.enable = true;
+        };
+      };
     };
 }

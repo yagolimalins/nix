@@ -94,8 +94,21 @@ fi
 
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-# ── Step 3: Apply system configuration ───────────────────────────────────────
-step "Step 3 — Apply System Configuration"
+# ── Step 3: Enable git hooks ──────────────────────────────────────────────────
+step "Step 3 — Enable Git Hooks"
+
+# core.hooksPath is per-clone (not committed), so new machines need this once.
+# Points git at the tracked .githooks/ pre-commit that runs `nix fmt`.
+HOOKS_PATH=".githooks"
+if [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == "$HOOKS_PATH" ]]; then
+    success "Git hooks already enabled (core.hooksPath=${HOOKS_PATH})."
+else
+    git config core.hooksPath "$HOOKS_PATH"
+    success "Git hooks enabled (core.hooksPath=${HOOKS_PATH})."
+fi
+
+# ── Step 4: Apply system configuration ───────────────────────────────────────
+step "Step 4 — Apply System Configuration"
 
 info "Running: sudo nixos-rebuild switch --flake .#${HOST}"
 sudo nixos-rebuild switch --flake ".#${HOST}"
