@@ -32,6 +32,7 @@
       "locale"
       "logging"
       "networking"
+      "nh"
       "nix"
       "postgresql"
       "power"

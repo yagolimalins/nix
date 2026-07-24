@@ -92,6 +92,7 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
       "locale"
       "logging"
       "networking"
+      "nh"
       "nix"
       "postgresql"
       "power"

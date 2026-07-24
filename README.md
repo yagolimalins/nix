@@ -65,6 +65,7 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
         │   ├── boot/                    #   Bootloader, kernel, tmpfs, sysctls, firmware
         │   ├── logging/                 #   journald limits
         │   ├── networking/              #   NetworkManager
+        │   ├── nh/                      #   nh CLI (nixos-rebuild/home-manager front-end) + weekly GC
         │   ├── dns/                     #   AdGuard Home + systemd-resolved
         │   ├── locale/                  #   Timezone, locale, console keymap
         │   ├── fonts/                   #   System fonts
