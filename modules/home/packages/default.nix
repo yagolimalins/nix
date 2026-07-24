@@ -1,0 +1,187 @@
+#
+# packages.nix — User package set
+#
+# Everything installed into the user profile, grouped by purpose, plus
+# direnv/nix-direnv for automatic per-project dev shells.
+#
+{
+  config,
+  lib,
+  pkgs,
+  namespace,
+  ...
+}:
+
+let
+  cfg = config.${namespace}.packages;
+in
+{
+  options.${namespace}.packages.enable = lib.mkEnableOption "user package set + direnv";
+
+  config = lib.mkIf cfg.enable {
+    xdg.desktopEntries.reaper = {
+      name = "REAPER";
+      exec = "pw-jack reaper %U";
+      icon = "cockos-reaper";
+      comment = "Digital Audio Workstation";
+      categories = [
+        "Audio"
+        "AudioVideo"
+      ];
+    };
+
+    xdg.desktopEntries."cockos-reaper" = {
+      name = "REAPER";
+      exec = "pw-jack reaper %U";
+      noDisplay = true;
+    };
+
+    home.packages = with pkgs; [
+
+      # ── Nix ──────────────────────────────────────────────────
+      nixfmt
+      nixd
+      nil
+
+      # ── System monitoring ────────────────────────────────────
+      btop
+      fastfetch
+
+      # ── Desktop utilities ────────────────────────────────────
+      playerctl
+      brightnessctl
+      networkmanagerapplet
+      blueman
+      seahorse
+      tumbler
+
+      # ── Screenshots & clipboard ──────────────────────────────
+      grimblast
+      wl-clipboard
+
+      # ── File management ──────────────────────────────────────
+      ristretto
+      zathura
+
+      # ── Fonts ────────────────────────────────────────────────
+      jetbrains-mono
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.fira-code
+
+      # ── Editors & IDEs ───────────────────────────────────────
+      neovim
+      vscode
+      zed-editor
+      code-cursor
+      jetbrains.idea
+
+      # ── Dev tools ────────────────────────────────────────────
+      ripgrep
+      fd
+      gcc
+      claude-code
+      uv
+
+      # ── Version control ──────────────────────────────────────
+      git
+      gh
+      lazygit
+      github-desktop
+
+      # ── JavaScript / TypeScript ──────────────────────────────
+      typescript
+      nodejs
+      deno
+      tsx
+
+      # ── JVM ──────────────────────────────────────────────────
+      maven
+
+      # ── Rust ─────────────────────────────────────────────────
+      rustc
+      cargo
+      rustfmt
+      clippy
+      rust-analyzer
+      sqlx-cli
+      sea-orm-cli
+      pkg-config
+      openssl
+      mold
+      sccache
+
+      # ── .NET ─────────────────────────────────────────────────
+      dotnet-sdk_10
+      dotnet-ef
+
+      # ── Databases ────────────────────────────────────────────
+      dbeaver-bin
+      beekeeper-studio
+
+      # ── API testing ──────────────────────────────────────────
+      insomnia
+
+      # ── Productivity ─────────────────────────────────────────
+      libreoffice-fresh
+      marktext
+      glow
+      anki
+
+      # ── Browsers ─────────────────────────────────────────────
+      # google-chrome
+      chromium
+
+      # ── Security & privacy ───────────────────────────────────
+      proton-vpn
+      proton-pass
+      protonmail-bridge
+      thunderbird
+
+      # ── Communication ────────────────────────────────────────
+      zoom-us
+
+      # ── Video ────────────────────────────────────────────────
+      obs-studio
+      popcorntime
+      vlc
+      kdePackages.kdenlive
+
+      # ── Audio production ─────────────────────────────────────
+      reaper
+      qpwgraph
+      carla
+      alsa-utils
+
+    ];
+
+    home.sessionVariables = {
+      OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
+      OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
+      PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+
+      LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+        pkgs.wayland
+        pkgs.libxkbcommon
+        pkgs.vulkan-loader
+        pkgs.libGL
+      ];
+
+      RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+
+      # Nix's rustc has no rustup-style toolchain dir, so tools like
+      # rust-analyzer can't auto-discover the stdlib sources without this.
+      RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+    };
+
+    home.file.".cargo/config.toml".text = ''
+      [target.x86_64-unknown-linux-gnu]
+      rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-B${pkgs.mold}/bin"]
+    '';
+
+    programs.direnv = {
+      enable = true;
+      silent = true; # suppress all direnv/nix-direnv log output
+      nix-direnv.enable = true;
+    };
+  };
+}
