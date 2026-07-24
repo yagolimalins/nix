@@ -65,44 +65,13 @@ success "Hardware configuration written to ${HW_FILE}."
 # the first time a host is configured; safe to edit/extend afterwards.
 if [[ ! -f "$DEFAULT_FILE" ]]; then
     cat > "$DEFAULT_FILE" <<EOF
-{ lib, namespace, ... }:
+{ ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
 
-  # Explicit config = { ... } lets \${namespace} below stay dynamic
-  # instead of hardcoding the namespace string as an attribute name —
-  # see systems/x86_64-linux/thinkpad/default.nix for why that matters.
-  config = {
-    networking.hostName = "$HOST";
+  networking.hostName = "$HOST";
 
-    # Toggle which modules/nixos/* this host runs. Trim this list for
-    # hardware that doesn't apply here (e.g. a headless box might drop
-    # "display", "bluetooth", "input-method"...).
-    \${namespace} = lib.\${namespace}.enable-modules [
-      "audio"
-      "bluetooth"
-      "boot"
-      "desktop"
-      "display"
-      "dns"
-      "fonts"
-      "input-method"
-      "input-remapper"
-      "locale"
-      "logging"
-      "networking"
-      "nh"
-      "nix"
-      "postgresql"
-      "power"
-      "printing"
-      "programs"
-      "tailscale"
-      "users"
-      "virtualisation"
-    ];
-  };
 }
 EOF
     git add "$DEFAULT_FILE"

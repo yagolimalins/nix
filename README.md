@@ -43,9 +43,10 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     ├── lib/
     │   └── default.nix                  # Shared helper, merged into lib.mine.*
     ├── systems/
+    │   ├── common.nix                   # Module toggles shared by every host (wired via systems.modules.nixos)
     │   └── x86_64-linux/                # <arch>-<format>, per Snowfall Lib's system targets
     │       ├── thinkpad/
-    │       │   ├── default.nix              # Host entry point: hostname, imports, module toggles
+    │       │   ├── default.nix              # Host entry point: hostname + host-specific imports
     │       │   ├── hardware-configuration.nix
     │       │   └── thinkpad.nix              # i915, TLP thresholds, thinkfan, …
     │       ├── laptop/
@@ -110,8 +111,11 @@ Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall
 - **Every module is an opt-in `mine.<name>.enable` toggle**
   Each file under `modules/nixos/*/default.nix` and `modules/home/*/default.nix` declares its own `options.${namespace}.<name>.enable` (a plain `lib.mkEnableOption`) and wraps its entire body in `config = lib.mkIf cfg.enable { ... }`. Nothing is force-applied globally anymore — a module only takes effect where a system or home explicitly turns it on. This makes every module independently reusable and lets a future host cherry-pick only what it needs (e.g. a headless box could skip `display`, `bluetooth`, `input-method`).
 
+- **`systems/common.nix`**
+  The `enable-modules [ ... ]` list every host shared verbatim (audio, networking, tailscale, users, …) lives here once, instead of being copy-pasted into every `systems/x86_64-linux/<host>/default.nix`. It's not auto-discovered like `modules/nixos/*` — it's wired in explicitly via `systems.modules.nixos = [ ./systems/common.nix ];` in `flake.nix`, Snowfall Lib's mechanism for applying a module to every NixOS system it builds.
+
 - **`systems/x86_64-linux/<host>/default.nix`**
-  Each host's entry point, kept intentionally thin: `networking.hostName`, `imports` for hardware config + any host-specific hardware file (e.g. `thinkpad.nix`), and one `${namespace} = lib.${namespace}.enable-modules [ ... ];` block listing which `modules/nixos/*` are active on that host. No other configuration belongs here.
+  Each host's entry point, kept intentionally thin: `networking.hostName` and `imports` for hardware config + any host-specific hardware file (e.g. `thinkpad.nix`). If a host ever needs a module the other hosts don't, it can add its own `${namespace} = lib.${namespace}.enable-modules [ ... ];` block on top of `systems/common.nix` — enabling the same module from both places is harmless, so `common.nix` only needs to hold what's *actually* shared.
 
 - **`homes/x86_64-linux/<user>/default.nix`**
   One Home Manager base per person sharing this flake (this repo currently only has `yago`). The username and home directory are inferred from the directory name and, since it has no `@<host>` suffix, Snowfall Lib attaches it to every `x86_64-linux` host automatically. Like the systems, it stays thin: a few `home.file`/`xdg` basics plus an `enable-modules [ ... ]` block toggling `modules/home/*`. Adding yourself is just: create `homes/x86_64-linux/<your-username>/default.nix`, no other file needs to know your name.
@@ -130,12 +134,7 @@ Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall
 
 - **Per-host differences** (e.g. Hyprland monitor layout) are resolved with Snowfall Lib's `host` argument, available in every home module — see `modules/home/hyprland/default.nix`.
 
-This layout scales naturally: adding a new machine means creating a `systems/x86_64-linux/<name>/` directory with a `default.nix` that lists the modules it needs; adding a new feature means creating a module directory with its own `enable` option — no other file needs to change.
-
-> **Two Nix module-system gotchas worth knowing** (both about using `${namespace}` as a dynamic attribute *name*, not as a value):
->
-> 1. **`systems/x86_64-linux/<host>/default.nix`** — using `${namespace}` as an *implicit* top-level key (sitting directly beside `imports`) recurses, because Nix must know a module's attribute names before `config` — and therefore `_module.args.namespace` — exists. Wrapping the same block in an explicit `config = { ${namespace} = ...; };` attribute fixes it: the module's top-level shape is now just the static keys `imports`/`config`, so `namespace` is only needed once `config` is already being resolved. That's why every `systems/*/default.nix` uses `config = { ... };` instead of the shorthand.
-> 2. **`homes/x86_64-linux/<user>/default.nix`** — the same `config = { ... }` trick does *not* work here, even nested inside its own `imports`. Home Manager is wired in as the literal value of the NixOS option `home-manager.users.<name>`, which has a `freeformType` that inspects this module's merged config to validate it as part of resolving `home-manager.extraSpecialArgs` (where `namespace` itself comes from) — a genuine cycle, not a syntax issue, and `--impure` doesn't touch it either (it's a module-system dependency cycle, not an impurity problem). So this one file has to spell out the namespace as a literal (currently `mine`) instead of `${namespace}` for its toggle-block attribute name. Every module it *imports* from `modules/home/` still reads/writes `config.${namespace}.*` dynamically without any issue — the limitation is scoped to this one entry point, and it's the *namespace* that's literal there, never a username.
+This layout scales naturally: adding a new machine means creating a `systems/x86_64-linux/<name>/` directory with a `default.nix` declaring its hostname and hardware — it inherits every module in `systems/common.nix` automatically, and only needs its own `enable-modules [ ... ]` block for anything beyond that; adding a new feature means creating a module directory with its own `enable` option — no other file needs to change.
 
 ---
 
