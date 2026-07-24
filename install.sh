@@ -26,6 +26,9 @@ echo ""
 # ── Sanity check ──────────────────────────────────────────────────────────────
 [[ -f flake.nix ]] || die "Run this script from the root of the nix configuration repository."
 
+OWNER_USER="${SUDO_USER:-$USER}"
+OWNER_GROUP="$(id -gn "$OWNER_USER")"
+
 # ── Host selection ────────────────────────────────────────────────────────────
 SYSTEMS_DIR="systems/x86_64-linux"
 DETECTED="$(hostname -s)"
@@ -41,8 +44,6 @@ step "Step 1 — Generate Hardware Configuration"
 HOST_DIR="$SYSTEMS_DIR/$HOST"
 HW_FILE="$HOST_DIR/hardware-configuration.nix"
 DEFAULT_FILE="$HOST_DIR/default.nix"
-OWNER_USER="${SUDO_USER:-$USER}"
-OWNER_GROUP="$(id -gn "$OWNER_USER")"
 
 mkdir -p "$HOST_DIR"
 
@@ -72,14 +73,45 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
 
   networking.hostName = "$HOST";
 
+  # Shared NixOS modules come from systems/common.nix (wired via
+  # systems.modules.nixos in flake.nix). Add host-specific imports or
+  # extra mine = lib.mine.enable-modules [ ... ] here if needed.
 }
 EOF
     git add "$DEFAULT_FILE"
     success "Created ${DEFAULT_FILE}."
 fi
 
-# ── Step 2: Enable flakes ─────────────────────────────────────────────────────
-step "Step 2 — Enable Flakes"
+# ── Step 2: Home Manager user ─────────────────────────────────────────────────
+step "Step 2 — Scaffold Home Manager User"
+
+HOMES_DIR="homes/x86_64-linux"
+USER_DIR="$HOMES_DIR/$OWNER_USER"
+HOME_DEFAULT="$USER_DIR/default.nix"
+
+info "Installing as user: ${BOLD}${OWNER_USER}${RESET}"
+
+if [[ -f "$HOME_DEFAULT" ]]; then
+    success "Home already exists at ${HOME_DEFAULT}."
+else
+    mkdir -p "$USER_DIR"
+    cat > "$HOME_DEFAULT" <<EOF
+{ ... }:
+
+{
+  # Shared home modules and XDG basics come from homes/common.nix
+  # (wired via homes.modules in flake.nix). The username is inferred
+  # from this directory's name. Add user-specific settings or
+  # mine = lib.mine.enable-modules [ ... ] here if needed.
+}
+EOF
+    sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$HOMES_DIR"
+    git add "$HOME_DEFAULT"
+    success "Created ${HOME_DEFAULT}."
+fi
+
+# ── Step 3: Enable flakes ─────────────────────────────────────────────────────
+step "Step 3 — Enable Flakes"
 
 CONFIG_FILE="$HOME/.config/nix/nix.conf"
 FLAKES_LINE="experimental-features = nix-command flakes"
@@ -94,8 +126,8 @@ fi
 
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-# ── Step 3: Enable git hooks ──────────────────────────────────────────────────
-step "Step 3 — Enable Git Hooks"
+# ── Step 4: Enable git hooks ──────────────────────────────────────────────────
+step "Step 4 — Enable Git Hooks"
 
 # core.hooksPath is per-clone (not committed), so new machines need this once.
 # Points git at the tracked .githooks/ pre-commit that runs `nix fmt`.
@@ -107,8 +139,8 @@ else
     success "Git hooks enabled (core.hooksPath=${HOOKS_PATH})."
 fi
 
-# ── Step 4: Apply system configuration ───────────────────────────────────────
-step "Step 4 — Apply System Configuration"
+# ── Step 5: Apply system configuration ───────────────────────────────────────
+step "Step 5 — Apply System Configuration"
 
 info "Running: sudo nixos-rebuild switch --flake .#${HOST}"
 sudo nixos-rebuild switch --flake ".#${HOST}"

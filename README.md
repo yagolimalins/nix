@@ -59,9 +59,10 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     │           ├── default.nix
     │           └── hardware-configuration.nix
     ├── homes/
+    │   ├── common.nix                   # Module toggles + XDG basics shared by every user (homes.modules)
     │   └── x86_64-linux/
-    │       └── <user>/                  # e.g. "yago" — one dir per person sharing this flake
-    │           └── default.nix          # Home Manager base + module toggles (username inferred from this dir name)
+    │       └── <user>/                  # e.g. "yago" — one dir per person; username inferred from this name
+    │           └── default.nix          # Thin Home Manager entry point (user-specific overrides only)
     └── modules/
         ├── nixos/                       # NixOS (system-level) modules — one `mine.<name>.enable` toggle each
         │   ├── nix/                     #   Nix daemon, GC, stateVersion
@@ -109,12 +110,12 @@ Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall
 
 - **`flake.nix`** — thin `snowfall-lib.mkFlake` call; Snowfall auto-discovers `systems/`, `homes/`, `modules/`, and `lib/`. Custom options live under `mine.*` (`snowfall.namespace`).
 - **Opt-in modules** — each `modules/{nixos,home}/*` is gated by `mine.<name>.enable`; nothing applies unless a system or home turns it on.
-- **`systems/common.nix`** — shared `enable-modules` list, applied to every host via `systems.modules.nixos` in `flake.nix`.
-- **Per-host / per-user entry points** — `systems/.../<host>/default.nix` is hostname + hardware; `homes/.../<user>/default.nix` toggles home modules. Username comes from the directory name; modules read users from `config.snowfallorg.users` (no hardcoded names).
+- **`systems/common.nix` / `homes/common.nix`** — shared `enable-modules` lists (plus home XDG basics), applied via `systems.modules.nixos` / `homes.modules` in `flake.nix`.
+- **Per-host / per-user entry points** — thin: host = hostname + hardware; user = overrides only. Username comes from the directory name; modules read users from `config.snowfallorg.users`.
 - **`lib.mine.enable-modules`** — turns a name list into `{ <name>.enable = true; }` for those toggle blocks.
 - **Host-specific UI** — things like Hyprland monitors use Snowfall's `host` arg (see `modules/home/hyprland`).
 
-Add a host with a new `systems/` directory (inherits `common.nix`); add a feature with a new module + `enable` option.
+`./install.sh` scaffolds a new host under `systems/` and the installing user under `homes/` if missing.
 
 ---
 
@@ -138,12 +139,13 @@ Run the interactive installer on the target machine:
 
     ./install.sh
 
-It will walk you through four steps:
+It will walk you through five steps:
 
-1. **Generate hardware configuration** — detects the current machine's hardware, writes `systems/x86_64-linux/<host>/hardware-configuration.nix`, and scaffolds a `default.nix` the first time a host is configured
-2. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
-3. **Enable git hooks** — sets `core.hooksPath` to `.githooks` so pre-commit runs `nix fmt`
-4. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
+1. **Generate hardware configuration** — writes `systems/x86_64-linux/<host>/hardware-configuration.nix` and scaffolds a host `default.nix` if missing
+2. **Scaffold Home Manager user** — creates `homes/x86_64-linux/<user>/default.nix` for the user running the script if missing (shared modules come from `homes/common.nix`)
+3. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
+4. **Enable git hooks** — sets `core.hooksPath` to `.githooks` so pre-commit runs `nix fmt`
+5. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
 
 ---
 

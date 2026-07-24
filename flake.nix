@@ -41,9 +41,10 @@
       # conflicts with the already-instantiated `pkgs` Snowfall provides).
       channels-config.allowUnfree = true;
 
-      # Applied to every NixOS host automatically, so systems/x86_64-linux/*
-      # don't each have to repeat the same enable-modules list.
+      # Applied to every NixOS host / Home Manager user automatically, so
+      # systems/ and homes/ entry points don't each repeat the same lists.
       systems.modules.nixos = [ ./systems/common.nix ];
+      homes.modules = [ ./homes/common.nix ];
 
       # Snowfall Lib defaults `formatter` to alejandra — replace it with a
       # treefmt wrapper that runs nixfmt (RFC 166). Enables `nix fmt`
