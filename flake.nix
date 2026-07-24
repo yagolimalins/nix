@@ -33,5 +33,9 @@
       # do this here instead of a `nixpkgs.config` module (that option
       # conflicts with the already-instantiated `pkgs` Snowfall provides).
       channels-config.allowUnfree = true;
+
+      # Applied to every NixOS host automatically, so systems/x86_64-linux/*
+      # don't each have to repeat the same enable-modules list.
+      systems.modules.nixos = [ ./systems/common.nix ];
     };
 }
