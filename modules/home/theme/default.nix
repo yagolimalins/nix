@@ -38,5 +38,7 @@ in
 
       gtk4.theme = lib.mkForce null;
     };
+
+    dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
   };
 }
