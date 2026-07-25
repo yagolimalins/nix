@@ -17,6 +17,12 @@ step() {
     echo -e "${BRED}────────────────────────────────────────${RESET}"
 }
 
+# Run sbctl from a nix shell so this works on minimal installs before the
+# flake's system profile (which ships pkgs.sbctl) is applied.
+sbctl() {
+    nix-shell -p sbctl --run "sudo sbctl $*"
+}
+
 # ── Header ────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BRED}  ❄  NixOS Multi-Host Installer${RESET}"
@@ -145,11 +151,65 @@ else
     success "Git hooks enabled (core.hooksPath=${HOOKS_PATH})."
 fi
 
-# ── Step 5: Apply system configuration ───────────────────────────────────────
-step "Step 5 — Apply System Configuration"
+# ── Step 5: Secure Boot keys (Lanzaboote) ─────────────────────────────────────
+# mine.boot.secureBoot defaults to true; Lanzaboote refuses to install a
+# generation until /var/lib/sbctl has keys. Create them before the rebuild.
+step "Step 5 — Secure Boot Keys (Lanzaboote)"
+
+PKI_BUNDLE="/var/lib/sbctl"
+if [[ -e "${PKI_BUNDLE}/keys/db/db.key" || -e "${PKI_BUNDLE}/GUID" ]]; then
+    success "Secure Boot keys already present at ${PKI_BUNDLE}."
+else
+    info "Creating Secure Boot keys at ${PKI_BUNDLE}..."
+    info "(Required so Lanzaboote can sign boot generations on first switch.)"
+    sbctl create-keys
+    success "Keys created at ${PKI_BUNDLE}."
+fi
+
+# ── Step 6: Apply system configuration ───────────────────────────────────────
+step "Step 6 — Apply System Configuration"
 
 info "Running: sudo nixos-rebuild switch --flake .#${HOST}"
 sudo nixos-rebuild switch --flake ".#${HOST}"
+
+# ── Step 7: Secure Boot enrollment (firmware) ────────────────────────────────
+step "Step 7 — Secure Boot Enrollment"
+
+info "Verifying signed boot artefacts..."
+if sbctl verify; then
+    success "Boot chain verifies as signed."
+else
+    warn "sbctl verify reported issues — check output above before enrolling."
+fi
+
+echo ""
+info "Firmware enrollment is still required once per machine:"
+echo -e "  1. Reboot into firmware setup → enable ${BOLD}Setup Mode${RESET}"
+echo -e "     (clear/factory-reset existing Secure Boot keys)"
+echo -e "  2. Boot NixOS again, then run:"
+echo -e "       ${BOLD}sudo sbctl enroll-keys -m${RESET}"
+echo -e "     (${BOLD}-m${RESET} keeps Microsoft keys — needed for some GPUs/BitLocker media)"
+echo -e "  3. Firmware → enable ${BOLD}Secure Boot${RESET}, disable Setup Mode, reboot"
+echo -e "  4. Confirm with: ${BOLD}bootctl status${RESET} / ${BOLD}sbctl status${RESET}"
+echo ""
+
+# Offer enroll now if the firmware is already in Setup Mode.
+STATUS_OUT="$(sbctl status 2>/dev/null || true)"
+if echo "$STATUS_OUT" | grep -Eiq 'Setup Mode.*(Enabled|Yes)|Setup Mode:\s*Enabled'; then
+    warn "Firmware appears to be in Setup Mode right now."
+    echo -en "${BOLD}Enroll keys into UEFI now? [Y/n] ${RESET}"
+    read -r enroll_ans
+    enroll_ans="${enroll_ans:-y}"
+    if [[ "${enroll_ans,,}" == "y" || "${enroll_ans,,}" == "yes" ]]; then
+        info "Running: sudo sbctl enroll-keys -m"
+        sbctl enroll-keys -m
+        success "Keys enrolled. Enable Secure Boot in firmware and reboot."
+    else
+        warn "Skipped enrollment — run ${BOLD}sudo sbctl enroll-keys -m${RESET} after entering Setup Mode."
+    fi
+else
+    warn "Firmware is not in Setup Mode yet — enroll after step 1 above."
+fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""

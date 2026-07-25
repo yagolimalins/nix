@@ -14,7 +14,8 @@
 { lib, ... }:
 
 {
-  home.stateVersion = "25.05";
+  # Keep in lockstep with the nixpkgs / home-manager release (26.05).
+  home.stateVersion = "26.05";
 
   # XDG user directories (kept in git via .keep placeholders).
   home.file."Desktop/.keep".text = "";

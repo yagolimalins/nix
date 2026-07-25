@@ -22,6 +22,13 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # UEFI Secure Boot for NixOS (signed UKIs). Enrollment still needs
+    # `sbctl` on each machine — see modules/nixos/boot.
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -43,7 +50,10 @@
 
       # Applied to every NixOS host / Home Manager user automatically, so
       # systems/ and homes/ entry points don't each repeat the same lists.
-      systems.modules.nixos = [ ./systems/common.nix ];
+      systems.modules.nixos = [
+        inputs.lanzaboote.nixosModules.lanzaboote
+        ./systems/common.nix
+      ];
       homes.modules = [ ./homes/common.nix ];
 
       # Snowfall Lib defaults `formatter` to alejandra — replace it with a

@@ -67,7 +67,7 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
         ├── nixos/                       # NixOS (system-level) modules — one `mine.<name>.enable` toggle each
         │   ├── nix/                     #   Nix daemon, GC, stateVersion
         │   ├── host/                    #   Per-machine facts (monitors, workspaces)
-        │   ├── boot/                    #   Bootloader, kernel, tmpfs, sysctls, firmware
+        │   ├── boot/                    #   Lanzaboote Secure Boot, kernel, tmpfs, firmware
         │   ├── logging/                 #   journald limits
         │   ├── networking/              #   NetworkManager
         │   ├── nh/                      #   nh CLI (nixos-rebuild/home-manager front-end) + weekly GC
@@ -117,6 +117,8 @@ Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall
 - **`lib.mine.enable-modules`** — turns a name list into `{ <name>.enable = true; }` for those toggle blocks.
 - **Host / user facts** — `mine.host` (NixOS: monitors, workspaces) and `mine.user` (HM: wallpaper, …). Hyprland reads host facts via `osConfig` and user facts via `config.mine.user` — no hostname `if` chains in UI modules.
 - **Package groups** — `mine.packages.enable` turns on direnv and defaults every group to on. Groups are split by concern (e.g. `editors` vs `ides`, `rust` vs `gtk`, `media` vs `creator`, `proton` vs `mail`). Opt out per user with e.g. `mine.packages.ides.enable = false`.
+- **Secure Boot** — `mine.boot.secureBoot` (default on) uses [Lanzaboote](https://github.com/nix-community/lanzaboote). After the first rebuild, create/enroll keys with `sbctl` (steps in `modules/nixos/boot`). Set `mine.boot.secureBoot = false` to fall back to systemd-boot.
+- **stateVersion** — `system.stateVersion` and `home.stateVersion` match the flake channel (`26.05`).
 
 `./install.sh` scaffolds a new host under `systems/` and the installing user under `homes/` if missing.
 
@@ -142,13 +144,15 @@ Run the interactive installer on the target machine:
 
     ./install.sh
 
-It will walk you through five steps:
+It will walk you through these steps:
 
 1. **Generate hardware configuration** — writes `systems/x86_64-linux/<host>/hardware-configuration.nix` and scaffolds a host `default.nix` if missing
 2. **Scaffold Home Manager user** — creates `homes/x86_64-linux/<user>/default.nix` for the user running the script if missing (shared modules come from `homes/common.nix`)
 3. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
 4. **Enable git hooks** — sets `core.hooksPath` to `.githooks` so pre-commit runs `nix fmt`
-5. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
+5. **Secure Boot keys** — runs `sbctl create-keys` into `/var/lib/sbctl` if missing (so Lanzaboote can sign on first switch)
+6. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
+7. **Secure Boot enrollment** — verifies signatures and prompts to `sbctl enroll-keys -m` if firmware is already in Setup Mode; otherwise prints the firmware steps still needed
 
 ---
 

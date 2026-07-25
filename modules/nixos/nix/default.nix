@@ -38,7 +38,7 @@ in
       options = "--delete-older-than 3d";
     };
 
-    # State version for stateful data compatibility — do not change casually.
-    system.stateVersion = "25.05";
+    # Keep in lockstep with the nixpkgs channel in flake.nix (nixos-26.05).
+    system.stateVersion = "26.05";
   };
 }
