@@ -108,6 +108,14 @@ in
       openssl
       mold
       sccache
+      gtk4
+      libadwaita
+      glib
+      cairo
+      pango
+      gdk-pixbuf
+      graphene
+      harfbuzz
 
       # ── .NET ─────────────────────────────────────────────────
       dotnet-sdk_10
@@ -156,13 +164,33 @@ in
     home.sessionVariables = {
       OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
       OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
-      PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+
+      PKG_CONFIG_PATH = lib.makeSearchPath "lib/pkgconfig" [
+        pkgs.openssl.dev
+        pkgs.gtk4.dev
+        pkgs.libadwaita.dev
+        pkgs.glib.dev
+        pkgs.cairo.dev
+        pkgs.pango.dev
+        pkgs.gdk-pixbuf.dev
+        pkgs.graphene.dev
+        pkgs.harfbuzz.dev
+        pkgs.vulkan-loader.dev # gtk4.pc Requires: vulkan
+      ];
 
       LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
         pkgs.wayland
         pkgs.libxkbcommon
         pkgs.vulkan-loader
         pkgs.libGL
+        pkgs.gtk4
+        pkgs.libadwaita
+        pkgs.glib
+        pkgs.cairo
+        pkgs.pango
+        pkgs.gdk-pixbuf
+        pkgs.graphene
+        pkgs.harfbuzz
       ];
 
       RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
