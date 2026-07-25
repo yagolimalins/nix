@@ -1,14 +1,25 @@
-# NixOS Multi-Host Configuration
+# ❄ NixOS Multi-Host Configuration
 
 Declarative multi-machine NixOS setup using **flakes**, **[Snowfall Lib](https://snowfall.org)**, and **Home Manager as a NixOS module**. Focus: reuse, clear module boundaries, and reproducible hosts.
 
-## Structure
+## 🖼 Screenshots
+
+Hyprland + Waybar on ThinkPad T480 (NixOS 26.05):
+
+![Desktop](screenshots/desktop.png)
+
+![fastfetch](screenshots/fastfetch.png)
+
+![btop](screenshots/btop.png)
+
+## 📁 Structure
 
 ```
 .
 ├── flake.nix                 # Snowfall entry — inputs + shared module wiring
 ├── flake.lock
 ├── install.sh                # Interactive bootstrap for a new machine
+├── screenshots/              # Desktop / rice previews for this README
 ├── .githooks/pre-commit      # Runs `nix fmt` on staged .nix files
 ├── lib/                      # lib.mine.* helpers (enable-modules, host layout, portal)
 ├── systems/                  # NixOS hosts (Snowfall: systems/, not hosts/)
@@ -38,9 +49,9 @@ Declarative multi-machine NixOS setup using **flakes**, **[Snowfall Lib](https:/
 
 Snowfall **requires** the directory names `systems/`, `homes/`, `modules/`, and `lib/`. Renaming them to `hosts/` or `users/` breaks discovery unless you reconfigure Snowfall’s root layout.
 
-## Organization
+## 🗂 Organization
 
-### Hosts (`systems/`)
+### 🖥 Hosts (`systems/`)
 
 Each host is `systems/x86_64-linux/<name>/`:
 
@@ -50,19 +61,19 @@ Each host is `systems/x86_64-linux/<name>/`:
 
 Shared toggles live in `systems/common.nix`.
 
-### Users (`homes/`)
+### 👤 Users (`homes/`)
 
 Each user is `homes/x86_64-linux/<username>/default.nix`.  
 A home **without** `@host` applies on every machine. Use `user@host` only when you need host-specific homes.
 
-### Modules
+### 🧩 Modules
 
 - **NixOS:** boot, networking, locale, display, desktop, audio, bluetooth, printing, users, virtualisation, security-related (lanzaboote via boot), services (dns, postgresql, tailscale, …).
 - **Home:** shell, terminal (kitty), desktop (hyprland, waybar, theme, …), development (`packages` groups), services (mail, nightshift, …).
 
 Facts modules (`mine.host`, `mine.user`) are options-only and always imported.
 
-### Packages
+### 📦 Packages
 
 HM module `mine.packages` — not a Snowfall `packages/` flake output.
 
@@ -70,17 +81,17 @@ HM module `mine.packages` — not a Snowfall `packages/` flake output.
 - Groups live under `modules/home/packages/groups/` (`system`, `desktop`, `dev`, `apps`, `media`)
 - Opt out: `mine.packages.ides.enable = false`
 
-### Home Manager
+### 🏠 Home Manager
 
 Integrated by Snowfall as a NixOS module (same generation as the system). Homes read host facts via `osConfig.mine.host`.
 
-### Lib
+### 📚 Lib
 
 `lib.mine.enable-modules` — batch-enable modules  
 `lib.mine.mkDualMonitorHost` — shared HDMI+eDP Hyprland layout  
 `lib.mine.mkGtkHyprlandPortal` — GTK portal stub for Hyprland (`UseIn=gnome` workaround)
 
-## Adding a new host
+## ➕ Adding a new host
 
 1. Create `systems/x86_64-linux/<host>/`.
 2. Add `hardware-configuration.nix` (`nixos-generate-config` or `./install.sh`).
@@ -102,7 +113,7 @@ Integrated by Snowfall as a NixOS module (same generation as the system). Homes 
 
 `systems/common.nix` already enables the shared module set.
 
-## Adding a new user
+## ➕ Adding a new user
 
 1. Create `homes/x86_64-linux/<username>/default.nix`:
 
@@ -121,7 +132,7 @@ Integrated by Snowfall as a NixOS module (same generation as the system). Homes 
 
 Shared modules come from `homes/common.nix`.
 
-## Adding a module
+## ➕ Adding a module
 
 1. Create `modules/nixos/<name>/default.nix` or `modules/home/<name>/default.nix`.
 2. Expose `options.${namespace}.<name>.enable` (unless options-only facts).
@@ -130,7 +141,7 @@ Shared modules come from `homes/common.nix`.
 
 Folder name = option name (`modules/nixos/audio` → `mine.audio`).
 
-## Rebuilding the system
+## 🔄 Rebuilding the system
 
 ```bash
 # Flake attribute = systems/ directory name
@@ -153,7 +164,7 @@ Bootstrap a **new** machine from minimal NixOS:
 
 That generates hardware config, scaffolds host/user (with current `mkDualMonitorHost` / package override hints), stages new files for the flake, optionally creates Secure Boot keys, rebuilds, and guides UEFI enrollment.
 
-## Development
+## 🛠 Development
 
 - One concern per module; prefer `mine.*.enable` over giant files.
 - Host-specific values → `mine.host` / host files under `systems/`, not `if host ==` in UI modules.
@@ -162,7 +173,7 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 - Format with `nix fmt` (treefmt + nixfmt); `.githooks` runs it on commit.
 - Keep `system.stateVersion` / `home.stateVersion` aligned with the nixpkgs channel (`26.05`).
 
-## Conventions
+## 📐 Conventions
 
 | Convention | Detail |
 |------------|--------|
@@ -176,7 +187,7 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 | Attribute order | options → config; boot/hardware/networking/services/… as applicable |
 | Lists | Trailing commas where it helps diffs |
 
-## Principles
+## 🧭 Principles
 
 1. **Snowfall layout is the source of truth** — don’t invent parallel `hosts/` / `users/` trees.
 2. **Opt-in modules** — nothing applies unless enabled.
@@ -184,6 +195,6 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 4. **Behaviour-preserving refactors** — structure and clarity first; no silent feature drops.
 5. **Forkability** — namespace and paths are not tied to one username.
 
-## Secure Boot
+## 🔐 Secure Boot
 
 `mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. Firmware enrollment runs only when keys exist and remains a one-time manual step (`sbctl enroll-keys -m` in Setup Mode).
