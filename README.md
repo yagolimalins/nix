@@ -66,6 +66,7 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
     └── modules/
         ├── nixos/                       # NixOS (system-level) modules — one `mine.<name>.enable` toggle each
         │   ├── nix/                     #   Nix daemon, GC, stateVersion
+        │   ├── host/                    #   Per-machine facts (monitors, workspaces)
         │   ├── boot/                    #   Bootloader, kernel, tmpfs, sysctls, firmware
         │   ├── logging/                 #   journald limits
         │   ├── networking/              #   NetworkManager
@@ -87,7 +88,8 @@ This repository demonstrates a real-world multi-machine NixOS configuration, foc
         │   ├── tailscale/               #   WireGuard mesh VPN
         │   └── users/                   #   User account + session env
         └── home/                        # Home Manager (user-level) modules — one `mine.<name>.enable` toggle each
-            ├── packages/                #   User packages + direnv
+            ├── packages/                #   User packages (group toggles) + direnv
+            ├── user/                    #   Per-user facts (wallpaper, …)
             ├── theme/                   #   GTK theme, icons, cursor (WhiteSur)
             ├── hyprland/                #   Hyprland WM settings + keybinds
             ├── waybar/                  #   Status bar config + CSS
@@ -111,9 +113,10 @@ Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall
 - **`flake.nix`** — thin `snowfall-lib.mkFlake` call; Snowfall auto-discovers `systems/`, `homes/`, `modules/`, and `lib/`. Custom options live under `mine.*` (`snowfall.namespace`).
 - **Opt-in modules** — each `modules/{nixos,home}/*` is gated by `mine.<name>.enable`; nothing applies unless a system or home turns it on.
 - **`systems/common.nix` / `homes/common.nix`** — shared `enable-modules` lists (plus home XDG basics), applied via `systems.modules.nixos` / `homes.modules` in `flake.nix`.
-- **Per-host / per-user entry points** — thin: host = hostname + hardware; user = overrides only. Username comes from the directory name; modules read users from `config.snowfallorg.users`.
+- **Per-host / per-user entry points** — thin: host = hostname + hardware + `mine.host.*` facts; user = `mine.user.*` overrides. Username comes from the directory name; modules read users from `config.snowfallorg.users`.
 - **`lib.mine.enable-modules`** — turns a name list into `{ <name>.enable = true; }` for those toggle blocks.
-- **Host-specific UI** — things like Hyprland monitors use Snowfall's `host` arg (see `modules/home/hyprland`).
+- **Host / user facts** — `mine.host` (NixOS: monitors, workspaces) and `mine.user` (HM: wallpaper, …). Hyprland reads host facts via `osConfig` and user facts via `config.mine.user` — no hostname `if` chains in UI modules.
+- **Package groups** — `mine.packages.enable` turns on direnv and defaults every group to on. Groups are split by concern (e.g. `editors` vs `ides`, `rust` vs `gtk`, `media` vs `creator`, `proton` vs `mail`). Opt out per user with e.g. `mine.packages.ides.enable = false`.
 
 `./install.sh` scaffolds a new host under `systems/` and the installing user under `homes/` if missing.
 

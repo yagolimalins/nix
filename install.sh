@@ -66,7 +66,7 @@ success "Hardware configuration written to ${HW_FILE}."
 # the first time a host is configured; safe to edit/extend afterwards.
 if [[ ! -f "$DEFAULT_FILE" ]]; then
     cat > "$DEFAULT_FILE" <<EOF
-{ ... }:
+{ namespace, ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
@@ -76,6 +76,12 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
   # Shared NixOS modules come from systems/common.nix (wired via
   # systems.modules.nixos in flake.nix). Add host-specific imports or
   # extra mine = lib.mine.enable-modules [ ... ] here if needed.
+  #
+  # Optional layout facts for Hyprland (see modules/nixos/host):
+  # \${namespace}.host = {
+  #   monitors = [ ", preferred, auto, 1" ];
+  #   workspaces = [ ];
+  # };
 }
 EOF
     git add "$DEFAULT_FILE"

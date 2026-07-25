@@ -1,64 +1,26 @@
 #
 # hyprland.nix — Hyprland compositor config
 #
-# Monitors, look & feel, input, autostart, and all keybindings. Lid-close
-# suspend is bound here so the behaviour is shared across every host.
-# `host` is provided by Snowfall Lib and matches the system this home is
-# attached to (see homes/x86_64-linux/<user>).
+# Look & feel, input, autostart, and keybindings. Lid-close suspend is
+# bound here so the behaviour is shared across every host.
+#
+# Monitor / workspace layout comes from osConfig.${namespace}.host
+# (set per machine under systems/). Wallpaper comes from
+# config.${namespace}.user (homes/).
 #
 {
   config,
   lib,
   pkgs,
-  host,
+  osConfig,
   namespace,
   ...
 }:
 
 let
   cfg = config.${namespace}.hyprland;
-
-  wallpaper = "${pkgs.nixos-artwork.wallpapers.nineish-dark-gray}/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
-
-  monitors = {
-    thinkpad = [
-      "HDMI-A-2, 2560x1080@60, 0x0, 1"
-      "eDP-1, 1920x1080@60, 320x1080, 1"
-    ];
-    laptop = [
-      "HDMI-A-1, 2560x1080@60, 0x0, 1"
-      "eDP-1, 1920x1080@60, 320x1080, 1"
-    ];
-  };
-  monitorConfig = monitors.${host} or [ ", preferred, auto, 1" ];
-
-  workspaces = {
-    thinkpad = [
-      "1, monitor:HDMI-A-2, default:true"
-      "2, monitor:HDMI-A-2"
-      "3, monitor:HDMI-A-2"
-      "4, monitor:HDMI-A-2"
-      "5, monitor:HDMI-A-2"
-      "6, monitor:HDMI-A-2"
-      "7, monitor:HDMI-A-2"
-      "8, monitor:HDMI-A-2"
-      "9, monitor:HDMI-A-2"
-      "10, monitor:eDP-1, default:true"
-    ];
-    laptop = [
-      "1, monitor:HDMI-A-1, default:true"
-      "2, monitor:HDMI-A-1"
-      "3, monitor:HDMI-A-1"
-      "4, monitor:HDMI-A-1"
-      "5, monitor:HDMI-A-1"
-      "6, monitor:HDMI-A-1"
-      "7, monitor:HDMI-A-1"
-      "8, monitor:HDMI-A-1"
-      "9, monitor:HDMI-A-1"
-      "10, monitor:eDP-1, default:true"
-    ];
-  };
-  workspaceConfig = workspaces.${host} or [ ];
+  hostCfg = osConfig.${namespace}.host;
+  userCfg = config.${namespace}.user;
 
   gtkPortalForHyprland = pkgs.writeTextDir "share/xdg-desktop-portal/portals/gtk-hyprland.portal" ''
     [portal]
@@ -108,8 +70,8 @@ in
         "$terminal" = "kitty";
         "$launcher" = "pgrep wofi || wofi --show drun --hide-actions";
 
-        monitor = monitorConfig;
-        workspace = workspaceConfig;
+        monitor = hostCfg.monitors;
+        workspace = hostCfg.workspaces;
 
         exec-once = [
           "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
@@ -117,7 +79,7 @@ in
           "bash -c 'systemctl --user start xdg-desktop-portal-gtk.service; sleep 1; systemctl --user restart xdg-desktop-portal.service'"
           "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
           "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
-          "swaybg -i ${wallpaper} -m fill"
+          "swaybg -i ${userCfg.wallpaper} -m fill"
           "fcitx5 -d"
           "mako"
           "nm-applet --indicator"
