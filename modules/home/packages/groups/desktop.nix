@@ -17,6 +17,7 @@ in
         brightnessctl
         networkmanagerapplet
         blueman
+        pwvucontrol
         seahorse
         tumbler
       ];
