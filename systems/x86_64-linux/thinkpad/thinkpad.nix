@@ -1,9 +1,5 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+# ThinkPad T480: i915, TLP, thinkfan, thermald.
+{ ... }:
 
 {
   boot.initrd.availableKernelModules = [ "usbhid" ];
@@ -20,7 +16,6 @@
   services.tlp = {
     enable = true;
     settings = {
-      # ── CPU ──────────────────────────────────────────────────
       CPU_SCALING_GOVERNOR_ON_AC = "powersave";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
@@ -36,37 +31,32 @@
       SCHED_POWERSAVE_ON_AC = 1;
       SCHED_POWERSAVE_ON_BAT = 1;
 
-      # ── GPU ──────────────────────────────────────────────────
       INTEL_GPU_MIN_FREQ_ON_AC = 300;
       INTEL_GPU_MAX_FREQ_ON_AC = 800;
       INTEL_GPU_MIN_FREQ_ON_BAT = 300;
       INTEL_GPU_MAX_FREQ_ON_BAT = 500;
 
-      # ── PCIe / runtime PM ────────────────────────────────────
       PCIE_ASPM_ON_AC = "default";
       PCIE_ASPM_ON_BAT = "powersupersave";
       RUNTIME_PM_ON_AC = "auto";
       RUNTIME_PM_ON_BAT = "auto";
 
-      # ── USB ──────────────────────────────────────────────────
+      # Denylist keeps flaky dongles awake. Keep powertop auto-tune off —
+      # it ignores USB_DENYLIST and suspends everything.
       USB_AUTOSUSPEND = 1;
       USB_DENYLIST = "1532:006e 320f:5000 25a7:fa70 3554:f5d5";
       USB_EXCLUDE_BTUSB = 1;
 
-      # ── Audio ────────────────────────────────────────────────
       SOUND_POWER_SAVE_ON_AC = 0;
       SOUND_POWER_SAVE_ON_BAT = 1;
       SOUND_POWER_SAVE_CONTROLLER = "Y";
 
-      # ── Disk ─────────────────────────────────────────────────
       MAX_LOST_WORK_SECS_ON_AC = 15;
       MAX_LOST_WORK_SECS_ON_BAT = 60;
 
-      # ── Wi-Fi ────────────────────────────────────────────────
       WIFI_PWR_ON_AC = "off";
       WIFI_PWR_ON_BAT = "on";
 
-      # ── Battery charge thresholds ────────────────────────────
       START_CHARGE_THRESH_BAT0 = 75;
       STOP_CHARGE_THRESH_BAT0 = 80;
       START_CHARGE_THRESH_BAT1 = 75;

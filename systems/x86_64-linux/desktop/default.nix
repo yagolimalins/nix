@@ -1,6 +1,3 @@
-#
-# systems/x86_64-linux/desktop — AMD desktop (amdgpu)
-#
 { ... }:
 
 {

@@ -1,9 +1,4 @@
-#
-# nix.nix — Nix daemon behaviour
-#
-# Flake/CLI features, store optimisation, garbage collection and the
-# NixOS release-compatibility marker. Nothing here is host-specific.
-#
+# Nix daemon: flakes, store optimise, GC, stateVersion.
 {
   config,
   lib,
@@ -24,12 +19,11 @@ in
         "nix-command"
         "flakes"
       ];
-      auto-optimise-store = true; # hard-link identical store paths
-      max-jobs = "auto"; # build derivations across all cores
-      keep-outputs = true; # don't GC build deps of dev shells
+      auto-optimise-store = true;
+      max-jobs = "auto";
+      keep-outputs = true;
     };
 
-    # Build at idle priority so compiles never steal the foreground.
     nix.daemonCPUSchedPolicy = "idle";
 
     nix.gc = {
@@ -38,7 +32,7 @@ in
       options = "--delete-older-than 3d";
     };
 
-    # Keep in lockstep with the nixpkgs channel in flake.nix (nixos-26.05).
+    # Keep in lockstep with the nixpkgs channel in flake.nix.
     system.stateVersion = "26.05";
   };
 }

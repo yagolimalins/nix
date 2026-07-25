@@ -1,13 +1,7 @@
-#
-# hyprland.nix — Hyprland compositor config
-#
-# Look & feel, input, autostart, and keybindings. Lid-close suspend is
-# bound here so the behaviour is shared across every host.
-#
-# Monitor / workspace layout comes from osConfig.${namespace}.host
-# (set per machine under systems/). Wallpaper comes from
-# config.${namespace}.user (homes/).
-#
+# Monitors/workspaces: osConfig.${namespace}.host
+# Wallpaper: config.${namespace}.user
+# Portal stub also in home profile — xdg-desktop-portal only scans the first
+# portals/ dir on XDG_DATA_DIRS (~/.nix-profile shadows /run/current-system).
 {
   config,
   lib,
@@ -21,25 +15,13 @@ let
   cfg = config.${namespace}.hyprland;
   hostCfg = osConfig.${namespace}.host;
   userCfg = config.${namespace}.user;
-
-  gtkPortalForHyprland = pkgs.writeTextDir "share/xdg-desktop-portal/portals/gtk-hyprland.portal" ''
-    [portal]
-    DBusName=org.freedesktop.impl.portal.desktop.gtk
-    Interfaces=org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Inhibit;org.freedesktop.impl.portal.Access;org.freedesktop.impl.portal.Account;org.freedesktop.impl.portal.Email;org.freedesktop.impl.portal.DynamicLauncher;org.freedesktop.impl.portal.Lockdown;org.freedesktop.impl.portal.Settings;org.freedesktop.impl.portal.Wallpaper;
-    UseIn=Hyprland
-  '';
-
+  gtkPortal = lib.${namespace}.mkGtkHyprlandPortal pkgs;
 in
-
 {
   options.${namespace}.hyprland.enable =
     lib.mkEnableOption "Hyprland compositor config (monitors, keybinds, autostart)";
 
   config = lib.mkIf cfg.enable {
-    ############################################################
-    # Cursor
-    ############################################################
-
     home.pointerCursor = {
       gtk.enable = true;
       x11.enable = true;
@@ -48,19 +30,11 @@ in
       size = 24;
     };
 
-    ############################################################
-    # Wallpaper / portals
-    ############################################################
-
     home.packages = [
       pkgs.swaybg
       pkgs.hyprpolkitagent
-      gtkPortalForHyprland
+      gtkPortal
     ];
-
-    ############################################################
-    # Hyprland window manager
-    ############################################################
 
     wayland.windowManager.hyprland = {
       enable = true;

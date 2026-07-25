@@ -1,34 +1,23 @@
-#
-# homes/common.nix — Modules and basics shared by every Home Manager user
-#
-# Wired into every home via `homes.modules` in flake.nix, so individual
-# users under homes/x86_64-linux/*/default.nix only need to declare what's
-# actually different about them. Add a module here once it's wanted for
-# everyone; a user can still layer on extra `mine = lib.mine.enable-modules
-# [ ... ]` entries of their own.
-#
-# The toggle attr must be the literal namespace ("mine") — same Home Manager
-# freeformType cycle that prevents `${namespace}` in per-user entry points
-# also applies to modules injected via homes.modules.
-#
+# Shared Home Manager toggles + XDG basics (wired via homes.modules).
+# Literal `mine` required — `${namespace}` hits an HM freeformType cycle here.
 { lib, ... }:
 
 {
-  # Keep in lockstep with the nixpkgs / home-manager release (26.05).
   home.stateVersion = "26.05";
 
-  # XDG user directories (kept in git via .keep placeholders).
-  home.file."Desktop/.keep".text = "";
-  home.file."Development/.keep".text = "";
-  home.file."Documents/.keep".text = "";
-  home.file."Downloads/.keep".text = "";
-  home.file."Music/.keep".text = "";
-  home.file."Pictures/Screenshots/.keep".text = "";
-  home.file."Public/.keep".text = "";
-  home.file."Templates/.keep".text = "";
-  home.file."Videos/.keep".text = "";
+  home.file = {
+    "Desktop/.keep".text = "";
+    "Development/.keep".text = "";
+    "Documents/.keep".text = "";
+    "Downloads/.keep".text = "";
+    "Music/.keep".text = "";
+    "Pictures/Screenshots/.keep".text = "";
+    "Public/.keep".text = "";
+    "Templates/.keep".text = "";
+    "Videos/.keep".text = "";
+  };
 
-  # Let Home Manager own the GTK settings files.
+  # HM owns these; avoid races with other generators.
   xdg.configFile."gtk-3.0/settings.ini".force = true;
   xdg.configFile."gtk-4.0/settings.ini".force = true;
 

@@ -1,20 +1,13 @@
-#
-# lockscreen.nix — Screen locking and idle handling
-#
-# hyprlock draws the lock screen; hypridle locks after 5 min idle and
-# also locks right before sleep so the machine always wakes locked.
-#
+# hyprlock + hypridle (lock on idle and before sleep).
 {
   config,
   lib,
-  pkgs,
   namespace,
   ...
 }:
 
 let
   cfg = config.${namespace}.lockscreen;
-  wallpaper = "${pkgs.nixos-artwork.wallpapers.nineish-dark-gray}/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
 in
 {
   options.${namespace}.lockscreen.enable = lib.mkEnableOption "hyprlock + hypridle screen locking";
@@ -31,7 +24,7 @@ in
 
         background = [
           {
-            path = wallpaper;
+            path = config.${namespace}.user.wallpaper;
             blur_passes = 0;
             brightness = 0.4;
           }
@@ -72,8 +65,8 @@ in
       settings = {
         general = {
           lock_cmd = "hyprlock";
-          before_sleep_cmd = "hyprlock"; # lock before the machine suspends
-          after_sleep_cmd = "hyprctl dispatch dpms on"; # wake the display on resume
+          before_sleep_cmd = "hyprlock";
+          after_sleep_cmd = "hyprctl dispatch dpms on";
         };
 
         listener = [

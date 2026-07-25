@@ -1,8 +1,4 @@
-#
-# theme.nix — GTK theme, icons and cursor
-#
-# WhiteSur (dark) GTK3/4 theme + icons, Bibata cursor at 24px.
-#
+# WhiteSur GTK/icons + Bibata cursor; portal color-scheme for Firefox/etc.
 {
   config,
   lib,
@@ -35,7 +31,8 @@ in
         package = pkgs.bibata-cursors;
         size = 24;
       };
-
+      # WhiteSur GTK4 CSS lives in gtk.gresource; HM file:// import of the
+      # stub gtk.css cannot see that resource.
       gtk4.theme = lib.mkForce null;
     };
 

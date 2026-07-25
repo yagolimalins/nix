@@ -1,176 +1,189 @@
-# ❄️ NixOS Multi-Host Configuration
+# NixOS Multi-Host Configuration
 
-A clean, modular, and reproducible **NixOS setup** built with **flakes**, **[Snowfall Lib](https://snowfall.org)**, and **Home Manager as a NixOS module**.
+Declarative multi-machine NixOS setup using **flakes**, **[Snowfall Lib](https://snowfall.org)**, and **Home Manager as a NixOS module**. Focus: reuse, clear module boundaries, and reproducible hosts.
 
-This repository demonstrates a real-world multi-machine NixOS configuration, focused on **reusability, clarity, and reproducibility** — the same ideas used in infrastructure-as-code environments.
+## Structure
 
----
+```
+.
+├── flake.nix                 # Snowfall entry — inputs + shared module wiring
+├── flake.lock
+├── install.sh                # Interactive bootstrap for a new machine
+├── .githooks/pre-commit      # Runs `nix fmt` on staged .nix files
+├── lib/                      # lib.mine.* helpers (enable-modules, host layout, portal)
+├── systems/                  # NixOS hosts (Snowfall: systems/, not hosts/)
+│   ├── common.nix            # Shared mine.*.enable toggles for every host
+│   └── x86_64-linux/
+│       ├── desktop/
+│       ├── laptop/
+│       └── thinkpad/
+├── homes/                    # Home Manager users (Snowfall: homes/, not users/)
+│   ├── common.nix            # Shared HM toggles + XDG dirs
+│   └── x86_64-linux/<user>/
+└── modules/
+    ├── nixos/                # System modules → mine.<name>.enable
+    └── home/                 # HM modules → mine.<name>.enable
+        └── packages/groups/  # Package groups by category
+```
 
-## 📸 Screenshots
+| Path | Role |
+|------|------|
+| `systems/` | Hosts: hardware, hostname, `mine.host.*` facts |
+| `homes/` | Users: HM entry points; username = directory name |
+| `modules/nixos/` | Opt-in NixOS features (boot, audio, display, …) |
+| `modules/home/` | Opt-in HM features (hyprland, shell, packages, …) |
+| `lib/` | Shared Nix functions under `lib.mine` |
+| `overlays/` | *(unused)* — add Snowfall overlays here if needed |
+| `packages/` | *(unused)* — Snowfall custom packages output, not HM package lists |
 
-![Desktop](screenshots/desktop.png)
-![Fastfetch](screenshots/fastfetch.png)
-![Btop](screenshots/btop.png)
+Snowfall **requires** the directory names `systems/`, `homes/`, `modules/`, and `lib/`. Renaming them to `hosts/` or `users/` breaks discovery unless you reconfigure Snowfall’s root layout.
 
----
+## Organization
 
-## 🚀 Why this setup?
+### Hosts (`systems/`)
 
-- Declarative system configuration
-- One codebase, multiple machines
-- Minimal duplication between hosts
-- Clear separation of concerns
-- Easy to extend and maintain
+Each host is `systems/x86_64-linux/<name>/`:
 
----
+- `default.nix` — hostname, imports, `mine.host` facts
+- `hardware-configuration.nix` — generated
+- optional host files (`thinkpad.nix`, `gpu.nix`)
 
-## ✨ Features
+Shared toggles live in `systems/common.nix`.
 
-- ❄️ Flakes-first workflow, wired up by **Snowfall Lib**
-- 🖥️ Multi-host support (desktop, laptop, etc.) — hosts are auto-discovered from the filesystem
-- 🏠 Home Manager integrated as a NixOS module, homes auto-discovered the same way
-- 🧩 Modular system design — every feature is its own `mine.<module>.enable` toggle
-- 🔁 Reproducible builds
+### Users (`homes/`)
 
----
+Each user is `homes/x86_64-linux/<username>/default.nix`.  
+A home **without** `@host` applies on every machine. Use `user@host` only when you need host-specific homes.
 
-## 🗂️ Repository Structure
+### Modules
 
-    .
-    ├── flake.nix                        # Entry point — a thin snowfall-lib.mkFlake call
-    ├── flake.lock
-    ├── .githooks/
-    │   └── pre-commit                   # Formats staged .nix files before commit
-    ├── install.sh                       # Interactive installer (hardware config, flakes, rebuild)
-    ├── lib/
-    │   └── default.nix                  # Shared helper, merged into lib.mine.*
-    ├── systems/
-    │   ├── common.nix                   # Module toggles shared by every host (wired via systems.modules.nixos)
-    │   └── x86_64-linux/                # <arch>-<format>, per Snowfall Lib's system targets
-    │       ├── thinkpad/
-    │       │   ├── default.nix              # Host entry point: hostname + host-specific imports
-    │       │   ├── hardware-configuration.nix
-    │       │   └── thinkpad.nix              # i915, TLP thresholds, thinkfan, …
-    │       ├── laptop/
-    │       │   ├── default.nix
-    │       │   ├── hardware-configuration.nix
-    │       │   └── gpu.nix                   # amdgpu
-    │       └── desktop/
-    │           ├── default.nix
-    │           └── hardware-configuration.nix
-    ├── homes/
-    │   ├── common.nix                   # Module toggles + XDG basics shared by every user (homes.modules)
-    │   └── x86_64-linux/
-    │       └── <user>/                  # e.g. "yago" — one dir per person; username inferred from this name
-    │           └── default.nix          # Thin Home Manager entry point (user-specific overrides only)
-    └── modules/
-        ├── nixos/                       # NixOS (system-level) modules — one `mine.<name>.enable` toggle each
-        │   ├── nix/                     #   Nix daemon, GC, stateVersion
-        │   ├── host/                    #   Per-machine facts (monitors, workspaces)
-        │   ├── boot/                    #   Lanzaboote Secure Boot, kernel, tmpfs, firmware
-        │   ├── logging/                 #   journald limits
-        │   ├── networking/              #   NetworkManager
-        │   ├── nh/                      #   nh CLI (nixos-rebuild/home-manager front-end) + weekly GC
-        │   ├── dns/                     #   AdGuard Home + systemd-resolved
-        │   ├── locale/                  #   Timezone, locale, console keymap
-        │   ├── fonts/                   #   System fonts
-        │   ├── input-method/            #   fcitx5 (Chinese + Japanese)
-        │   ├── audio/                   #   PipeWire, WirePlumber, realtime limits
-        │   ├── bluetooth/               #   Bluetooth hardware + Blueman
-        │   ├── printing/                #   CUPS
-        │   ├── power/                   #   CPU governor + toggle script
-        │   ├── display/                 #   Hyprland, greetd, logind, XDG portal
-        │   ├── desktop/                 #   Thunar, keyring, dconf, file services
-        │   ├── programs/                #   Firefox, JDK, nix-ld
-        │   ├── virtualisation/          #   Docker + Ollama
-        │   ├── postgresql/              #   Postgres dev container
-        │   ├── input-remapper/          #   Key/button remapping
-        │   ├── tailscale/               #   WireGuard mesh VPN
-        │   └── users/                   #   User account + session env
-        └── home/                        # Home Manager (user-level) modules — one `mine.<name>.enable` toggle each
-            ├── packages/                #   User packages (group toggles) + direnv
-            ├── user/                    #   Per-user facts (wallpaper, …)
-            ├── theme/                   #   GTK theme, icons, cursor (WhiteSur)
-            ├── hyprland/                #   Hyprland WM settings + keybinds
-            ├── waybar/                  #   Status bar config + CSS
-            ├── launchers/               #   Wofi launcher + CSS
-            ├── kitty/                   #   Kitty terminal
-            ├── shell/                   #   Bash prompt
-            ├── notifications/           #   Mako
-            ├── lockscreen/              #   Hyprlock + Hypridle
-            ├── nightshift/              #   Hyprsunset timers
-            ├── mail/                    #   Proton Mail Bridge
-            ├── thunar/                  #   Thunar file manager
-            ├── input-remapper/          #   Per-user remap profiles
-            └── spotify/                 #   spotify-player + theme
+- **NixOS:** boot, networking, locale, display, desktop, audio, bluetooth, printing, users, virtualisation, security-related (lanzaboote via boot), services (dns, postgresql, tailscale, …).
+- **Home:** shell, terminal (kitty), desktop (hyprland, waybar, theme, …), development (`packages` groups), services (mail, nightshift, …).
 
-Every `.nix` file lives at `<module>/default.nix`, which is the layout [Snowfall Lib](https://snowfall.org) expects.
+Facts modules (`mine.host`, `mine.user`) are options-only and always imported.
 
----
+### Packages
 
-## 🧠 Design Overview
+HM module `mine.packages` — not a Snowfall `packages/` flake output.
 
-- **`flake.nix`** — thin `snowfall-lib.mkFlake` call; Snowfall auto-discovers `systems/`, `homes/`, `modules/`, and `lib/`. Custom options live under `mine.*` (`snowfall.namespace`).
-- **Opt-in modules** — each `modules/{nixos,home}/*` is gated by `mine.<name>.enable`; nothing applies unless a system or home turns it on.
-- **`systems/common.nix` / `homes/common.nix`** — shared `enable-modules` lists (plus home XDG basics), applied via `systems.modules.nixos` / `homes.modules` in `flake.nix`.
-- **Per-host / per-user entry points** — thin: host = hostname + hardware + `mine.host.*` facts; user = `mine.user.*` overrides. Username comes from the directory name; modules read users from `config.snowfallorg.users`.
-- **`lib.mine.enable-modules`** — turns a name list into `{ <name>.enable = true; }` for those toggle blocks.
-- **Host / user facts** — `mine.host` (NixOS: monitors, workspaces) and `mine.user` (HM: wallpaper, …). Hyprland reads host facts via `osConfig` and user facts via `config.mine.user` — no hostname `if` chains in UI modules.
-- **Package groups** — `mine.packages.enable` turns on direnv and defaults every group to on. Groups are split by concern (e.g. `editors` vs `ides`, `rust` vs `gtk`, `media` vs `creator`, `proton` vs `mail`). Opt out per user with e.g. `mine.packages.ides.enable = false`.
-- **Secure Boot** — `mine.boot.secureBoot` (default on) uses [Lanzaboote](https://github.com/nix-community/lanzaboote). After the first rebuild, create/enroll keys with `sbctl` (steps in `modules/nixos/boot`). Set `mine.boot.secureBoot = false` to fall back to systemd-boot.
-- **stateVersion** — `system.stateVersion` and `home.stateVersion` match the flake channel (`26.05`).
+- `mine.packages.enable` → direnv + all groups default on
+- Groups live under `modules/home/packages/groups/` (`system`, `desktop`, `dev`, `apps`, `media`)
+- Opt out: `mine.packages.ides.enable = false`
 
-`./install.sh` scaffolds a new host under `systems/` and the installing user under `homes/` if missing.
+### Home Manager
 
----
+Integrated by Snowfall as a NixOS module (same generation as the system). Homes read host facts via `osConfig.mine.host`.
 
-## 🎨 Formatting
+### Lib
 
-[`treefmt`](https://github.com/numtide/treefmt) (via [`treefmt-nix`](https://github.com/numtide/treefmt-nix)) wraps [`nixfmt`](https://github.com/NixOS/nixfmt) (RFC 166). Config lives inline in `flake.nix`'s `outputs-builder`; run it repo-wide with:
+`lib.mine.enable-modules` — batch-enable modules  
+`lib.mine.mkDualMonitorHost` — shared HDMI+eDP Hyprland layout  
+`lib.mine.mkGtkHyprlandPortal` — GTK portal stub for Hyprland (`UseIn=gnome` workaround)
 
-    nix fmt
+## Adding a new host
 
-A tracked pre-commit hook in `.githooks/` formats any staged `.nix` files the same way. `./install.sh` enables it for the clone automatically (`git config core.hooksPath .githooks`); to do it by hand:
+1. Create `systems/x86_64-linux/<host>/`.
+2. Add `hardware-configuration.nix` (`nixos-generate-config` or `./install.sh`).
+3. Add `default.nix`:
 
-    git config core.hooksPath .githooks
+```nix
+{ lib, namespace, ... }:
 
----
+{
+  imports = [ ./hardware-configuration.nix ];
+  networking.hostName = "myhost";
 
-## 🧪 Installation (NixOS Minimal)
+  # Optional layout facts for Hyprland:
+  # ${namespace}.host = lib.${namespace}.mkDualMonitorHost "HDMI-A-1";
+}
+```
 
-This setup is designed to be applied on top of a **minimal NixOS installation**.
+4. Rebuild: `sudo nixos-rebuild switch --flake .#myhost` (or `nh os switch`).
 
-Run the interactive installer on the target machine:
+`systems/common.nix` already enables the shared module set.
 
-    ./install.sh
+## Adding a new user
 
-It will walk you through these steps:
+1. Create `homes/x86_64-linux/<username>/default.nix`:
 
-1. **Generate hardware configuration** — writes `systems/x86_64-linux/<host>/hardware-configuration.nix` and scaffolds a host `default.nix` if missing
-2. **Scaffold Home Manager user** — creates `homes/x86_64-linux/<user>/default.nix` for the user running the script if missing (shared modules come from `homes/common.nix`)
-3. **Enable flakes** — adds `nix-command` and `flakes` to `~/.config/nix/nix.conf`
-4. **Enable git hooks** — sets `core.hooksPath` to `.githooks` so pre-commit runs `nix fmt`
-5. **Secure Boot keys** — runs `sbctl create-keys` into `/var/lib/sbctl` if missing (so Lanzaboote can sign on first switch)
-6. **Apply the system** — runs `sudo nixos-rebuild switch --flake .#<host>`
-7. **Secure Boot enrollment** — verifies signatures and prompts to `sbctl enroll-keys -m` if firmware is already in Setup Mode; otherwise prints the firmware steps still needed
+```nix
+{ ... }:
 
----
+{
+  # Optional overrides, e.g.:
+  # mine.packages.creator.enable = false;
+  # mine.user.wallpaper = ./wall.png;
+}
+```
 
-## ⚡ Quick Start (TL;DR)
+2. Directory name **must** match the Unix username.
+3. Rebuild the system (HM is applied as part of the NixOS generation).
 
-    ./install.sh
+Shared modules come from `homes/common.nix`.
 
----
+## Adding a module
 
-## 📌 Notes
+1. Create `modules/nixos/<name>/default.nix` or `modules/home/<name>/default.nix`.
+2. Expose `options.${namespace}.<name>.enable` (unless options-only facts).
+3. Gate config with `lib.mkIf cfg.enable`.
+4. Enable it in `systems/common.nix` or `homes/common.nix` (or per host/user).
 
-- Hardware-specific state is isolated per host
-- Shared logic lives in clean, reusable modules
-- Suitable for personal setups or as a foundation for larger NixOS deployments
+Folder name = option name (`modules/nixos/audio` → `mine.audio`).
 
----
+## Rebuilding the system
 
-## 📄 License
+```bash
+# Flake attribute = systems/ directory name
+sudo nixos-rebuild switch --flake ~/.nix#thinkpad
 
-Use it, learn from it, break it, improve it.
-That’s the whole point 🙂
+# From the repo (nh uses NH_FLAKE / programs.nh.flake)
+nh os switch
+
+# Explicit host
+nh os switch -H laptop
+```
+
+Home Manager is included in that switch (Snowfall + HM-as-NixOS-module). There is no separate `home-manager switch` required for normal use.
+
+Bootstrap a **new** machine from minimal NixOS:
+
+```bash
+./install.sh
+```
+
+That generates hardware config, scaffolds host/user, creates Secure Boot keys if needed, rebuilds, and guides UEFI enrollment.
+
+## Development
+
+- One concern per module; prefer `mine.*.enable` over giant files.
+- Host-specific values → `mine.host` / host files under `systems/`, not `if host ==` in UI modules.
+- User-specific values → `mine.user` or `homes/<user>/default.nix`.
+- Deduplicate via `lib/mine` helpers.
+- Format with `nix fmt` (treefmt + nixfmt); `.githooks` runs it on commit.
+- Keep `system.stateVersion` / `home.stateVersion` aligned with the nixpkgs channel (`26.05`).
+
+## Conventions
+
+| Convention | Detail |
+|------------|--------|
+| Namespace | `mine` (`snowfall.namespace`) |
+| Enable pattern | `mine.<module>.enable` |
+| Batch enable | `lib.mine.enable-modules [ ... ]` |
+| Host facts | `mine.host.monitors` / `workspaces` |
+| User facts | `mine.user.wallpaper` |
+| HM namespace in `homes/common.nix` | Literal `mine` (HM freeformType cycle) |
+| Comments | Only architecture, workarounds, Nix limitations |
+| Attribute order | options → config; boot/hardware/networking/services/… as applicable |
+| Lists | Trailing commas where it helps diffs |
+
+## Principles
+
+1. **Snowfall layout is the source of truth** — don’t invent parallel `hosts/` / `users/` trees.
+2. **Opt-in modules** — nothing applies unless enabled.
+3. **Facts over conditionals** — hosts declare data; modules consume `osConfig` / `config`.
+4. **Behaviour-preserving refactors** — structure and clarity first; no silent feature drops.
+5. **Forkability** — namespace and paths are not tied to one username.
+
+## Secure Boot
+
+`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl`. `./install.sh` creates keys before the first switch; firmware enrollment (`sbctl enroll-keys -m` in Setup Mode) remains a one-time manual step. Disable with `mine.boot.secureBoot = false` if needed.

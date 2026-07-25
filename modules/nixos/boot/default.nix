@@ -44,41 +44,43 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable (lib.mkMerge [
-    {
-      boot = {
-        loader.efi.canTouchEfiVariables = true;
-        loader.systemd-boot.configurationLimit = 5;
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      {
+        boot = {
+          loader.efi.canTouchEfiVariables = true;
+          loader.systemd-boot.configurationLimit = 5;
 
-        # Lanzaboote owns the EFI bootloader when Secure Boot is on.
-        loader.systemd-boot.enable = lib.mkForce (!cfg.secureBoot);
+          # Lanzaboote owns the EFI bootloader when Secure Boot is on.
+          loader.systemd-boot.enable = lib.mkForce (!cfg.secureBoot);
 
-        kernelPackages = pkgs.linuxPackages_latest;
-        kernelParams = [
-          "quiet"
-          "loglevel=3"
-        ];
+          kernelPackages = pkgs.linuxPackages_latest;
+          kernelParams = [
+            "quiet"
+            "loglevel=3"
+          ];
 
-        initrd.systemd.enable = true;
+          initrd.systemd.enable = true;
 
-        tmp.useTmpfs = true; # /tmp in RAM: faster builds, auto-cleared on reboot
-      };
+          tmp.useTmpfs = true; # /tmp in RAM: faster builds, auto-cleared on reboot
+        };
 
-      # Prefer zram over disk swap aggressively (paired with zramSwap on hosts).
-      boot.kernel.sysctl."vm.swappiness" = 180;
+        # Prefer zram over disk swap aggressively (paired with zramSwap on hosts).
+        boot.kernel.sysctl."vm.swappiness" = 180;
 
-      # Wi-Fi/Bluetooth firmware; also enables hardware.cpu.*.updateMicrocode
-      # via the mkDefault in hardware-configuration.nix.
-      hardware.enableRedistributableFirmware = true;
-    }
+        # Wi-Fi/Bluetooth firmware; also enables hardware.cpu.*.updateMicrocode
+        # via the mkDefault in hardware-configuration.nix.
+        hardware.enableRedistributableFirmware = true;
+      }
 
-    (lib.mkIf cfg.secureBoot {
-      boot.lanzaboote = {
-        enable = true;
-        pkiBundle = "/var/lib/sbctl";
-      };
+      (lib.mkIf cfg.secureBoot {
+        boot.lanzaboote = {
+          enable = true;
+          pkiBundle = "/var/lib/sbctl";
+        };
 
-      environment.systemPackages = [ pkgs.sbctl ];
-    })
-  ]);
+        environment.systemPackages = [ pkgs.sbctl ];
+      })
+    ]
+  );
 }

@@ -1,11 +1,9 @@
 {
-  description = "Multi-host NixOS flake, built with Snowfall Lib";
+  description = "Multi-host NixOS flake (Snowfall Lib + Home Manager)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    # Auto-discovers systems/, homes/, modules/ and wires everything
-    # together — see https://snowfall.org for the expected layout.
     snowfall-lib = {
       url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -13,18 +11,14 @@
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs"; # keep home-manager on the same nixpkgs
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Wraps treefmt around per-language formatters (nixfmt here) so
-    # `nix fmt` can grow beyond Nix without changing the flake wiring.
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # UEFI Secure Boot for NixOS (signed UKIs). Enrollment still needs
-    # `sbctl` on each machine — see modules/nixos/boot.
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,28 +31,19 @@
       inherit inputs;
       src = ./.;
 
-      # Prefix for every custom option this flake declares (config.mine.*,
-      # lib.mine.*, …) — deliberately not tied to any specific username, so
-      # this repo stays easy to fork: add your own systems/<host> and
-      # homes/<user>, and everything under modules/ just works.
+      # Options/lib live under mine.* — not tied to a username.
       snowfall.namespace = "mine";
 
-      # Passed straight to nixpkgs when Snowfall Lib instantiates `pkgs` —
-      # do this here instead of a `nixpkgs.config` module (that option
-      # conflicts with the already-instantiated `pkgs` Snowfall provides).
+      # Prefer this over nixpkgs.config modules (conflicts with Snowfall's pkgs).
       channels-config.allowUnfree = true;
 
-      # Applied to every NixOS host / Home Manager user automatically, so
-      # systems/ and homes/ entry points don't each repeat the same lists.
       systems.modules.nixos = [
         inputs.lanzaboote.nixosModules.lanzaboote
         ./systems/common.nix
       ];
       homes.modules = [ ./homes/common.nix ];
 
-      # Snowfall Lib defaults `formatter` to alejandra — replace it with a
-      # treefmt wrapper that runs nixfmt (RFC 166). Enables `nix fmt`
-      # (and the pre-commit hook in .githooks/).
+      # Replace Snowfall's default alejandra formatter.
       outputs-builder = channels: {
         formatter = inputs.treefmt-nix.lib.mkWrapper channels.nixpkgs {
           projectRootFile = "flake.nix";
