@@ -132,7 +132,7 @@
   };
 
   zramSwap.enable = true;
-  powerManagement.powertop.enable = true;
+  powerManagement.powertop.enable = false;
   services.acpid.enable = true;
   services.earlyoom.enable = true;
   services.fstrim = {
