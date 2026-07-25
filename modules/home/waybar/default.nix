@@ -97,7 +97,8 @@ in
                 "󰕾"
               ];
             };
-            on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+            on-click = "pwvucontrol";
+            on-click-right = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
             tooltip-format = "{desc} — {volume}%";
             scroll-step = 5;
             max-volume = 100;
