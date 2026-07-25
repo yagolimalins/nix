@@ -60,6 +60,13 @@ let
   };
   workspaceConfig = workspaces.${host} or [ ];
 
+  gtkPortalForHyprland = pkgs.writeTextDir "share/xdg-desktop-portal/portals/gtk-hyprland.portal" ''
+    [portal]
+    DBusName=org.freedesktop.impl.portal.desktop.gtk
+    Interfaces=org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Inhibit;org.freedesktop.impl.portal.Access;org.freedesktop.impl.portal.Account;org.freedesktop.impl.portal.Email;org.freedesktop.impl.portal.DynamicLauncher;org.freedesktop.impl.portal.Lockdown;org.freedesktop.impl.portal.Settings;org.freedesktop.impl.portal.Wallpaper;
+    UseIn=Hyprland
+  '';
+
 in
 
 {
@@ -80,12 +87,13 @@ in
     };
 
     ############################################################
-    # Wallpaper
+    # Wallpaper / portals
     ############################################################
 
     home.packages = [
       pkgs.swaybg
       pkgs.hyprpolkitagent
+      gtkPortalForHyprland
     ];
 
     ############################################################
@@ -105,6 +113,8 @@ in
 
         exec-once = [
           "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+          "bash -c 'systemctl --user start xdg-desktop-portal-gtk.service; sleep 1; systemctl --user restart xdg-desktop-portal.service'"
           "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
           "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
           "swaybg -i ${wallpaper} -m fill"

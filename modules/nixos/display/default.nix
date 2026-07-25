@@ -15,6 +15,13 @@
 
 let
   cfg = config.${namespace}.display;
+
+  gtkPortalForHyprland = pkgs.writeTextDir "share/xdg-desktop-portal/portals/gtk-hyprland.portal" ''
+    [portal]
+    DBusName=org.freedesktop.impl.portal.desktop.gtk
+    Interfaces=org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Inhibit;org.freedesktop.impl.portal.Access;org.freedesktop.impl.portal.Account;org.freedesktop.impl.portal.Email;org.freedesktop.impl.portal.DynamicLauncher;org.freedesktop.impl.portal.Lockdown;org.freedesktop.impl.portal.Settings;org.freedesktop.impl.portal.Wallpaper;
+    UseIn=Hyprland
+  '';
 in
 {
   options.${namespace}.display.enable =
@@ -49,7 +56,20 @@ in
 
     xdg.portal = {
       enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+      extraPortals = [
+        pkgs.xdg-desktop-portal-hyprland
+        pkgs.xdg-desktop-portal-gtk
+        gtkPortalForHyprland
+      ];
+
+      config.common = {
+        default = [
+          "hyprland"
+          "gtk-hyprland"
+        ];
+        "org.freedesktop.impl.portal.Settings" = "gtk-hyprland";
+        "org.freedesktop.impl.portal.Inhibit" = "gtk-hyprland";
+      };
     };
   };
 }
