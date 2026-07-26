@@ -1,10 +1,9 @@
 #
 # boot.nix — Bootloader, kernel and low-level tuning
 #
-# Lanzaboote (Secure Boot) replaces systemd-boot, plus kernel package/params,
-# tmpfs /tmp, kernel sysctls and redistributable firmware (CPU microcode).
+# EFI: Lanzaboote (Secure Boot) or systemd-boot. BIOS/VM without ESP: GRUB.
 #
-# Secure Boot enrollment (once per machine):
+# Secure Boot enrollment (once per bare-metal EFI machine):
 #
 #   ./install.sh already runs `sbctl create-keys` before the first rebuild.
 #   Manual / existing hosts:
@@ -17,7 +16,8 @@
 #   6. Firmware: enable Secure Boot, disable Setup Mode, reboot
 #   7. bootctl status / sbctl status   # confirm Secure Boot is active
 #
-# Temporarily bail out with:  mine.boot.secureBoot = false;
+# Bail out: mine.boot.secureBoot = false;
+# BIOS / no ESP: mine.boot.efi = false; (optional mine.boot.grubDevice)
 #
 {
   config,
@@ -34,12 +34,27 @@ in
   options.${namespace}.boot = {
     enable = lib.mkEnableOption "bootloader, kernel and low-level system tuning";
 
+    efi = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Use an EFI bootloader (systemd-boot or Lanzaboote). Set false for BIOS
+        guests or machines without a mounted ESP at boot.loader.efi.efiSysMountPoint.
+      '';
+    };
+
+    grubDevice = lib.mkOption {
+      type = lib.types.str;
+      default = "/dev/vda";
+      description = "Disk for GRUB MBR install when efi = false (typical QEMU: /dev/vda).";
+    };
+
     secureBoot = lib.mkOption {
       type = lib.types.bool;
       default = true;
       description = ''
-        Use Lanzaboote for UEFI Secure Boot (signed UKIs). When false, falls
-        back to unsigned systemd-boot.
+        Use Lanzaboote for UEFI Secure Boot (signed UKIs). When false on EFI,
+        falls back to unsigned systemd-boot. Ignored when efi = false.
       '';
     };
   };
@@ -48,12 +63,6 @@ in
     lib.mkMerge [
       {
         boot = {
-          loader.efi.canTouchEfiVariables = true;
-          loader.systemd-boot.configurationLimit = 5;
-
-          # Lanzaboote owns the EFI bootloader when Secure Boot is on.
-          loader.systemd-boot.enable = lib.mkForce (!cfg.secureBoot);
-
           kernelPackages = pkgs.linuxPackages_latest;
           kernelParams = [
             "quiet"
@@ -62,24 +71,44 @@ in
 
           initrd.systemd.enable = true;
 
-          tmp.useTmpfs = true; # /tmp in RAM: faster builds, auto-cleared on reboot
+          tmp.useTmpfs = true;
+
+          kernel.sysctl."vm.swappiness" = 180;
         };
 
-        # Prefer zram over disk swap aggressively (paired with zramSwap on hosts).
-        boot.kernel.sysctl."vm.swappiness" = 180;
-
-        # Wi-Fi/Bluetooth firmware; also enables hardware.cpu.*.updateMicrocode
-        # via the mkDefault in hardware-configuration.nix.
         hardware.enableRedistributableFirmware = true;
       }
 
-      (lib.mkIf cfg.secureBoot {
+      (lib.mkIf cfg.efi {
+        boot.loader = {
+          efi.canTouchEfiVariables = true;
+          systemd-boot = {
+            enable = lib.mkForce (!(cfg.secureBoot));
+            configurationLimit = 5;
+          };
+          grub.enable = lib.mkForce false;
+        };
+      })
+
+      (lib.mkIf (cfg.efi && cfg.secureBoot) {
         boot.lanzaboote = {
           enable = true;
           pkiBundle = "/var/lib/sbctl";
         };
 
         environment.systemPackages = [ pkgs.sbctl ];
+      })
+
+      (lib.mkIf (!cfg.efi) {
+        boot.loader = {
+          efi.canTouchEfiVariables = false;
+          systemd-boot.enable = lib.mkForce false;
+          grub = {
+            enable = true;
+            device = cfg.grubDevice;
+            configurationLimit = 5;
+          };
+        };
       })
     ]
   );

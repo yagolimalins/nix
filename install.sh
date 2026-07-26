@@ -29,6 +29,10 @@ host_disables_secure_boot() {
     grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.secureBoot[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
 }
 
+host_disables_efi() {
+    grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.efi[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
+}
+
 host_tree_disables_secure_boot() {
     local f
     for f in "$HOST_DIR"/*.nix; do
@@ -36,6 +40,57 @@ host_tree_disables_secure_boot() {
         host_disables_secure_boot "$f" && return 0
     done
     return 1
+}
+
+host_tree_disables_efi() {
+    local f
+    for f in "$HOST_DIR"/*.nix; do
+        [[ -f "$f" ]] || continue
+        host_disables_efi "$f" && return 0
+    done
+    return 1
+}
+
+detect_grub_device() {
+    if [[ -b /dev/vda ]]; then
+        echo /dev/vda
+    elif [[ -b /dev/sda ]]; then
+        echo /dev/sda
+    elif [[ -b /dev/nvme0n1 ]]; then
+        echo /dev/nvme0n1
+    else
+        lsblk -dno NAME,TYPE 2>/dev/null | awk '$2 == "disk" { print "/dev/" $1; exit }'
+    fi
+}
+
+# Insert line(s) before the first top-level closing `}`.
+insert_before_closing_brace() {
+    local file="$1"
+    shift
+    local tmp line
+    tmp="$(mktemp)"
+    {
+        for line in "$@"; do
+            printf '%s\n' "$line"
+        done
+    } >"${tmp}.lines"
+    awk -v lines_file="${tmp}.lines" '
+        BEGIN {
+            while ((getline line < lines_file) > 0) lines[++n] = line
+            close(lines_file)
+            inserted = 0
+        }
+        {
+            if (!inserted && $0 ~ /^}/) {
+                for (i = 1; i <= n; i++) print lines[i]
+                inserted = 1
+            }
+            print
+        }
+        END { if (!inserted) exit 1 }
+    ' "$file" >"$tmp" || die "Could not update ${file}."
+    mv "$tmp" "$file"
+    rm -f "${tmp}.lines"
 }
 
 ensure_host_disables_secure_boot() {
@@ -48,25 +103,42 @@ ensure_host_disables_secure_boot() {
     if grep -Eq '^[[:space:]]*#[[:space:]]*\$\{namespace\}\.boot\.secureBoot[[:space:]]*=[[:space:]]*false' "$file"; then
         sed -i -E 's/^([[:space:]]*)#[[:space:]]*(\$\{namespace\}\.boot\.secureBoot[[:space:]]*=[[:space:]]*false;.*)/\1\2/' "$file"
     else
-        local tmp
-        tmp="$(mktemp)"
-        awk '
-            BEGIN { inserted = 0 }
-            {
-                if (!inserted && $0 ~ /^}/) {
-                    print "  ${namespace}.boot.secureBoot = false;"
-                    inserted = 1
-                }
-                print
-            }
-            END { if (!inserted) exit 1 }
-        ' "$file" >"$tmp" || die "Could not insert secureBoot = false into ${file}."
-        mv "$tmp" "$file"
+        insert_before_closing_brace "$file" "  \${namespace}.boot.secureBoot = false;"
     fi
 
     host_disables_secure_boot "$file" || die "Failed to set secureBoot = false in ${file}."
     git_stage "$file"
     success "Set \${namespace}.boot.secureBoot = false in ${file}."
+}
+
+# systemd-boot needs a mounted ESP at /boot; BIOS/VMs without one use GRUB.
+ensure_host_bios_boot() {
+    local file="$1"
+    local grub
+    grub="$(detect_grub_device)"
+    [[ -n "$grub" ]] || die "Could not detect a disk for GRUB (set mine.boot.grubDevice manually)."
+
+    if host_disables_efi "$file" && host_disables_secure_boot "$file"; then
+        if grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.grubDevice' "$file"; then
+            success "Host already configured for BIOS/GRUB (${file})."
+            return 0
+        fi
+    fi
+
+    local -a lines=()
+    host_disables_efi "$file" || lines+=("  \${namespace}.boot.efi = false;")
+    host_disables_secure_boot "$file" || lines+=("  \${namespace}.boot.secureBoot = false;")
+    if ! grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.grubDevice' "$file"; then
+        lines+=("  \${namespace}.boot.grubDevice = \"${grub}\";")
+    fi
+
+    if [[ "${#lines[@]}" -gt 0 ]]; then
+        insert_before_closing_brace "$file" "${lines[@]}"
+    fi
+
+    host_disables_efi "$file" || die "Failed to set boot.efi = false in ${file}."
+    git_stage "$file"
+    success "BIOS/GRUB boot: efi=false, grubDevice=${grub} (${file})."
 }
 
 # Prefer system sbctl; fall back to `nix shell` (not nested nix-shell -p).
@@ -88,10 +160,21 @@ sbctl() {
 detect_virt_env() {
     IS_VIRTUAL=0
     HAS_EFI=0
+    HAS_BOOT_MOUNT=0
+    USE_EFI=0
     VIRT_NAME="none"
 
     if [[ -d /sys/firmware/efi ]]; then
         HAS_EFI=1
+    fi
+
+    if mountpoint -q /boot 2>/dev/null; then
+        HAS_BOOT_MOUNT=1
+    fi
+
+    # systemd-boot/Lanzaboote need EFI firmware + ESP mounted at /boot.
+    if [[ "$HAS_EFI" -eq 1 && "$HAS_BOOT_MOUNT" -eq 1 ]]; then
+        USE_EFI=1
     fi
 
     if command -v systemd-detect-virt >/dev/null 2>&1; then
@@ -101,9 +184,9 @@ detect_virt_env() {
         fi
     fi
 
-    # Skip firmware enrollment on VMs and non-EFI.
+    # Skip firmware enrollment on VMs and when EFI bootloader is not usable.
     SKIP_SB_ENROLL=0
-    if [[ "$IS_VIRTUAL" -eq 1 || "$HAS_EFI" -eq 0 ]]; then
+    if [[ "$IS_VIRTUAL" -eq 1 || "$USE_EFI" -eq 0 ]]; then
         SKIP_SB_ENROLL=1
     fi
 }
@@ -128,9 +211,12 @@ OWNER_HOME="$(getent passwd "$OWNER_USER" | cut -d: -f6)"
 
 detect_virt_env
 if [[ "$IS_VIRTUAL" -eq 1 ]]; then
-    warn "Virtual machine detected (${VIRT_NAME}) — Secure Boot enrollment will be skipped by default."
-elif [[ "$HAS_EFI" -eq 0 ]]; then
-    warn "No EFI firmware detected — Secure Boot / Lanzaboote enrollment will be skipped by default."
+    warn "Virtual machine detected (${VIRT_NAME})."
+fi
+if [[ "$USE_EFI" -eq 0 ]]; then
+    warn "No usable EFI ESP at /boot — will use GRUB (mine.boot.efi = false)."
+elif [[ "$IS_VIRTUAL" -eq 1 ]]; then
+    warn "Secure Boot enrollment will be skipped by default on this VM."
 fi
 
 SYSTEMS_DIR="systems/x86_64-linux"
@@ -169,9 +255,15 @@ success "Hardware configuration written to ${HW_FILE}."
 
 # Snowfall expects systems/<arch>/<host>/default.nix
 if [[ ! -f "$DEFAULT_FILE" ]]; then
-    SECURE_BOOT_LINE="# \${namespace}.boot.secureBoot = false;"
-    if [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
-        SECURE_BOOT_LINE="\${namespace}.boot.secureBoot = false;"
+    BOOT_LINES="# Optional: \${namespace}.boot.secureBoot = false;"
+    if [[ "$USE_EFI" -eq 0 ]]; then
+        GRUB_DEV="$(detect_grub_device)"
+        [[ -n "$GRUB_DEV" ]] || die "Could not detect a disk for GRUB."
+        BOOT_LINES="\${namespace}.boot.efi = false;
+  \${namespace}.boot.secureBoot = false;
+  \${namespace}.boot.grubDevice = \"${GRUB_DEV}\";"
+    elif [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
+        BOOT_LINES="\${namespace}.boot.secureBoot = false;"
     fi
     cat > "$DEFAULT_FILE" <<EOF
 { lib, namespace, ... }:
@@ -182,7 +274,7 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
   networking.hostName = "$HOST";
 
   # Optional: \${namespace}.host = lib.\${namespace}.mkDualMonitorHost "HDMI-A-1";
-  ${SECURE_BOOT_LINE}
+  ${BOOT_LINES}
 }
 EOF
     git_stage "$DEFAULT_FILE"
@@ -255,10 +347,13 @@ PKI_BUNDLE="/var/lib/sbctl"
 DB_PEM="${PKI_BUNDLE}/keys/db/db.pem"
 WANT_SECURE_BOOT=0
 
-if [[ -e "$DB_PEM" ]]; then
+if [[ "$USE_EFI" -eq 0 ]]; then
+    warn "Configuring BIOS/GRUB boot (no mounted EFI system partition at /boot)."
+    ensure_host_bios_boot "$DEFAULT_FILE"
+elif [[ -e "$DB_PEM" ]]; then
     success "Secure Boot keys already present (${DB_PEM})."
     if [[ "$SKIP_SB_ENROLL" -eq 1 ]] && ! host_tree_disables_secure_boot; then
-        warn "Keys exist, but this looks like a VM or non-EFI system."
+        warn "Keys exist, but this looks like a VM — Secure Boot enrollment is usually skipped."
         echo -en "${BOLD}Disable Secure Boot on host '${HOST}'? [Y/n] ${RESET}"
         read -r sb_dis_ans
         sb_dis_ans="${sb_dis_ans:-y}"
@@ -273,7 +368,7 @@ if [[ -e "$DB_PEM" ]]; then
     fi
 else
     if [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
-        warn "VM / non-EFI: skipping Secure Boot keys by default (systemd-boot without Lanzaboote)."
+        warn "VM: skipping Secure Boot keys by default."
         echo -en "${BOLD}Create Secure Boot keys anyway? [y/N] ${RESET}"
         read -r sb_ans
         sb_ans="${sb_ans:-n}"
@@ -296,8 +391,12 @@ else
     fi
 fi
 
-if [[ ! -e "$DB_PEM" ]] && ! host_tree_disables_secure_boot; then
+if [[ "$USE_EFI" -eq 1 ]] && [[ ! -e "$DB_PEM" ]] && ! host_tree_disables_secure_boot; then
     die "No keys at ${DB_PEM} and host under ${HOST_DIR} does not set secureBoot = false — refusing rebuild."
+fi
+
+if [[ "$USE_EFI" -eq 0 ]] && ! host_tree_disables_efi; then
+    die "No ESP at /boot and host under ${HOST_DIR} does not set boot.efi = false — refusing rebuild."
 fi
 
 step "Step 6 — Apply System Configuration"

@@ -197,4 +197,4 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 
 ## 🔐 Secure Boot
 
-`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. On VMs / non-EFI systems the installer defaults to disabling Secure Boot and skips firmware enrollment. On bare-metal EFI, enrollment (`sbctl enroll-keys -m` in Setup Mode) remains a one-time manual step.
+`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. On VMs / systems without a mounted ESP at `/boot`, the installer sets `mine.boot.efi = false` (GRUB) and skips Secure Boot. On bare-metal EFI with `/boot` mounted, enrollment (`sbctl enroll-keys -m` in Setup Mode) remains a one-time manual step.
