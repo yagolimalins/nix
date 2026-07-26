@@ -31,6 +31,7 @@ in
         "video"
         "realtime"
         "docker"
+        "libvirtd"
       ];
       description = "Extra groups granted to every user declared under homes/.";
     };
