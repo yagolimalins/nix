@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ── Colours ───────────────────────────────────────────────────────────────────
 RED='\033[38;5;160m'; BRED='\033[1;38;5;160m'; GREEN='\033[0;32m'
 YELLOW='\033[1;33m'; BOLD='\033[1m'; RESET='\033[0m'
 
@@ -17,22 +16,28 @@ step() {
     echo -e "${BRED}────────────────────────────────────────${RESET}"
 }
 
-# Flakes only see tracked/staged files — stage safely when inside a git repo.
+# Flakes ignore untracked files — stage only inside a git repo.
 git_stage() {
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         git add "$@"
     else
-        warn "Not a git repository — skipped staging: $*"
-        warn "Flakes ignore untracked files; initialise git or copy files into a clone before rebuild."
+        die "Not a git repository. Flakes ignore untracked files — clone or git init before running install.sh."
     fi
 }
 
-# True when the host file actively disables Lanzaboote (uncommented assignment).
 host_disables_secure_boot() {
     grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.secureBoot[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
 }
 
-# Ensure the host opts out of Secure Boot so rebuild can proceed without keys.
+host_tree_disables_secure_boot() {
+    local f
+    for f in "$HOST_DIR"/*.nix; do
+        [[ -f "$f" ]] || continue
+        host_disables_secure_boot "$f" && return 0
+    done
+    return 1
+}
+
 ensure_host_disables_secure_boot() {
     local file="$1"
     if host_disables_secure_boot "$file"; then
@@ -64,34 +69,53 @@ ensure_host_disables_secure_boot() {
     success "Set \${namespace}.boot.secureBoot = false in ${file}."
 }
 
-# Prefer system sbctl (available after the flake's boot module is applied).
-# Fall back to `nix shell` on minimal installs — avoids nested `nix-shell -p`
-# which breaks when install.sh is already running inside a nix-shell.
+# Prefer system sbctl; fall back to `nix shell` (not nested nix-shell -p).
 sbctl() {
     local bin=""
     if [[ -x /run/current-system/sw/bin/sbctl ]]; then
         bin=/run/current-system/sw/bin/sbctl
     else
-        # type -P: PATH only (not this function)
         bin="$(type -P sbctl 2>/dev/null || true)"
     fi
 
     if [[ -n "$bin" ]]; then
         sudo "$bin" "$@"
     else
-        # Absolute path so sudo's secure_path still finds sbctl.
         nix shell nixpkgs#sbctl -c sh -c 'sudo "$(command -v sbctl)" "$@"' sh "$@"
     fi
 }
 
-# ── Header ────────────────────────────────────────────────────────────────────
+detect_virt_env() {
+    IS_VIRTUAL=0
+    HAS_EFI=0
+    VIRT_NAME="none"
+
+    if [[ -d /sys/firmware/efi ]]; then
+        HAS_EFI=1
+    fi
+
+    if command -v systemd-detect-virt >/dev/null 2>&1; then
+        VIRT_NAME="$(systemd-detect-virt 2>/dev/null || echo none)"
+        if [[ -n "$VIRT_NAME" && "$VIRT_NAME" != "none" ]]; then
+            IS_VIRTUAL=1
+        fi
+    fi
+
+    # Skip firmware enrollment on VMs and non-EFI.
+    SKIP_SB_ENROLL=0
+    if [[ "$IS_VIRTUAL" -eq 1 || "$HAS_EFI" -eq 0 ]]; then
+        SKIP_SB_ENROLL=1
+    fi
+}
+
 echo ""
 echo -e "${BRED}  ❄  NixOS Multi-Host Installer${RESET}"
 echo -e "  Configure and apply a NixOS host from this flake."
 echo ""
 
-# ── Sanity check ──────────────────────────────────────────────────────────────
 [[ -f flake.nix ]] || die "Run this script from the root of the nix configuration repository."
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    || die "Not a git repository. Flakes ignore untracked files — clone or git init first."
 
 if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
     warn "Prefer running without sudo; this script elevates only where needed."
@@ -102,7 +126,13 @@ OWNER_GROUP="$(id -gn "$OWNER_USER")"
 OWNER_HOME="$(getent passwd "$OWNER_USER" | cut -d: -f6)"
 [[ -n "$OWNER_HOME" && -d "$OWNER_HOME" ]] || die "Cannot resolve home directory for '${OWNER_USER}'."
 
-# ── Host selection ────────────────────────────────────────────────────────────
+detect_virt_env
+if [[ "$IS_VIRTUAL" -eq 1 ]]; then
+    warn "Virtual machine detected (${VIRT_NAME}) — Secure Boot enrollment will be skipped by default."
+elif [[ "$HAS_EFI" -eq 0 ]]; then
+    warn "No EFI firmware detected — Secure Boot / Lanzaboote enrollment will be skipped by default."
+fi
+
 SYSTEMS_DIR="systems/x86_64-linux"
 DETECTED="$(hostname -s)"
 AVAILABLE="$(ls "$SYSTEMS_DIR/" | tr '\n' ' ')"
@@ -111,8 +141,9 @@ info "Flake attribute = directory name under ${SYSTEMS_DIR}/ (not necessarily th
 echo -en "${BOLD}Host name to configure [${DETECTED}]: ${RESET}"
 read -r HOST
 HOST="${HOST:-$DETECTED}"
+[[ "$HOST" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] \
+    || die "Invalid host name '${HOST}' (use letters, digits, _ or -)."
 
-# ── Step 1: Hardware configuration ───────────────────────────────────────────
 step "Step 1 — Generate Hardware Configuration"
 
 HOST_DIR="$SYSTEMS_DIR/$HOST"
@@ -136,9 +167,12 @@ sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$SYSTEMS_DIR"
 git_stage "$HW_FILE"
 success "Hardware configuration written to ${HW_FILE}."
 
-# Snowfall Lib needs a default.nix per system — scaffold a minimal one
-# the first time a host is configured; safe to edit/extend afterwards.
+# Snowfall expects systems/<arch>/<host>/default.nix
 if [[ ! -f "$DEFAULT_FILE" ]]; then
+    SECURE_BOOT_LINE="# \${namespace}.boot.secureBoot = false;"
+    if [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
+        SECURE_BOOT_LINE="\${namespace}.boot.secureBoot = false;"
+    fi
     cat > "$DEFAULT_FILE" <<EOF
 { lib, namespace, ... }:
 
@@ -147,22 +181,14 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
 
   networking.hostName = "$HOST";
 
-  # Shared NixOS modules come from systems/common.nix (wired via
-  # systems.modules.nixos in flake.nix). Add host-specific imports or
-  # extra mine = lib.mine.enable-modules [ ... ] here if needed.
-  #
-  # Optional Hyprland layout facts (see modules/nixos/host + lib/):
-  # \${namespace}.host = lib.\${namespace}.mkDualMonitorHost "HDMI-A-1";
-  #
-  # VMs / machines without Secure Boot:
-  # \${namespace}.boot.secureBoot = false;
+  # Optional: \${namespace}.host = lib.\${namespace}.mkDualMonitorHost "HDMI-A-1";
+  ${SECURE_BOOT_LINE}
 }
 EOF
     git_stage "$DEFAULT_FILE"
     success "Created ${DEFAULT_FILE}."
 fi
 
-# ── Step 2: Home Manager user ─────────────────────────────────────────────────
 step "Step 2 — Scaffold Home Manager User"
 
 HOMES_DIR="homes/x86_64-linux"
@@ -179,13 +205,8 @@ else
 { ... }:
 
 {
-  # Shared home modules and XDG basics come from homes/common.nix
-  # (wired via homes.modules in flake.nix). The username is inferred
-  # from this directory's name.
-  #
-  # Optional overrides, e.g.:
-  # mine.packages.creator.enable = false;
-  # mine.user.wallpaper = ./wall.png;
+  # Optional: mine.packages.creator.enable = false;
+  # Optional: mine.user.wallpaper = ./wall.png;
 }
 EOF
     sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$HOMES_DIR"
@@ -193,13 +214,11 @@ EOF
     success "Created ${HOME_DEFAULT}."
 fi
 
-# Stage the whole host/home dirs so flakes can see every new file.
 git_stage "$HOST_DIR" "$USER_DIR"
 
-# ── Step 3: Enable flakes ─────────────────────────────────────────────────────
 step "Step 3 — Enable Flakes"
 
-# Always target the installing user's home (not root's $HOME if run via sudo).
+# Owner home — not root's $HOME when run via sudo.
 CONFIG_DIR="${OWNER_HOME}/.config/nix"
 CONFIG_FILE="${CONFIG_DIR}/nix.conf"
 FLAKES_LINE="experimental-features = nix-command flakes"
@@ -219,74 +238,100 @@ fi
 
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-# ── Step 4: Enable git hooks ──────────────────────────────────────────────────
 step "Step 4 — Enable Git Hooks"
 
-# core.hooksPath is per-clone (not committed), so new machines need this once.
-# Points git at the tracked .githooks/ pre-commit that runs `nix fmt`.
 HOOKS_PATH=".githooks"
-if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    warn "Not a git repository — skipped git hooks setup."
-elif [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == "$HOOKS_PATH" ]]; then
+if [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == "$HOOKS_PATH" ]]; then
     success "Git hooks already enabled (core.hooksPath=${HOOKS_PATH})."
 else
     git config core.hooksPath "$HOOKS_PATH"
     success "Git hooks enabled (core.hooksPath=${HOOKS_PATH})."
 fi
 
-# ── Step 5: Secure Boot keys (Lanzaboote) ─────────────────────────────────────
-# mine.boot.secureBoot defaults to true; Lanzaboote refuses to install a
-# generation until /var/lib/sbctl has keys (db.pem). Create them before rebuild
-# unless the operator opts out (VMs / no Secure Boot) — then disable on the host.
+# Keys before rebuild: Lanzaboote needs db.pem, or host must set secureBoot = false.
 step "Step 5 — Secure Boot Keys (Lanzaboote)"
 
 PKI_BUNDLE="/var/lib/sbctl"
 DB_PEM="${PKI_BUNDLE}/keys/db/db.pem"
+WANT_SECURE_BOOT=0
 
 if [[ -e "$DB_PEM" ]]; then
     success "Secure Boot keys already present (${DB_PEM})."
+    if [[ "$SKIP_SB_ENROLL" -eq 1 ]] && ! host_tree_disables_secure_boot; then
+        warn "Keys exist, but this looks like a VM or non-EFI system."
+        echo -en "${BOLD}Disable Secure Boot on host '${HOST}'? [Y/n] ${RESET}"
+        read -r sb_dis_ans
+        sb_dis_ans="${sb_dis_ans:-y}"
+        if [[ "${sb_dis_ans,,}" == "y" || "${sb_dis_ans,,}" == "yes" ]]; then
+            ensure_host_disables_secure_boot "$DEFAULT_FILE"
+        else
+            WANT_SECURE_BOOT=1
+            warn "Keeping Secure Boot enabled — enrollment may still fail in this environment."
+        fi
+    else
+        WANT_SECURE_BOOT=1
+    fi
 else
-    echo -en "${BOLD}Create Secure Boot keys (Lanzaboote)? [Y/n] ${RESET}"
-    read -r sb_ans
-    sb_ans="${sb_ans:-y}"
+    if [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
+        warn "VM / non-EFI: skipping Secure Boot keys by default (systemd-boot without Lanzaboote)."
+        echo -en "${BOLD}Create Secure Boot keys anyway? [y/N] ${RESET}"
+        read -r sb_ans
+        sb_ans="${sb_ans:-n}"
+    else
+        echo -en "${BOLD}Create Secure Boot keys (Lanzaboote)? [Y/n] ${RESET}"
+        read -r sb_ans
+        sb_ans="${sb_ans:-y}"
+    fi
+
     if [[ "${sb_ans,,}" == "y" || "${sb_ans,,}" == "yes" ]]; then
         info "Creating Secure Boot keys at ${PKI_BUNDLE}..."
         info "(Required so Lanzaboote can sign boot generations on first switch.)"
         sbctl create-keys
         [[ -e "$DB_PEM" ]] || die "Keys were created but ${DB_PEM} is missing — aborting."
         success "Keys created at ${PKI_BUNDLE}."
+        WANT_SECURE_BOOT=1
     else
         warn "Skipped key creation — disabling Secure Boot on host '${HOST}'."
         ensure_host_disables_secure_boot "$DEFAULT_FILE"
     fi
 fi
 
-# Gate rebuild: keys present XOR host disables Secure Boot.
-if [[ ! -e "$DB_PEM" ]] && ! host_disables_secure_boot "$DEFAULT_FILE"; then
-    die "No keys at ${DB_PEM} and ${DEFAULT_FILE} does not set secureBoot = false — refusing rebuild."
+if [[ ! -e "$DB_PEM" ]] && ! host_tree_disables_secure_boot; then
+    die "No keys at ${DB_PEM} and host under ${HOST_DIR} does not set secureBoot = false — refusing rebuild."
 fi
 
-# ── Step 6: Apply system configuration ───────────────────────────────────────
 step "Step 6 — Apply System Configuration"
 
-# Root ignores the user's nix.conf; keep NIX_CONFIG so --flake works on
-# minimal installs before this flake's nix module is applied.
+# Root ignores user nix.conf — keep NIX_CONFIG for --flake on minimal installs.
 info "Running: sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake .#${HOST}"
 info "(Afterwards you can use: nh os switch .#${HOST})"
 sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake ".#${HOST}"
+success "System configuration applied."
 
-# ── Step 7: Secure Boot enrollment (firmware) ────────────────────────────────
-# Independent of the create-keys prompt: only needs a key bundle on disk.
+# Enrollment after rebuild (signed generations). Bare-metal EFI only.
 step "Step 7 — Secure Boot Enrollment"
 
-if [[ ! -e "$DB_PEM" ]]; then
-    warn "No Secure Boot keys at ${DB_PEM} — enrollment steps omitted."
+ENROLL_STATUS="skipped"
+
+if host_tree_disables_secure_boot; then
+    warn "Host has secureBoot = false — enrollment omitted."
+elif [[ ! -e "$DB_PEM" ]]; then
+    warn "No Secure Boot keys at ${DB_PEM} — enrollment omitted."
+elif [[ "$HAS_EFI" -eq 0 ]]; then
+    warn "No EFI firmware — sbctl enrollment omitted."
+elif [[ "$IS_VIRTUAL" -eq 1 ]]; then
+    warn "Virtual machine (${VIRT_NAME}) — firmware enrollment omitted."
+    warn "For guest Secure Boot, configure OVMF in the hypervisor; or keep mine.boot.secureBoot = false."
+elif [[ "$WANT_SECURE_BOOT" -eq 0 ]]; then
+    warn "Secure Boot was not requested — enrollment omitted."
 else
     info "Verifying signed boot artefacts..."
     if sbctl verify; then
         success "Boot chain verifies as signed."
+        ENROLL_STATUS="verified"
     else
         warn "sbctl verify reported issues — check output above before enrolling."
+        ENROLL_STATUS="verify-failed"
     fi
 
     echo ""
@@ -300,7 +345,6 @@ else
     echo -e "  4. Confirm with: ${BOLD}bootctl status${RESET} / ${BOLD}sbctl status${RESET}"
     echo ""
 
-    # Offer enroll now if the firmware is already in Setup Mode.
     STATUS_OUT="$(sbctl status 2>/dev/null || true)"
     if echo "$STATUS_OUT" | grep -Eiq 'Setup Mode.*(Enabled|Yes)|Setup Mode:\s*Enabled'; then
         warn "Firmware appears to be in Setup Mode right now."
@@ -311,16 +355,25 @@ else
             info "Running: sudo sbctl enroll-keys -m"
             sbctl enroll-keys -m
             success "Keys enrolled. Enable Secure Boot in firmware and reboot."
+            ENROLL_STATUS="enrolled"
         else
             warn "Skipped enrollment — run ${BOLD}sudo sbctl enroll-keys -m${RESET} after entering Setup Mode."
+            ENROLL_STATUS="pending"
         fi
     else
         warn "Firmware is not in Setup Mode yet — enroll after step 1 above."
+        ENROLL_STATUS="pending"
     fi
 fi
 
-# ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
-success "All done! Welcome to your new NixOS system."
+success "System install finished for host ${BOLD}${HOST}${RESET}."
+case "$ENROLL_STATUS" in
+    enrolled)   info "Secure Boot keys enrolled — enable Secure Boot in firmware if needed." ;;
+    verified)   info "Boot chain verified; firmware enrollment still pending (see step 7)." ;;
+    pending)    info "Secure Boot firmware enrollment still pending (see step 7)." ;;
+    verify-failed) warn "sbctl verify had issues — fix ESP/firmware before enrolling." ;;
+    skipped)    info "Secure Boot enrollment skipped (VM, non-EFI, or disabled on host)." ;;
+esac
 echo -e "  Rebuild later: ${BOLD}nh os switch .#${HOST}${RESET}  or  ${BOLD}sudo nixos-rebuild switch --flake .#${HOST}${RESET}"
 echo ""

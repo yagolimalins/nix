@@ -162,7 +162,7 @@ Bootstrap a **new** machine from minimal NixOS:
 ./install.sh
 ```
 
-That generates hardware config, scaffolds host/user (with current `mkDualMonitorHost` / package override hints), stages new files for the flake, optionally creates Secure Boot keys, rebuilds, and guides UEFI enrollment.
+That generates hardware config, scaffolds host/user (with current `mkDualMonitorHost` / package override hints), stages new files for the flake, optionally creates Secure Boot keys, rebuilds, and guides UEFI enrollment. On VMs / non-EFI hosts it defaults to `secureBoot = false` and skips firmware enrollment.
 
 ## 🛠 Development
 
@@ -197,4 +197,4 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 
 ## 🔐 Secure Boot
 
-`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. Firmware enrollment runs only when keys exist and remains a one-time manual step (`sbctl enroll-keys -m` in Setup Mode).
+`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. On VMs / non-EFI systems the installer defaults to disabling Secure Boot and skips firmware enrollment. On bare-metal EFI, enrollment (`sbctl enroll-keys -m` in Setup Mode) remains a one-time manual step.
