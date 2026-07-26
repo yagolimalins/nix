@@ -25,9 +25,8 @@ in
   config = lib.mkIf cfg.enable {
     virtualisation.docker = {
       enable = true;
-      # Socket-/unit-activated on demand (oci-containers, `docker …`).
-      # Avoids docker/overlays blocking early boot (local-fs).
       enableOnBoot = false;
+      daemon.settings.live-restore = false;
     };
     virtualisation.oci-containers.backend = "docker";
 

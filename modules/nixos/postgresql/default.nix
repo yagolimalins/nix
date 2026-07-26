@@ -20,7 +20,7 @@ in
   config = lib.mkIf cfg.enable {
     virtualisation.oci-containers.containers.postgres = {
       image = "postgres:18";
-      autoStart = true;
+      autoStart = false;
 
       ports = [ "127.0.0.1:5432:5432" ];
 
