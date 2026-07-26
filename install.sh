@@ -25,12 +25,35 @@ git_stage() {
     fi
 }
 
+# Flat (`mine.boot.secureBoot = false`) or nested (`boot = { secureBoot = false; }`).
 host_disables_secure_boot() {
-    grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.secureBoot[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
+    grep -Eq '(\$\{namespace\}|mine)\.boot\.secureBoot[[:space:]]*=[[:space:]]*false' "$1" \
+        || grep -Eq '^[[:space:]]*secureBoot[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
 }
 
 host_disables_efi() {
-    grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.efi[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
+    grep -Eq '(\$\{namespace\}|mine)\.boot\.efi[[:space:]]*=[[:space:]]*false' "$1" \
+        || grep -Eq '^[[:space:]]*efi[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
+}
+
+host_has_grub_device() {
+    grep -Eq '(\$\{namespace\}|mine)\.boot\.grubDevice' "$1" \
+        || grep -Eq '^[[:space:]]*grubDevice[[:space:]]*=' "$1"
+}
+
+# Strip flat mine.boot.* lines and nested mine.boot = { ... }; blocks we manage.
+strip_managed_boot_attrs() {
+    local file="$1"
+    local tmp
+    tmp="$(mktemp)"
+    awk '
+        /\$\{namespace\}\.boot = \{/ || /^[[:space:]]*mine\.boot = \{/ { skip = 1; next }
+        skip && /^[[:space:]]*\};[[:space:]]*$/ { skip = 0; next }
+        skip { next }
+        /\$\{namespace\}\.boot\./ || /^[[:space:]]*mine\.boot\./ { next }
+        { print }
+    ' "$file" >"$tmp"
+    mv "$tmp" "$file"
 }
 
 host_tree_disables_secure_boot() {
@@ -100,11 +123,12 @@ ensure_host_disables_secure_boot() {
         return 0
     fi
 
-    if grep -Eq '^[[:space:]]*#[[:space:]]*\$\{namespace\}\.boot\.secureBoot[[:space:]]*=[[:space:]]*false' "$file"; then
-        sed -i -E 's/^([[:space:]]*)#[[:space:]]*(\$\{namespace\}\.boot\.secureBoot[[:space:]]*=[[:space:]]*false;.*)/\1\2/' "$file"
-    else
-        insert_before_closing_brace "$file" "  \${namespace}.boot.secureBoot = false;"
-    fi
+    # One nested attrset — multiple ${namespace}.boot.* siblings are invalid Nix.
+    strip_managed_boot_attrs "$file"
+    insert_before_closing_brace "$file" \
+        "  \${namespace}.boot = {" \
+        "    secureBoot = false;" \
+        "  };"
 
     host_disables_secure_boot "$file" || die "Failed to set secureBoot = false in ${file}."
     git_stage "$file"
@@ -112,29 +136,25 @@ ensure_host_disables_secure_boot() {
 }
 
 # systemd-boot needs a mounted ESP at /boot; BIOS/VMs without one use GRUB.
+# Must be one nested ${namespace}.boot = { ... }; (not sibling dynamic attrs).
 ensure_host_bios_boot() {
     local file="$1"
     local grub
     grub="$(detect_grub_device)"
     [[ -n "$grub" ]] || die "Could not detect a disk for GRUB (set mine.boot.grubDevice manually)."
 
-    if host_disables_efi "$file" && host_disables_secure_boot "$file"; then
-        if grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.grubDevice' "$file"; then
-            success "Host already configured for BIOS/GRUB (${file})."
-            return 0
-        fi
+    if host_disables_efi "$file" && host_disables_secure_boot "$file" && host_has_grub_device "$file"; then
+        success "Host already configured for BIOS/GRUB (${file})."
+        return 0
     fi
 
-    local -a lines=()
-    host_disables_efi "$file" || lines+=("  \${namespace}.boot.efi = false;")
-    host_disables_secure_boot "$file" || lines+=("  \${namespace}.boot.secureBoot = false;")
-    if ! grep -Eq '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.grubDevice' "$file"; then
-        lines+=("  \${namespace}.boot.grubDevice = \"${grub}\";")
-    fi
-
-    if [[ "${#lines[@]}" -gt 0 ]]; then
-        insert_before_closing_brace "$file" "${lines[@]}"
-    fi
+    strip_managed_boot_attrs "$file"
+    insert_before_closing_brace "$file" \
+        "  \${namespace}.boot = {" \
+        "    efi = false;" \
+        "    secureBoot = false;" \
+        "    grubDevice = \"${grub}\";" \
+        "  };"
 
     host_disables_efi "$file" || die "Failed to set boot.efi = false in ${file}."
     git_stage "$file"
@@ -259,11 +279,15 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
     if [[ "$USE_EFI" -eq 0 ]]; then
         GRUB_DEV="$(detect_grub_device)"
         [[ -n "$GRUB_DEV" ]] || die "Could not detect a disk for GRUB."
-        BOOT_LINES="\${namespace}.boot.efi = false;
-  \${namespace}.boot.secureBoot = false;
-  \${namespace}.boot.grubDevice = \"${GRUB_DEV}\";"
+        BOOT_LINES="\${namespace}.boot = {
+    efi = false;
+    secureBoot = false;
+    grubDevice = \"${GRUB_DEV}\";
+  };"
     elif [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
-        BOOT_LINES="\${namespace}.boot.secureBoot = false;"
+        BOOT_LINES="\${namespace}.boot = {
+    secureBoot = false;
+  };"
     fi
     cat > "$DEFAULT_FILE" <<EOF
 { lib, namespace, ... }:
