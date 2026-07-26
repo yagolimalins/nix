@@ -41,6 +41,17 @@ host_has_grub_device() {
         || grep -Eq '^[[:space:]]*grubDevice[[:space:]]*=' "$1"
 }
 
+# Nested ${namespace}.boot = { ... }; is valid; multiple ${namespace}.boot.* siblings are not.
+host_has_nested_boot() {
+    grep -Eq '(\$\{namespace\}|mine)\.boot = \{' "$1"
+}
+
+host_has_flat_boot_siblings() {
+    local n
+    n="$(grep -cE '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.[a-zA-Z]+[[:space:]]*=' "$1" 2>/dev/null || true)"
+    [[ "${n:-0}" -gt 1 ]]
+}
+
 # Strip flat mine.boot.* lines and nested mine.boot = { ... }; blocks we manage.
 strip_managed_boot_attrs() {
     local file="$1"
@@ -143,9 +154,17 @@ ensure_host_bios_boot() {
     grub="$(detect_grub_device)"
     [[ -n "$grub" ]] || die "Could not detect a disk for GRUB (set mine.boot.grubDevice manually)."
 
-    if host_disables_efi "$file" && host_disables_secure_boot "$file" && host_has_grub_device "$file"; then
+    if host_has_nested_boot "$file" \
+        && host_disables_efi "$file" \
+        && host_disables_secure_boot "$file" \
+        && host_has_grub_device "$file" \
+        && ! host_has_flat_boot_siblings "$file"; then
         success "Host already configured for BIOS/GRUB (${file})."
         return 0
+    fi
+
+    if host_has_flat_boot_siblings "$file"; then
+        warn "Rewriting invalid flat \${namespace}.boot.* siblings into one nested attrset."
     fi
 
     strip_managed_boot_attrs "$file"
@@ -157,6 +176,7 @@ ensure_host_bios_boot() {
         "  };"
 
     host_disables_efi "$file" || die "Failed to set boot.efi = false in ${file}."
+    ! host_has_flat_boot_siblings "$file" || die "Host ${file} still has flat boot attr siblings."
     git_stage "$file"
     success "BIOS/GRUB boot: efi=false, grubDevice=${grub} (${file})."
 }
