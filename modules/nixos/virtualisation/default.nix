@@ -3,8 +3,7 @@
 #
 # Docker as the container runtime (also the OCI-containers backend used by
 # postgresql.nix), libvirt/QEMU/KVM + virt-manager for VMs, plus a local
-# Ollama service. Docker is not in multi-user on boot (enableOnBoot =
-# false); oci-containers / `docker` start it on demand. Ollama: start with
+# Ollama service. Docker + Postgres both start at boot. Ollama: start with
 # `sudo systemctl start ollama`.
 #
 {
@@ -25,7 +24,7 @@ in
   config = lib.mkIf cfg.enable {
     virtualisation.docker = {
       enable = true;
-      enableOnBoot = false;
+      enableOnBoot = true;
       daemon.settings.live-restore = false;
     };
     virtualisation.oci-containers.backend = "docker";

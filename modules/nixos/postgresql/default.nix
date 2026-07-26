@@ -3,6 +3,7 @@
 #
 # A throwaway Postgres 18 container bound to localhost only. Credentials
 # are default/dev values — not intended for anything exposed.
+# Starts at boot alongside Docker (enableOnBoot).
 #
 {
   config,
@@ -20,7 +21,7 @@ in
   config = lib.mkIf cfg.enable {
     virtualisation.oci-containers.containers.postgres = {
       image = "postgres:18";
-      autoStart = false;
+      autoStart = true;
 
       ports = [ "127.0.0.1:5432:5432" ];
 
