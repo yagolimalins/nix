@@ -50,7 +50,6 @@ in
         vscode
         zed-editor
         code-cursor
-        jetbrains.idea
       ];
     })
 
