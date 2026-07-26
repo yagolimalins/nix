@@ -64,10 +64,24 @@ ensure_host_disables_secure_boot() {
     success "Set \${namespace}.boot.secureBoot = false in ${file}."
 }
 
-# Run sbctl from a nix shell so this works on minimal installs before the
-# flake's system profile (which ships pkgs.sbctl) is applied.
+# Prefer system sbctl (available after the flake's boot module is applied).
+# Fall back to `nix shell` on minimal installs — avoids nested `nix-shell -p`
+# which breaks when install.sh is already running inside a nix-shell.
 sbctl() {
-    nix-shell -p sbctl --run "sudo sbctl $*"
+    local bin=""
+    if [[ -x /run/current-system/sw/bin/sbctl ]]; then
+        bin=/run/current-system/sw/bin/sbctl
+    else
+        # type -P: PATH only (not this function)
+        bin="$(type -P sbctl 2>/dev/null || true)"
+    fi
+
+    if [[ -n "$bin" ]]; then
+        sudo "$bin" "$@"
+    else
+        # Absolute path so sudo's secure_path still finds sbctl.
+        nix shell nixpkgs#sbctl -c sh -c 'sudo "$(command -v sbctl)" "$@"' sh "$@"
+    fi
 }
 
 # ── Header ────────────────────────────────────────────────────────────────────
