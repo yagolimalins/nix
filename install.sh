@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
+# Bootstrap a new (or freshly installed) NixOS host from this Snowfall flake.
+#
+#   ./install.sh
+#
+# What it does:
+#   1. Detect EFI+ESP vs BIOS/VM boot needs
+#   2. Generate hardware-configuration.nix (strips Docker/Podman overlays)
+#   3. Scaffold systems/<arch>/<host>/ and homes/<arch>/<user>/ if missing
+#   4. Enable flakes; create Secure Boot keys when appropriate
+#   5. nixos-rebuild switch --flake .#<host>
+#
+# What it does NOT do:
+#   - Rewrite an existing systems/.../default.nix (edit boot options yourself)
+#   - Enroll Secure Boot keys into firmware (prints the one-time steps)
 set -euo pipefail
 
 RED='\033[38;5;160m'; BRED='\033[1;38;5;160m'; GREEN='\033[0;32m'
@@ -16,328 +30,367 @@ step() {
     echo -e "${BRED}────────────────────────────────────────${RESET}"
 }
 
-# Flakes ignore untracked files — stage only inside a git repo.
-git_stage() {
-    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        git add "$@"
+ask_yn() {
+    # $1 prompt  $2 default (y|n)
+    local prompt="$1" default="$2" ans
+    if [[ "$default" == "y" ]]; then
+        echo -en "${BOLD}${prompt} [Y/n] ${RESET}"
     else
-        die "Not a git repository. Flakes ignore untracked files — clone or git init before running install.sh."
+        echo -en "${BOLD}${prompt} [y/N] ${RESET}"
     fi
+    read -r ans || true
+    ans="${ans:-$default}"
+    [[ "${ans,,}" == "y" || "${ans,,}" == "yes" ]]
 }
 
-# Flat (`mine.boot.secureBoot = false`) or nested (`boot = { secureBoot = false; }`).
-host_disables_secure_boot() {
-    grep -Eq '(\$\{namespace\}|mine)\.boot\.secureBoot[[:space:]]*=[[:space:]]*false' "$1" \
-        || grep -Eq '^[[:space:]]*secureBoot[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
+git_stage() {
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+        || die "Not a git repository. Flakes ignore untracked files — clone or git init first."
+    git add "$@"
 }
 
-host_disables_efi() {
-    grep -Eq '(\$\{namespace\}|mine)\.boot\.efi[[:space:]]*=[[:space:]]*false' "$1" \
-        || grep -Eq '^[[:space:]]*efi[[:space:]]*=[[:space:]]*false[[:space:]]*;' "$1"
-}
+# ── Environment ──────────────────────────────────────────────────────────────
 
-host_has_grub_device() {
-    grep -Eq '(\$\{namespace\}|mine)\.boot\.grubDevice' "$1" \
-        || grep -Eq '^[[:space:]]*grubDevice[[:space:]]*=' "$1"
-}
-
-# Nested ${namespace}.boot = { ... }; is valid; multiple ${namespace}.boot.* siblings are not.
-host_has_nested_boot() {
-    grep -Eq '(\$\{namespace\}|mine)\.boot = \{' "$1"
-}
-
-host_has_flat_boot_siblings() {
-    local n
-    n="$(grep -cE '^[[:space:]]*(\$\{namespace\}|mine)\.boot\.[a-zA-Z]+[[:space:]]*=' "$1" 2>/dev/null || true)"
-    [[ "${n:-0}" -gt 1 ]]
-}
-
-# Strip flat mine.boot.* lines and nested mine.boot = { ... }; blocks we manage.
-strip_managed_boot_attrs() {
-    local file="$1"
-    local tmp
-    tmp="$(mktemp)"
-    awk '
-        /\$\{namespace\}\.boot = \{/ || /^[[:space:]]*mine\.boot = \{/ { skip = 1; next }
-        skip && /^[[:space:]]*\};[[:space:]]*$/ { skip = 0; next }
-        skip { next }
-        /\$\{namespace\}\.boot\./ || /^[[:space:]]*mine\.boot\./ { next }
-        { print }
-    ' "$file" >"$tmp"
-    mv "$tmp" "$file"
-}
-
-host_tree_disables_secure_boot() {
-    local f
-    for f in "$HOST_DIR"/*.nix; do
-        [[ -f "$f" ]] || continue
-        host_disables_secure_boot "$f" && return 0
-    done
-    return 1
-}
-
-host_tree_disables_efi() {
-    local f
-    for f in "$HOST_DIR"/*.nix; do
-        [[ -f "$f" ]] || continue
-        host_disables_efi "$f" && return 0
-    done
-    return 1
+detect_system() {
+    case "$(uname -m)" in
+        x86_64)       echo x86_64-linux ;;
+        aarch64|arm64) echo aarch64-linux ;;
+        *) die "Unsupported architecture: $(uname -m)" ;;
+    esac
 }
 
 detect_grub_device() {
-    if [[ -b /dev/vda ]]; then
-        echo /dev/vda
-    elif [[ -b /dev/sda ]]; then
-        echo /dev/sda
-    elif [[ -b /dev/nvme0n1 ]]; then
-        echo /dev/nvme0n1
-    else
-        lsblk -dno NAME,TYPE 2>/dev/null | awk '$2 == "disk" { print "/dev/" $1; exit }'
-    fi
+    local d
+    for d in /dev/vda /dev/sda /dev/nvme0n1; do
+        [[ -b "$d" ]] && { echo "$d"; return; }
+    done
+    lsblk -dno NAME,TYPE 2>/dev/null | awk '$2 == "disk" { print "/dev/" $1; exit }'
 }
 
-# Insert line(s) before the first top-level closing `}`.
-insert_before_closing_brace() {
-    local file="$1"
-    shift
-    local tmp line
-    tmp="$(mktemp)"
-    {
-        for line in "$@"; do
-            printf '%s\n' "$line"
-        done
-    } >"${tmp}.lines"
-    awk -v lines_file="${tmp}.lines" '
-        BEGIN {
-            while ((getline line < lines_file) > 0) lines[++n] = line
-            close(lines_file)
-            inserted = 0
-        }
-        {
-            if (!inserted && $0 ~ /^}/) {
-                for (i = 1; i <= n; i++) print lines[i]
-                inserted = 1
-            }
-            print
-        }
-        END { if (!inserted) exit 1 }
-    ' "$file" >"$tmp" || die "Could not update ${file}."
-    mv "$tmp" "$file"
-    rm -f "${tmp}.lines"
-}
-
-ensure_host_disables_secure_boot() {
-    local file="$1"
-    if host_disables_secure_boot "$file"; then
-        success "Host already sets secureBoot = false (${file})."
-        return 0
-    fi
-
-    # One nested attrset — multiple ${namespace}.boot.* siblings are invalid Nix.
-    strip_managed_boot_attrs "$file"
-    insert_before_closing_brace "$file" \
-        "  \${namespace}.boot = {" \
-        "    secureBoot = false;" \
-        "  };"
-
-    host_disables_secure_boot "$file" || die "Failed to set secureBoot = false in ${file}."
-    git_stage "$file"
-    success "Set \${namespace}.boot.secureBoot = false in ${file}."
-}
-
-# systemd-boot needs a mounted ESP at /boot; BIOS/VMs without one use GRUB.
-# Must be one nested ${namespace}.boot = { ... }; (not sibling dynamic attrs).
-ensure_host_bios_boot() {
-    local file="$1"
-    local grub
-    grub="$(detect_grub_device)"
-    [[ -n "$grub" ]] || die "Could not detect a disk for GRUB (set mine.boot.grubDevice manually)."
-
-    if host_has_nested_boot "$file" \
-        && host_disables_efi "$file" \
-        && host_disables_secure_boot "$file" \
-        && host_has_grub_device "$file" \
-        && ! host_has_flat_boot_siblings "$file"; then
-        success "Host already configured for BIOS/GRUB (${file})."
-        return 0
-    fi
-
-    if host_has_flat_boot_siblings "$file"; then
-        warn "Rewriting invalid flat \${namespace}.boot.* siblings into one nested attrset."
-    fi
-
-    strip_managed_boot_attrs "$file"
-    insert_before_closing_brace "$file" \
-        "  \${namespace}.boot = {" \
-        "    efi = false;" \
-        "    secureBoot = false;" \
-        "    grubDevice = \"${grub}\";" \
-        "  };"
-
-    host_disables_efi "$file" || die "Failed to set boot.efi = false in ${file}."
-    ! host_has_flat_boot_siblings "$file" || die "Host ${file} still has flat boot attr siblings."
-    git_stage "$file"
-    success "BIOS/GRUB boot: efi=false, grubDevice=${grub} (${file})."
-}
-
-# Prefer system sbctl; fall back to `nix shell` (not nested nix-shell -p).
-sbctl() {
-    local bin=""
-    if [[ -x /run/current-system/sw/bin/sbctl ]]; then
-        bin=/run/current-system/sw/bin/sbctl
-    else
-        bin="$(type -P sbctl 2>/dev/null || true)"
-    fi
-
-    if [[ -n "$bin" ]]; then
-        sudo "$bin" "$@"
-    else
-        nix shell nixpkgs#sbctl -c sh -c 'sudo "$(command -v sbctl)" "$@"' sh "$@"
-    fi
-}
-
-detect_virt_env() {
-    IS_VIRTUAL=0
+# Sets: IS_VM VIRT_NAME HAS_EFI HAS_ESP USE_EFI
+detect_boot_env() {
     HAS_EFI=0
-    HAS_BOOT_MOUNT=0
+    HAS_ESP=0
     USE_EFI=0
-    VIRT_NAME="none"
+    IS_VM=0
+    VIRT_NAME=none
 
-    if [[ -d /sys/firmware/efi ]]; then
-        HAS_EFI=1
-    fi
-
-    if mountpoint -q /boot 2>/dev/null; then
-        HAS_BOOT_MOUNT=1
-    fi
-
-    # systemd-boot/Lanzaboote need EFI firmware + ESP mounted at /boot.
-    if [[ "$HAS_EFI" -eq 1 && "$HAS_BOOT_MOUNT" -eq 1 ]]; then
-        USE_EFI=1
-    fi
+    [[ -d /sys/firmware/efi ]] && HAS_EFI=1
+    mountpoint -q /boot 2>/dev/null && HAS_ESP=1
+    # systemd-boot / Lanzaboote need firmware EFI + ESP mounted at /boot.
+    [[ "$HAS_EFI" -eq 1 && "$HAS_ESP" -eq 1 ]] && USE_EFI=1
 
     if command -v systemd-detect-virt >/dev/null 2>&1; then
         VIRT_NAME="$(systemd-detect-virt 2>/dev/null || echo none)"
-        if [[ -n "$VIRT_NAME" && "$VIRT_NAME" != "none" ]]; then
-            IS_VIRTUAL=1
-        fi
-    fi
-
-    # Skip firmware enrollment on VMs and when EFI bootloader is not usable.
-    SKIP_SB_ENROLL=0
-    if [[ "$IS_VIRTUAL" -eq 1 || "$USE_EFI" -eq 0 ]]; then
-        SKIP_SB_ENROLL=1
+        [[ -n "$VIRT_NAME" && "$VIRT_NAME" != "none" ]] && IS_VM=1
     fi
 }
 
+run_sbctl() {
+    if [[ -x /run/current-system/sw/bin/sbctl ]]; then
+        sudo /run/current-system/sw/bin/sbctl "$@"
+    elif command -v sbctl >/dev/null 2>&1; then
+        sudo sbctl "$@"
+    else
+        sudo nix shell nixpkgs#sbctl -c sbctl "$@"
+    fi
+}
+
+# ── Hardware config ──────────────────────────────────────────────────────────
+
+stop_container_runtimes() {
+    if systemctl is-active --quiet docker.service 2>/dev/null \
+        || systemctl is-active --quiet docker.socket 2>/dev/null; then
+        warn "Stopping Docker so hardware scan does not capture overlay mounts..."
+        sudo systemctl stop docker.service docker.socket 2>/dev/null || true
+    fi
+    if systemctl is-active --quiet podman.service 2>/dev/null; then
+        warn "Stopping Podman so hardware scan does not capture overlay mounts..."
+        sudo systemctl stop podman.service 2>/dev/null || true
+    fi
+    local mp
+    while IFS= read -r mp; do
+        [[ -n "$mp" ]] || continue
+        sudo umount -l "$mp" 2>/dev/null || true
+    done < <(findmnt -nlo TARGET 2>/dev/null | grep -E '^/var/lib/(docker|containers)' || true)
+}
+
+# nixos-generate-config snapshots /proc/mounts; live container overlays become
+# fileSystems entries and break local-fs.target on reboot.
+strip_ephemeral_filesystems() {
+    local file="$1" tmp removed
+    tmp="$(mktemp)"
+    removed="$(mktemp)"
+    awk '
+        function brace_delta(s,    i, c, d) {
+            d = 0
+            for (i = 1; i <= length(s); i++) {
+                c = substr(s, i, 1)
+                if (c == "{") d++
+                if (c == "}") d--
+            }
+            return d
+        }
+        function fs_path(s,    t) {
+            t = s
+            sub(/^.*fileSystems\."/, "", t)
+            sub(/".*$/, "", t)
+            return t
+        }
+        function is_ephemeral(p, b) {
+            return (p ~ /\/var\/lib\/docker/) \
+                || (p ~ /\/var\/lib\/containers/) \
+                || (b ~ /device = "overlay"/) \
+                || (b ~ /fsType = "overlay"/)
+        }
+        BEGIN { skip = 0; depth = 0; path = ""; buf = "" }
+        {
+            if (!skip && $0 ~ /^[[:space:]]*fileSystems\."/) {
+                path = fs_path($0)
+                buf = $0
+                depth = brace_delta($0)
+                skip = 1
+                if (depth <= 0 && $0 ~ /;\s*$/) {
+                    if (is_ephemeral(path, buf)) print path > "/dev/stderr"
+                    else print buf
+                    skip = 0; path = ""; buf = ""
+                }
+                next
+            }
+            if (skip) {
+                buf = buf ORS $0
+                depth += brace_delta($0)
+                if (depth <= 0 && $0 ~ /;\s*$/) {
+                    if (is_ephemeral(path, buf)) print path > "/dev/stderr"
+                    else print buf
+                    skip = 0; path = ""; buf = ""; depth = 0
+                }
+                next
+            }
+            print
+        }
+    ' "$file" >"$tmp" 2>"$removed"
+    mv "$tmp" "$file"
+    if [[ -s "$removed" ]]; then
+        warn "Removed ephemeral container mounts from hardware-configuration:"
+        while IFS= read -r mp; do
+            [[ -n "$mp" ]] || continue
+            warn "  - ${mp}"
+        done <"$removed"
+    fi
+    rm -f "$removed"
+}
+
+# ── Host / home scaffolds (create only — never rewrite) ──────────────────────
+
+# Print a boot attrset for a *new* host default.nix (one nested mine.boot = { }).
+boot_block_for_new_host() {
+    local want_sb="$1" # y|n — only meaningful when USE_EFI=1
+    local grub
+
+    if [[ "$USE_EFI" -eq 0 ]]; then
+        grub="$(detect_grub_device)"
+        [[ -n "$grub" ]] || die "Could not detect a disk for GRUB (set mine.boot.grubDevice by hand)."
+        cat <<EOF
+  # BIOS / no ESP at /boot — GRUB (typical QEMU BIOS VM).
+  \${namespace}.boot = {
+    efi = false;
+    secureBoot = false;
+    grubDevice = "${grub}";
+  };
+EOF
+        return
+    fi
+
+    if [[ "$want_sb" != "y" ]]; then
+        cat <<EOF
+  # Unsigned systemd-boot (no Lanzaboote keys).
+  \${namespace}.boot = {
+    secureBoot = false;
+  };
+EOF
+    fi
+    # want_sb=y → omit boot block; module default secureBoot=true + keys created below.
+}
+
+host_sets_efi_false() {
+    grep -Eq '(^|[[:space:]])(efi)\s*=\s*false\s*;' "$1" \
+        || grep -Eq '(\$\{namespace\}|mine)\.boot\.efi\s*=\s*false' "$1"
+}
+
+host_sets_secure_boot_false() {
+    grep -Eq '(^|[[:space:]])(secureBoot)\s*=\s*false\s*;' "$1" \
+        || grep -Eq '(\$\{namespace\}|mine)\.boot\.secureBoot\s*=\s*false' "$1"
+}
+
+require_boot_config() {
+    local file="$1"
+    [[ -f "$file" ]] || die "Missing ${file}"
+
+    if [[ "$USE_EFI" -eq 0 ]]; then
+        if ! host_sets_efi_false "$file"; then
+            local grub
+            grub="$(detect_grub_device)"
+            die "No usable EFI ESP at /boot, but ${file} does not set efi = false.
+Add this (one nested attrset — not multiple mine.boot.* siblings):
+
+  \${namespace}.boot = {
+    efi = false;
+    secureBoot = false;
+    grubDevice = \"${grub:-/dev/vda}\";
+  };
+"
+        fi
+        return
+    fi
+
+    # EFI path: either keys exist, or host disables Secure Boot.
+    if [[ ! -e "$DB_PEM" ]] && ! host_sets_secure_boot_false "$file"; then
+        die "No Secure Boot keys at ${DB_PEM} and ${file} does not set secureBoot = false.
+Either create keys (re-run and accept the prompt) or add:
+
+  \${namespace}.boot = {
+    secureBoot = false;
+  };
+"
+    fi
+}
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
 echo ""
 echo -e "${BRED}  ❄  NixOS Multi-Host Installer${RESET}"
-echo -e "  Configure and apply a NixOS host from this flake."
+echo -e "  Bootstrap a host from this Snowfall flake."
 echo ""
 
-[[ -f flake.nix ]] || die "Run this script from the root of the nix configuration repository."
+[[ -f flake.nix ]] || die "Run from the repository root (flake.nix missing)."
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
     || die "Not a git repository. Flakes ignore untracked files — clone or git init first."
 
 if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
-    warn "Prefer running without sudo; this script elevates only where needed."
+    warn "Prefer running as a normal user; the script sudo's only where needed."
 fi
 
 OWNER_USER="${SUDO_USER:-$USER}"
 OWNER_GROUP="$(id -gn "$OWNER_USER")"
 OWNER_HOME="$(getent passwd "$OWNER_USER" | cut -d: -f6)"
-[[ -n "$OWNER_HOME" && -d "$OWNER_HOME" ]] || die "Cannot resolve home directory for '${OWNER_USER}'."
+[[ -n "$OWNER_HOME" && -d "$OWNER_HOME" ]] || die "Cannot resolve home for '${OWNER_USER}'."
 
-detect_virt_env
-if [[ "$IS_VIRTUAL" -eq 1 ]]; then
+SYSTEM="$(detect_system)"
+detect_boot_env
+
+PKI_BUNDLE="/var/lib/sbctl"
+DB_PEM="${PKI_BUNDLE}/keys/db/db.pem"
+
+info "System: ${BOLD}${SYSTEM}${RESET}  user: ${BOLD}${OWNER_USER}${RESET}"
+if [[ "$IS_VM" -eq 1 ]]; then
     warn "Virtual machine detected (${VIRT_NAME})."
 fi
-if [[ "$USE_EFI" -eq 0 ]]; then
-    warn "No usable EFI ESP at /boot — will use GRUB (mine.boot.efi = false)."
-elif [[ "$IS_VIRTUAL" -eq 1 ]]; then
-    warn "Secure Boot enrollment will be skipped by default on this VM."
+if [[ "$USE_EFI" -eq 1 ]]; then
+    info "Boot path: EFI (firmware + /boot mounted)."
+else
+    warn "Boot path: BIOS/GRUB (no EFI firmware and/or /boot not mounted)."
 fi
 
-SYSTEMS_DIR="systems/x86_64-linux"
-DETECTED="$(hostname -s)"
-AVAILABLE="$(ls "$SYSTEMS_DIR/" | tr '\n' ' ')"
-info "Available hosts: ${BOLD}${AVAILABLE}${RESET}"
-info "Flake attribute = directory name under ${SYSTEMS_DIR}/ (not necessarily the live hostname)."
-echo -en "${BOLD}Host name to configure [${DETECTED}]: ${RESET}"
+SYSTEMS_DIR="systems/${SYSTEM}"
+HOMES_DIR="homes/${SYSTEM}"
+mkdir -p "$SYSTEMS_DIR"
+
+AVAILABLE="$(find "$SYSTEMS_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f ' 2>/dev/null || true)"
+DETECTED="$(hostname -s 2>/dev/null || echo nixos)"
+info "Existing hosts: ${BOLD}${AVAILABLE:-none}${RESET}"
+info "Flake attribute = directory name under ${SYSTEMS_DIR}/."
+echo -en "${BOLD}Host name [${DETECTED}]: ${RESET}"
 read -r HOST
 HOST="${HOST:-$DETECTED}"
 [[ "$HOST" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] \
-    || die "Invalid host name '${HOST}' (use letters, digits, _ or -)."
+    || die "Invalid host name '${HOST}' (letters, digits, _ or -)."
 
-step "Step 1 — Generate Hardware Configuration"
-
-HOST_DIR="$SYSTEMS_DIR/$HOST"
-HW_FILE="$HOST_DIR/hardware-configuration.nix"
-DEFAULT_FILE="$HOST_DIR/default.nix"
-
+HOST_DIR="${SYSTEMS_DIR}/${HOST}"
+HW_FILE="${HOST_DIR}/hardware-configuration.nix"
+DEFAULT_FILE="${HOST_DIR}/default.nix"
 mkdir -p "$HOST_DIR"
 
+# ── 1. Hardware ──────────────────────────────────────────────────────────────
+
+step "1 — Hardware configuration"
+
 if [[ -f "$HW_FILE" ]]; then
-    warn "Hardware configuration already exists for '${HOST}'."
-    echo -en "${BOLD}Overwrite it? [y/N] ${RESET}"
-    read -r ans
-    [[ "${ans,,}" == "y" || "${ans,,}" == "yes" ]] || die "Aborted."
-else
-    info "Detecting hardware for '${HOST}'..."
+    ask_yn "Overwrite existing ${HW_FILE}?" n || die "Aborted."
 fi
 
+stop_container_runtimes
+info "Running nixos-generate-config..."
 sudo nixos-generate-config
+[[ -f /etc/nixos/hardware-configuration.nix ]] \
+    || die "nixos-generate-config did not produce /etc/nixos/hardware-configuration.nix"
 sudo cp -f /etc/nixos/hardware-configuration.nix "$HW_FILE"
-sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$SYSTEMS_DIR"
+sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$HOST_DIR"
+strip_ephemeral_filesystems "$HW_FILE"
+sudo cp -f "$HW_FILE" /etc/nixos/hardware-configuration.nix
 git_stage "$HW_FILE"
-success "Hardware configuration written to ${HW_FILE}."
+success "Wrote ${HW_FILE}"
 
-# Snowfall expects systems/<arch>/<host>/default.nix
+# ── 2. Host scaffold ─────────────────────────────────────────────────────────
+
+step "2 — Host scaffold"
+
+WANT_SB=n
 if [[ ! -f "$DEFAULT_FILE" ]]; then
-    BOOT_LINES="# Optional: \${namespace}.boot.secureBoot = false;"
-    if [[ "$USE_EFI" -eq 0 ]]; then
-        GRUB_DEV="$(detect_grub_device)"
-        [[ -n "$GRUB_DEV" ]] || die "Could not detect a disk for GRUB."
-        BOOT_LINES="\${namespace}.boot = {
-    efi = false;
-    secureBoot = false;
-    grubDevice = \"${GRUB_DEV}\";
-  };"
-    elif [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
-        BOOT_LINES="\${namespace}.boot = {
-    secureBoot = false;
-  };"
+    if [[ "$USE_EFI" -eq 1 ]]; then
+        if [[ "$IS_VM" -eq 1 ]]; then
+            warn "VM with EFI — defaulting to secureBoot = false (systemd-boot)."
+            if ask_yn "Create Secure Boot keys / enable Lanzaboote anyway?" n; then
+                WANT_SB=y
+            fi
+        else
+            if ask_yn "Enable Secure Boot (Lanzaboote keys)?" y; then
+                WANT_SB=y
+            fi
+        fi
     fi
-    cat > "$DEFAULT_FILE" <<EOF
+
+    {
+        cat <<EOF
 { lib, namespace, ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
 
-  networking.hostName = "$HOST";
+  networking.hostName = "${HOST}";
 
   # Optional: \${namespace}.host = lib.\${namespace}.mkDualMonitorHost "HDMI-A-1";
-  ${BOOT_LINES}
-}
 EOF
+        boot_block_for_new_host "$WANT_SB"
+        echo "}"
+    } >"$DEFAULT_FILE"
+
     git_stage "$DEFAULT_FILE"
-    success "Created ${DEFAULT_FILE}."
+    success "Created ${DEFAULT_FILE}"
+else
+    success "Keeping existing ${DEFAULT_FILE} (not rewritten)."
+    if [[ "$USE_EFI" -eq 1 ]] && [[ ! -e "$DB_PEM" ]] && ! host_sets_secure_boot_false "$DEFAULT_FILE"; then
+        if ask_yn "No Secure Boot keys found — create them now?" "$([[ "$IS_VM" -eq 1 ]] && echo n || echo y)"; then
+            WANT_SB=y
+        fi
+    elif [[ -e "$DB_PEM" ]] && ! host_sets_secure_boot_false "$DEFAULT_FILE"; then
+        WANT_SB=y
+    fi
 fi
 
-step "Step 2 — Scaffold Home Manager User"
+# ── 3. Home scaffold ─────────────────────────────────────────────────────────
 
-HOMES_DIR="homes/x86_64-linux"
-USER_DIR="$HOMES_DIR/$OWNER_USER"
-HOME_DEFAULT="$USER_DIR/default.nix"
+step "3 — Home Manager user"
 
-info "Installing as user: ${BOLD}${OWNER_USER}${RESET}"
+USER_DIR="${HOMES_DIR}/${OWNER_USER}"
+HOME_DEFAULT="${USER_DIR}/default.nix"
+mkdir -p "$USER_DIR"
 
 if [[ -f "$HOME_DEFAULT" ]]; then
-    success "Home already exists at ${HOME_DEFAULT}."
+    success "Keeping existing ${HOME_DEFAULT}"
 else
-    mkdir -p "$USER_DIR"
-    cat > "$HOME_DEFAULT" <<EOF
+    cat >"$HOME_DEFAULT" <<EOF
+# Username = directory name. Shared modules: homes/common.nix.
 { ... }:
 
 {
@@ -345,178 +398,94 @@ else
   # Optional: mine.user.wallpaper = ./wall.png;
 }
 EOF
-    sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$HOMES_DIR"
+    sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$HOMES_DIR" 2>/dev/null || true
     git_stage "$HOME_DEFAULT"
-    success "Created ${HOME_DEFAULT}."
+    success "Created ${HOME_DEFAULT}"
 fi
 
 git_stage "$HOST_DIR" "$USER_DIR"
 
-step "Step 3 — Enable Flakes"
+# ── 4. Flakes + hooks ────────────────────────────────────────────────────────
 
-# Owner home — not root's $HOME when run via sudo.
+step "4 — Flakes"
+
 CONFIG_DIR="${OWNER_HOME}/.config/nix"
 CONFIG_FILE="${CONFIG_DIR}/nix.conf"
 FLAKES_LINE="experimental-features = nix-command flakes"
 
 if grep -Fxq "$FLAKES_LINE" "$CONFIG_FILE" 2>/dev/null; then
-    success "Flakes already enabled in ${CONFIG_FILE}."
+    success "Flakes already enabled (${CONFIG_FILE})."
 else
     if mkdir -p "$CONFIG_DIR" 2>/dev/null && [[ -w "$CONFIG_DIR" ]]; then
-        echo "$FLAKES_LINE" >> "$CONFIG_FILE"
+        echo "$FLAKES_LINE" >>"$CONFIG_FILE"
     else
         sudo mkdir -p "$CONFIG_DIR"
         echo "$FLAKES_LINE" | sudo tee -a "$CONFIG_FILE" >/dev/null
         sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$CONFIG_DIR"
     fi
-    success "Flakes enabled in ${CONFIG_FILE}."
+    success "Enabled flakes in ${CONFIG_FILE}."
 fi
-
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-step "Step 4 — Enable Git Hooks"
-
-HOOKS_PATH=".githooks"
-if [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == "$HOOKS_PATH" ]]; then
-    success "Git hooks already enabled (core.hooksPath=${HOOKS_PATH})."
-else
-    git config core.hooksPath "$HOOKS_PATH"
-    success "Git hooks enabled (core.hooksPath=${HOOKS_PATH})."
+if [[ -d .githooks ]]; then
+    if [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == ".githooks" ]]; then
+        success "Git hooks already enabled."
+    else
+        git config core.hooksPath .githooks
+        success "Enabled git hooks (core.hooksPath=.githooks)."
+    fi
 fi
 
-# Keys before rebuild: Lanzaboote needs db.pem, or host must set secureBoot = false.
-step "Step 5 — Secure Boot Keys (Lanzaboote)"
+# ── 5. Secure Boot keys ──────────────────────────────────────────────────────
 
-PKI_BUNDLE="/var/lib/sbctl"
-DB_PEM="${PKI_BUNDLE}/keys/db/db.pem"
-WANT_SECURE_BOOT=0
+step "5 — Secure Boot keys"
 
 if [[ "$USE_EFI" -eq 0 ]]; then
-    warn "Configuring BIOS/GRUB boot (no mounted EFI system partition at /boot)."
-    ensure_host_bios_boot "$DEFAULT_FILE"
+    warn "Non-EFI boot — skipping Lanzaboote keys."
 elif [[ -e "$DB_PEM" ]]; then
-    success "Secure Boot keys already present (${DB_PEM})."
-    if [[ "$SKIP_SB_ENROLL" -eq 1 ]] && ! host_tree_disables_secure_boot; then
-        warn "Keys exist, but this looks like a VM — Secure Boot enrollment is usually skipped."
-        echo -en "${BOLD}Disable Secure Boot on host '${HOST}'? [Y/n] ${RESET}"
-        read -r sb_dis_ans
-        sb_dis_ans="${sb_dis_ans:-y}"
-        if [[ "${sb_dis_ans,,}" == "y" || "${sb_dis_ans,,}" == "yes" ]]; then
-            ensure_host_disables_secure_boot "$DEFAULT_FILE"
-        else
-            WANT_SECURE_BOOT=1
-            warn "Keeping Secure Boot enabled — enrollment may still fail in this environment."
-        fi
-    else
-        WANT_SECURE_BOOT=1
-    fi
+    success "Keys already present (${DB_PEM})."
+elif [[ "$WANT_SB" == "y" ]]; then
+    info "Creating keys at ${PKI_BUNDLE}..."
+    run_sbctl create-keys
+    [[ -e "$DB_PEM" ]] || die "sbctl create-keys ran but ${DB_PEM} is missing."
+    success "Keys created."
 else
-    if [[ "$SKIP_SB_ENROLL" -eq 1 ]]; then
-        warn "VM: skipping Secure Boot keys by default."
-        echo -en "${BOLD}Create Secure Boot keys anyway? [y/N] ${RESET}"
-        read -r sb_ans
-        sb_ans="${sb_ans:-n}"
-    else
-        echo -en "${BOLD}Create Secure Boot keys (Lanzaboote)? [Y/n] ${RESET}"
-        read -r sb_ans
-        sb_ans="${sb_ans:-y}"
-    fi
-
-    if [[ "${sb_ans,,}" == "y" || "${sb_ans,,}" == "yes" ]]; then
-        info "Creating Secure Boot keys at ${PKI_BUNDLE}..."
-        info "(Required so Lanzaboote can sign boot generations on first switch.)"
-        sbctl create-keys
-        [[ -e "$DB_PEM" ]] || die "Keys were created but ${DB_PEM} is missing — aborting."
-        success "Keys created at ${PKI_BUNDLE}."
-        WANT_SECURE_BOOT=1
-    else
-        warn "Skipped key creation — disabling Secure Boot on host '${HOST}'."
-        ensure_host_disables_secure_boot "$DEFAULT_FILE"
-    fi
+    warn "No keys — host must set secureBoot = false (checked next)."
 fi
 
-if [[ "$USE_EFI" -eq 1 ]] && [[ ! -e "$DB_PEM" ]] && ! host_tree_disables_secure_boot; then
-    die "No keys at ${DB_PEM} and host under ${HOST_DIR} does not set secureBoot = false — refusing rebuild."
-fi
+require_boot_config "$DEFAULT_FILE"
 
-if [[ "$USE_EFI" -eq 0 ]] && ! host_tree_disables_efi; then
-    die "No ESP at /boot and host under ${HOST_DIR} does not set boot.efi = false — refusing rebuild."
-fi
+# ── 6. Rebuild ───────────────────────────────────────────────────────────────
 
-step "Step 6 — Apply System Configuration"
+step "6 — Apply configuration"
 
-# Root ignores user nix.conf — keep NIX_CONFIG for --flake on minimal installs.
-info "Running: sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake .#${HOST}"
-info "(Afterwards you can use: nh os switch .#${HOST})"
+info "sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake .#${HOST}"
 sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake ".#${HOST}"
-success "System configuration applied."
+success "Applied .#${HOST}"
 
-# Enrollment after rebuild (signed generations). Bare-metal EFI only.
-step "Step 7 — Secure Boot Enrollment"
+# ── 7. Enrollment notes ──────────────────────────────────────────────────────
 
-ENROLL_STATUS="skipped"
+step "7 — Done"
 
-if host_tree_disables_secure_boot; then
-    warn "Host has secureBoot = false — enrollment omitted."
-elif [[ ! -e "$DB_PEM" ]]; then
-    warn "No Secure Boot keys at ${DB_PEM} — enrollment omitted."
-elif [[ "$HAS_EFI" -eq 0 ]]; then
-    warn "No EFI firmware — sbctl enrollment omitted."
-elif [[ "$IS_VIRTUAL" -eq 1 ]]; then
-    warn "Virtual machine (${VIRT_NAME}) — firmware enrollment omitted."
-    warn "For guest Secure Boot, configure OVMF in the hypervisor; or keep mine.boot.secureBoot = false."
-elif [[ "$WANT_SECURE_BOOT" -eq 0 ]]; then
-    warn "Secure Boot was not requested — enrollment omitted."
-else
-    info "Verifying signed boot artefacts..."
-    if sbctl verify; then
-        success "Boot chain verifies as signed."
-        ENROLL_STATUS="verified"
+if [[ "$USE_EFI" -eq 1 && -e "$DB_PEM" ]] && ! host_sets_secure_boot_false "$DEFAULT_FILE"; then
+    if [[ "$IS_VM" -eq 1 ]]; then
+        warn "VM: firmware enrollment skipped. Keep secureBoot = false unless OVMF Secure Boot is set up."
     else
-        warn "sbctl verify reported issues — check output above before enrolling."
-        ENROLL_STATUS="verify-failed"
-    fi
-
-    echo ""
-    info "Firmware enrollment is still required once per machine:"
-    echo -e "  1. Reboot into firmware setup → enable ${BOLD}Setup Mode${RESET}"
-    echo -e "     (clear/factory-reset existing Secure Boot keys)"
-    echo -e "  2. Boot NixOS again, then run:"
-    echo -e "       ${BOLD}sudo sbctl enroll-keys -m${RESET}"
-    echo -e "     (${BOLD}-m${RESET} keeps Microsoft keys — needed for some GPUs/BitLocker media)"
-    echo -e "  3. Firmware → enable ${BOLD}Secure Boot${RESET}, disable Setup Mode, reboot"
-    echo -e "  4. Confirm with: ${BOLD}bootctl status${RESET} / ${BOLD}sbctl status${RESET}"
-    echo ""
-
-    STATUS_OUT="$(sbctl status 2>/dev/null || true)"
-    if echo "$STATUS_OUT" | grep -Eiq 'Setup Mode.*(Enabled|Yes)|Setup Mode:\s*Enabled'; then
-        warn "Firmware appears to be in Setup Mode right now."
-        echo -en "${BOLD}Enroll keys into UEFI now? [Y/n] ${RESET}"
-        read -r enroll_ans
-        enroll_ans="${enroll_ans:-y}"
-        if [[ "${enroll_ans,,}" == "y" || "${enroll_ans,,}" == "yes" ]]; then
-            info "Running: sudo sbctl enroll-keys -m"
-            sbctl enroll-keys -m
-            success "Keys enrolled. Enable Secure Boot in firmware and reboot."
-            ENROLL_STATUS="enrolled"
-        else
-            warn "Skipped enrollment — run ${BOLD}sudo sbctl enroll-keys -m${RESET} after entering Setup Mode."
-            ENROLL_STATUS="pending"
+        info "One-time Secure Boot enrollment (bare metal):"
+        echo -e "  1. Firmware → enable ${BOLD}Setup Mode${RESET} (clear Secure Boot keys)"
+        echo -e "  2. Boot NixOS, then: ${BOLD}sudo sbctl enroll-keys -m${RESET}"
+        echo -e "  3. Firmware → enable Secure Boot, reboot"
+        echo -e "  4. Confirm: ${BOLD}bootctl status${RESET} / ${BOLD}sbctl status${RESET}"
+        if run_sbctl status 2>/dev/null | grep -Eiq 'Setup Mode.*(Enabled|Yes)|Setup Mode:\s*Enabled'; then
+            if ask_yn "Firmware is in Setup Mode — enroll keys now?" y; then
+                run_sbctl enroll-keys -m
+                success "Keys enrolled. Enable Secure Boot in firmware and reboot."
+            fi
         fi
-    else
-        warn "Firmware is not in Setup Mode yet — enroll after step 1 above."
-        ENROLL_STATUS="pending"
     fi
 fi
 
 echo ""
-success "System install finished for host ${BOLD}${HOST}${RESET}."
-case "$ENROLL_STATUS" in
-    enrolled)   info "Secure Boot keys enrolled — enable Secure Boot in firmware if needed." ;;
-    verified)   info "Boot chain verified; firmware enrollment still pending (see step 7)." ;;
-    pending)    info "Secure Boot firmware enrollment still pending (see step 7)." ;;
-    verify-failed) warn "sbctl verify had issues — fix ESP/firmware before enrolling." ;;
-    skipped)    info "Secure Boot enrollment skipped (VM, non-EFI, or disabled on host)." ;;
-esac
-echo -e "  Rebuild later: ${BOLD}nh os switch .#${HOST}${RESET}  or  ${BOLD}sudo nixos-rebuild switch --flake .#${HOST}${RESET}"
+success "Finished for host ${BOLD}${HOST}${RESET}."
+echo -e "  Later: ${BOLD}nh os switch -H ${HOST}${RESET}  or  ${BOLD}sudo nixos-rebuild switch --flake .#${HOST}${RESET}"
 echo ""

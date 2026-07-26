@@ -162,7 +162,15 @@ Bootstrap a **new** machine from minimal NixOS:
 ./install.sh
 ```
 
-That generates hardware config, scaffolds host/user (with current `mkDualMonitorHost` / package override hints), stages new files for the flake, optionally creates Secure Boot keys, rebuilds, and guides UEFI enrollment. On VMs / non-EFI hosts it defaults to `secureBoot = false` and skips firmware enrollment.
+`install.sh` is a linear bootstrap:
+
+1. Detect boot path (EFI + `/boot` mounted → EFI; otherwise BIOS/GRUB)
+2. Generate `hardware-configuration.nix` (stops Docker/Podman first; strips overlay `fileSystems` that would break boot)
+3. Scaffold `systems/<arch>/<host>/default.nix` and `homes/<arch>/<user>/` **only if missing** (never rewrites an existing host file)
+4. Enable flakes; create Lanzaboote keys when you opt in
+5. `nixos-rebuild switch --flake .#<host>`
+
+New hosts get the right `mine.boot` block baked in (GRUB on non-EFI; `secureBoot = false` on VMs by default). If the host file already exists, fix boot options yourself — the script only checks and refuses to rebuild when requirements are unmet.
 
 ## 🛠 Development
 
@@ -197,4 +205,4 @@ That generates hardware config, scaffolds host/user (with current `mkDualMonitor
 
 ## 🔐 Secure Boot
 
-`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (Lanzaboote needs `keys/db/db.pem`). `./install.sh` asks before creating keys; declining writes `${namespace}.boot.secureBoot = false` on the host so the rebuild can proceed. On VMs / systems without a mounted ESP at `/boot`, the installer sets `mine.boot.efi = false` (GRUB) and skips Secure Boot. On bare-metal EFI with `/boot` mounted, enrollment (`sbctl enroll-keys -m` in Setup Mode) remains a one-time manual step.
+`mine.boot.secureBoot` (default `true`) uses Lanzaboote. Keys live in `/var/lib/sbctl` (`keys/db/db.pem`). On a **new** host, `./install.sh` asks whether to create keys; declining scaffolds `secureBoot = false`. Without a mounted ESP at `/boot`, new hosts get `efi = false` + GRUB. Firmware enrollment (`sbctl enroll-keys -m` in Setup Mode) is still a one-time bare-metal step after rebuild.
