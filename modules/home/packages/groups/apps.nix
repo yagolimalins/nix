@@ -54,7 +54,10 @@ in
     })
 
     (lib.mkIf cfg.communication.enable {
-      home.packages = [ pkgs.zoom-us ];
+      home.packages = with pkgs; [
+        zoom-us
+        discord
+      ];
     })
   ];
 }
