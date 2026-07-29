@@ -48,7 +48,6 @@ in
     (lib.mkIf cfg.ides.enable {
       home.packages = with pkgs; [
         vscode
-        zed-editor
         code-cursor
       ];
     })

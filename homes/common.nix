@@ -49,5 +49,6 @@
     "theme"
     "packages"
     "input-remapper"
+    "zed"
   ];
 }
