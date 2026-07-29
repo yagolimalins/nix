@@ -16,6 +16,19 @@ let
     pkgs.libGL
   ];
 
+  rustNativeLibs = waylandLibs ++ [
+    pkgs.alsa-lib
+    pkgs.udev
+  ];
+
+  rustNativePkgConfig = [
+    pkgs.wayland.dev
+    pkgs.libxkbcommon.dev
+    pkgs.vulkan-loader.dev
+    pkgs.alsa-lib.dev
+    pkgs.udev.dev
+  ];
+
   gtkLibs = [
     pkgs.gtk4
     pkgs.libadwaita
@@ -146,13 +159,16 @@ in
     # Single assignments so rust/gtk/wayland groups don't clash under mkMerge.
     (lib.mkIf (cfg.rust.enable || cfg.gtk.enable) {
       home.sessionVariables.PKG_CONFIG_PATH = lib.makeSearchPath "lib/pkgconfig" (
-        lib.optionals cfg.rust.enable [ pkgs.openssl.dev ] ++ lib.optionals cfg.gtk.enable gtkPkgConfig
+        lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
+        ++ lib.optionals cfg.gtk.enable gtkPkgConfig
       );
     })
 
-    (lib.mkIf (cfg.wayland.enable || cfg.gtk.enable) {
+    (lib.mkIf (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) {
       home.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath (
-        lib.optionals (cfg.wayland.enable || cfg.gtk.enable) waylandLibs
+        lib.optionals (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) (
+          if cfg.rust.enable then rustNativeLibs else waylandLibs
+        )
         ++ lib.optionals cfg.gtk.enable gtkLibs
       );
     })
