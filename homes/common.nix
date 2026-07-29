@@ -5,6 +5,17 @@
 {
   home.stateVersion = "26.05";
 
+  home.sessionVariables.BROWSER = "firefox";
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = [ "firefox.desktop" ];
+      "application/xhtml+xml" = [ "firefox.desktop" ];
+      "x-scheme-handler/http" = [ "firefox.desktop" ];
+      "x-scheme-handler/https" = [ "firefox.desktop" ];
+    };
+  };
+
   home.file = {
     "Desktop/.keep".text = "";
     "Development/.keep".text = "";
