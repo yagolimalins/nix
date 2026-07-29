@@ -57,6 +57,7 @@ in
       home.packages = with pkgs; [
         zoom-us
         discord
+        telegram-desktop
       ];
     })
   ];

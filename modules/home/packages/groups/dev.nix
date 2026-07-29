@@ -93,33 +93,44 @@ in
       home.packages = [ pkgs.maven ];
     })
 
-    (lib.mkIf cfg.rust.enable {
-      home.packages = with pkgs; [
-        rustc
-        cargo
-        rustfmt
-        clippy
-        rust-analyzer
-        sqlx-cli
-        sea-orm-cli
-        pkg-config
-        openssl
-        mold
-        sccache
-      ];
+    (lib.mkIf cfg.rust.enable (
+      let
+        # Binary toolchain with wasm target (nixpkgs rustc has host only).
+        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+          extensions = [
+            "rust-src"
+            "rustfmt"
+            "clippy"
+            "rust-analyzer"
+          ];
+          targets = [ "wasm32-unknown-unknown" ];
+        };
+      in
+      {
+        home.packages = with pkgs; [
+          rustToolchain
+          trunk
+          sqlx-cli
+          sea-orm-cli
+          pkg-config
+          openssl
+          mold
+          sccache
+        ];
 
-      home.sessionVariables = {
-        OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
-        OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
-        RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
-        RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
-      };
+        home.sessionVariables = {
+          OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
+          OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
+          RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+          RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
+        };
 
-      home.file.".cargo/config.toml".text = ''
-        [target.x86_64-unknown-linux-gnu]
-        rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-B${pkgs.mold}/bin"]
-      '';
-    })
+        home.file.".cargo/config.toml".text = ''
+          [target.x86_64-unknown-linux-gnu]
+          rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-B${pkgs.mold}/bin"]
+        '';
+      }
+    ))
 
     (lib.mkIf cfg.gtk.enable {
       home.packages = gtkLibs;

@@ -23,6 +23,11 @@
       url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -36,6 +41,8 @@
 
       # Prefer this over nixpkgs.config modules (conflicts with Snowfall's pkgs).
       channels-config.allowUnfree = true;
+
+      overlays = [ inputs.rust-overlay.overlays.default ];
 
       systems.modules.nixos = [
         inputs.lanzaboote.nixosModules.lanzaboote
