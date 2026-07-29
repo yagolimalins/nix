@@ -34,8 +34,8 @@ in
         format_on_save = "on";
         code_lens = "on";
         "experimental.semanticTokens" = "combined";
-        show_signature_help_after_edits = true;
-        auto_signature_help = true;
+        show_signature_help_after_edits = false;
+        auto_signature_help = false;
         gutter.runnables = true;
 
         languages.rust = {
