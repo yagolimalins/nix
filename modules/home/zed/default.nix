@@ -43,9 +43,9 @@ in
           format_on_save = "on";
           inlay_hints = {
             enabled = true;
-            show_type_hints = true;
-            show_parameter_hints = true;
-            show_other_hints = true;
+            show_type_hints = false;
+            show_parameter_hints = false;
+            show_other_hints = false;
           };
         };
 
@@ -84,6 +84,7 @@ in
             allFeatures = true;
           };
           inlayHints = {
+            chainingHints.enable = false;
             maxLength = null;
             lifetimeElisionHints = {
               enable = "skip_trivial";
