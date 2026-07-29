@@ -33,12 +33,12 @@ in
         show_edit_predictions = false;
         format_on_save = "on";
         code_lens = "on";
-        "experimental.semanticTokens" = "combined";
+        semantic_tokens = "combined";
         show_signature_help_after_edits = false;
         auto_signature_help = false;
         gutter.runnables = true;
 
-        languages.rust = {
+        languages.Rust = {
           show_edit_predictions = false;
           format_on_save = "on";
           inlay_hints = {
