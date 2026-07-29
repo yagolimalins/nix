@@ -32,7 +32,7 @@ in
         edit_predictions.provider = "zed";
         show_edit_predictions = false;
         format_on_save = "on";
-        code_lens = "on";
+        code_lens = "off";
         semantic_tokens = "combined";
         show_signature_help_after_edits = false;
         auto_signature_help = false;
