@@ -13,6 +13,18 @@
 
 let
   cfg = config.${namespace}.xdg;
+
+  # Stub overrides in ~/.local/share/applications (wins over system/profile).
+  hideFromLauncher = ids: lib.listToAttrs (
+    map (id: {
+      name = id;
+      value = {
+        name = id;
+        noDisplay = true;
+        exec = "true";
+      };
+    }) ids
+  );
 in
 {
   options.${namespace}.xdg.enable = lib.mkEnableOption "XDG dirs, mime defaults, and HM force flags";
@@ -29,6 +41,27 @@ in
         "x-scheme-handler/https" = [ "firefox.desktop" ];
       };
     };
+
+    # CLI/demos/helpers that clutter fuzzel — keep Spotify, Blueman Manager, etc.
+    xdg.desktopEntries = hideFromLauncher [
+      "btop"
+      "nvim"
+      "org.gtk.Demo4"
+      "org.gtk.WidgetFactory4"
+      "org.gtk.PrintEditor4"
+      "org.gtk.gtk4.NodeEditor"
+      "org.gtk.Shaper"
+      "blueman-adapters"
+      "org.fcitx.Fcitx5"
+      "org.fcitx.fcitx5-migrator"
+      "kbd-layout-viewer5"
+      "carla-control"
+      "cups"
+      "nm-connection-editor"
+      "thunar-settings"
+      "thunar-volman-settings"
+      "thunar-bulk-rename"
+    ];
 
     home.file = {
       "Desktop/.keep".text = "";
