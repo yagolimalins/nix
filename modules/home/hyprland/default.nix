@@ -42,7 +42,7 @@ in
       settings = {
         "$mod" = "SUPER";
         "$terminal" = "kitty";
-        "$launcher" = "pgrep wofi || wofi --show drun --hide-actions";
+        "$launcher" = "pkill fuzzel || fuzzel";
 
         monitor = hostCfg.monitors;
         workspace = hostCfg.workspaces;
@@ -236,13 +236,15 @@ in
           "$mod, mouse:273, resizewindow"
         ];
 
+        # Fuzzel resizes after the first buffer (upstream quirk); Hyprland would
+        # animate that as a weird settle/pop — disable layer anim for it.
         layerrule = [
-          "blur on, match:namespace wofi"
+          "blur on, match:namespace launcher"
+          "ignore_alpha 0.2, match:namespace launcher"
+          "no_anim on, match:namespace launcher"
         ];
 
         windowrule = [
-          "float on,  match:class wofi"
-          "center on, match:class wofi"
           "float on,  match:title Open File"
           "center on, match:title Open File"
           "float on,  match:title Save As"

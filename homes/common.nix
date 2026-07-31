@@ -9,7 +9,7 @@
     "xdg"
     "hyprland"
     "waybar"
-    "wofi"
+    "fuzzel"
     "kitty"
     "shell"
     "notifications"

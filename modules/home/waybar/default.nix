@@ -354,10 +354,10 @@ in
             tooltip = false;
           };
 
-          # Power menu — single button with wofi
+          # Power menu — fuzzel dmenu
           "custom/power" = {
             format = "󰐥";
-            on-click = ''bash -c 'pgrep wofi && exit; choice=$(echo -e "Logout\nRestart\nShutdown" | wofi --dmenu --prompt "Power" --width 140 --height 160); case "$choice" in Logout) hyprctl dispatch exit;; Restart) systemctl reboot;; Shutdown) systemctl poweroff;; esac' '';
+            on-click = ''bash -c 'pkill fuzzel; choice=$(echo -e "Logout\nRestart\nShutdown" | fuzzel --dmenu --minimal-lines --width=12 --prompt "Power> "); case "$choice" in Logout) hyprctl dispatch exit;; Restart) systemctl reboot;; Shutdown) systemctl poweroff;; esac' '';
             tooltip = false;
           };
 
