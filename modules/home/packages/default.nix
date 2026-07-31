@@ -29,6 +29,8 @@ let
     "js"
     "jvm"
     "rust"
+    "dioxus"
+    "tauri"
     "gtk"
     "dotnet"
     "databases"
@@ -75,6 +77,8 @@ in
     js.enable = mkGroup "JavaScript / TypeScript";
     jvm.enable = mkGroup "JVM tooling";
     rust.enable = mkGroup "Rust toolchain (stable + wasm32-unknown-unknown + trunk)";
+    dioxus.enable = mkGroup "Dioxus CLI + web/desktop native deps";
+    tauri.enable = mkGroup "Tauri CLI, create-tauri-app, + Linux WebKit/GTK deps";
     gtk.enable = mkGroup "GTK4/Libadwaita (Relm4, …)";
     dotnet.enable = mkGroup ".NET SDK";
 

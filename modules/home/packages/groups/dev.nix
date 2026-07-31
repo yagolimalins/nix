@@ -31,6 +31,31 @@ let
     pkgs.udev.dev
   ];
 
+  # Shared wry/tao stack (Dioxus desktop + Tauri).
+  wryDesktopLibs = [
+    pkgs.webkitgtk_4_1
+    pkgs.gtk3
+    pkgs.libayatana-appindicator
+  ];
+
+  wryDesktopPkgConfig = [
+    pkgs.webkitgtk_4_1.dev
+    pkgs.gtk3.dev
+  ];
+
+  # Tauri v2 Linux extras beyond the wry stack (see tauri.app prerequisites).
+  tauriLibs = wryDesktopLibs ++ [
+    pkgs.librsvg
+    pkgs.xdotool
+    pkgs.libsoup_3
+    pkgs.glib-networking
+  ];
+
+  tauriPkgConfig = wryDesktopPkgConfig ++ [
+    pkgs.librsvg.dev
+    pkgs.libsoup_3.dev
+  ];
+
   gtkLibs = [
     pkgs.gtk4
     pkgs.libadwaita
@@ -162,6 +187,28 @@ in
       }
     ))
 
+    (lib.mkIf (on "dioxus") {
+      home.packages = [
+        (lib.hiPrio pkgs.dioxus-cli)
+        pkgs.wasm-bindgen-cli
+        pkgs.binaryen
+        pkgs.lld
+      ] ++ wryDesktopLibs;
+    })
+
+    (lib.mkIf (on "tauri") {
+      # Native libs stay on PKG_CONFIG_PATH / LD_LIBRARY_PATH only —
+      # putting librsvg in home.packages conflicts with gdk-pixbuf's loaders.cache.
+      home.packages = [
+        pkgs.cargo-tauri
+        pkgs.${namespace}.create-tauri-app
+        pkgs.xdotool
+      ];
+
+      # Common NixOS + WebKitGTK workaround for blank/broken webviews.
+      home.sessionVariables.WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+    })
+
     (lib.mkIf (on "gtk") {
       home.packages = gtkLibs;
     })
@@ -173,20 +220,35 @@ in
       ];
     })
 
-    # Single assignments so rust/gtk/wayland groups don't clash under mkMerge.
-    (lib.mkIf (cfg.enable && (cfg.rust.enable || cfg.gtk.enable)) {
+    # Single assignments so rust/gtk/wayland/dioxus/tauri groups don't clash under mkMerge.
+    (lib.mkIf (
+      cfg.enable && (cfg.rust.enable || cfg.gtk.enable || cfg.dioxus.enable || cfg.tauri.enable)
+    ) {
       home.sessionVariables.PKG_CONFIG_PATH = lib.makeSearchPath "lib/pkgconfig" (
         lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
         ++ lib.optionals cfg.gtk.enable gtkPkgConfig
+        ++ lib.optionals cfg.dioxus.enable wryDesktopPkgConfig
+        ++ lib.optionals cfg.tauri.enable tauriPkgConfig
       );
     })
 
-    (lib.mkIf (cfg.enable && (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable)) {
+    (lib.mkIf (
+      cfg.enable
+      && (
+        cfg.wayland.enable
+        || cfg.gtk.enable
+        || cfg.rust.enable
+        || cfg.dioxus.enable
+        || cfg.tauri.enable
+      )
+    ) {
       home.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath (
         lib.optionals (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) (
           if cfg.rust.enable then rustNativeLibs else waylandLibs
         )
         ++ lib.optionals cfg.gtk.enable gtkLibs
+        ++ lib.optionals cfg.dioxus.enable wryDesktopLibs
+        ++ lib.optionals cfg.tauri.enable tauriLibs
       );
     })
   ];
