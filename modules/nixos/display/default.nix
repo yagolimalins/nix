@@ -1,4 +1,8 @@
-# Hyprland, greetd/tuigreet, logind, XDG portals.
+#
+# display — System Hyprland stack (greetd, portals, logind)
+#
+# Pairs with HM mine.hyprland. Not the file-manager "desktop" module.
+#
 {
   config,
   lib,
@@ -10,6 +14,7 @@
 let
   cfg = config.${namespace}.display;
   gtkPortal = lib.${namespace}.mkGtkHyprlandPortal pkgs;
+  palette = lib.${namespace}.palette;
 in
 {
   options.${namespace}.display.enable =
@@ -36,7 +41,7 @@ in
             --greeting "  ${config.networking.hostName}" \
             --asterisks \
             --cmd "start-hyprland &>/dev/null" \
-            --theme "border=#cc2222;text=#dedede;prompt=#7a7a7a;time=#dedede;action=#7a7a7a;button=#171717;container=#171717;input=#dedede"
+            --theme "border=${palette.accent};text=${palette.text};prompt=${palette.muted};time=${palette.text};action=${palette.muted};button=${palette.surface};container=${palette.surface};input=${palette.text}"
         '';
         user = "greeter";
       };

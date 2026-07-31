@@ -1,7 +1,10 @@
-# HM-managed presets are store symlinks — edit here and rebuild (GUI can't save).
-# Login: Hyprland exec-once. Rebuild: NixOS input-remapper ExecStartPost.
-# Avoid a user oneshot here — HM waits on it during switch while the system
-# daemon is still restarting, which added ~1min of failed retries per activate.
+#
+# input-remapper — Declarative presets + Hyprland login autoload
+#
+# Presets are store symlinks (GUI can't save). Rebuild reload:
+# NixOS mine.input-remapper ExecStartPost (runuser). Avoid HM oneshots —
+# activation waits on them while the system daemon restarts.
+#
 {
   config,
   lib,
@@ -49,6 +52,10 @@ in
     lib.mkEnableOption "declarative input-remapper presets";
 
   config = lib.mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings.exec-once = [
+      "input-remapper-control --command autoload"
+    ];
+
     xdg.configFile."input-remapper-2/config.json" = {
       force = true;
       text = builtins.toJSON {

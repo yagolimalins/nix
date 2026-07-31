@@ -1,10 +1,8 @@
 #
-# desktop.nix — Desktop integration
+# desktop — Session integration (not the WM; see display + hyprland)
 #
-# The bits that make a bare compositor feel like a desktop: power stats,
-# removable-media mounting, the Thunar file manager, the GNOME keyring
-# (unlocked at login by tuigreet), dconf for GTK settings, and a couple
-# of archive utilities.
+# Power stats, GVFS/Thunar system bits, GNOME keyring (tuigreet unlock),
+# dconf, archives.
 #
 {
   config,

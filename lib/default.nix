@@ -9,6 +9,19 @@
       enable = true;
     });
 
+  # Shared UI palette (Hyprland / Waybar / Kitty / Mako / …).
+  palette = {
+    bg = "#0d0d0d";
+    surface = "#171717";
+    border = "#222222";
+    text = "#dedede";
+    muted = "#7a7a7a";
+    accent = "#cc2222";
+    urgent = "#e63329";
+    warning = "#e8a045";
+    ok = "#5a9e5a";
+  };
+
   # Ultrawide HDMI + internal eDP layout shared by thinkpad/laptop hosts.
   mkDualMonitorHost =
     hdmi:

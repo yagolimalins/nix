@@ -1,8 +1,5 @@
 #
-# kitty.nix — Kitty terminal
-#
-# JetBrains Mono at 14pt with a tango-dark palette recoloured around the
-# system red (#cc2222) accent.
+# kitty — Terminal (tango-dark ANSI + lib.mine.palette chrome)
 #
 {
   config,
@@ -13,6 +10,7 @@
 
 let
   cfg = config.${namespace}.kitty;
+  palette = lib.${namespace}.palette;
 in
 {
   options.${namespace}.kitty.enable =
@@ -26,13 +24,13 @@ in
         size = 14;
       };
       settings = {
-        foreground = "#dedede";
-        background = "#0d0d0d";
-        selection_foreground = "#0d0d0d";
-        selection_background = "#cc2222";
-        cursor = "#cc2222";
-        cursor_text_color = "#0d0d0d";
-        url_color = "#cc2222";
+        foreground = palette.text;
+        background = palette.bg;
+        selection_foreground = palette.bg;
+        selection_background = palette.accent;
+        cursor = palette.accent;
+        cursor_text_color = palette.bg;
+        url_color = palette.accent;
 
         # Terminal color palette (tango-dark base)
         color0 = "#2e2e2e";
@@ -63,11 +61,11 @@ in
         tab_bar_style = "separator";
         tab_separator = "  │  ";
         tab_bar_background = "#0a0a0a";
-        active_tab_foreground = "#cc2222";
-        active_tab_background = "#0d0d0d";
+        active_tab_foreground = palette.accent;
+        active_tab_background = palette.bg;
         active_tab_font_style = "bold";
         inactive_tab_foreground = "#444444";
-        inactive_tab_background = "#0d0d0d";
+        inactive_tab_background = palette.bg;
       };
     };
   };

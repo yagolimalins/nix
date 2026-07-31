@@ -1,14 +1,5 @@
 #
-# shell.nix — Zsh + Starship
-#
-# oh-my-zsh for plugins, zsh-autosuggestions and zsh-syntax-highlighting
-# for inline completions/colouring, and Starship as the prompt.
-# direnv hooks are injected automatically by the programs.direnv module.
-#
-# Colour palette — matches the system ThinkPad theme:
-#   #cc2222  accent red       #dedede  primary text
-#   #e63329  bright red       #aaaaaa  secondary text
-#   #5a9e5a  green (positive) #7a7a7a  muted text
+# shell — Zsh + Starship (direnv hooks come from programs.direnv)
 #
 {
   config,
@@ -19,6 +10,7 @@
 
 let
   cfg = config.${namespace}.shell;
+  palette = lib.${namespace}.palette;
 in
 {
   options.${namespace}.shell.enable = lib.mkEnableOption "Zsh + Starship prompt";
@@ -66,26 +58,26 @@ in
         add_newline = false;
 
         directory = {
-          style = "bold #cc2222";
+          style = "bold ${palette.accent}";
         };
         git_branch = {
-          style = "bold #dedede";
+          style = "bold ${palette.text}";
         };
         git_status = {
-          style = "bold #cc2222";
+          style = "bold ${palette.accent}";
         };
         cmd_duration = {
-          style = "#7a7a7a";
+          style = palette.muted;
         };
         username = {
-          style_user = "bold #dedede";
-          style_root = "bold #e63329";
+          style_user = "bold ${palette.text}";
+          style_root = "bold ${palette.urgent}";
         };
         hostname = {
           style = "bold #aaaaaa";
         };
         nix_shell = {
-          style = "bold #5a9e5a";
+          style = "bold ${palette.ok}";
         };
 
         # character has colors embedded in the symbol strings.

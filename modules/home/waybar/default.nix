@@ -1,24 +1,167 @@
 #
-# waybar.nix — Status bar
+# waybar — Status bar + Hyprland autostart
 #
-# Top bar with workspaces, media, clock, and a right-hand cluster of
-# system indicators (audio, network, battery, CPU/temp, VPN, night-shift
-# and CPU-governor toggles, tray, power menu).
+# CSS is generated from lib.mine.palette (no separate style.css).
 #
 {
   config,
   lib,
+  pkgs,
   namespace,
   ...
 }:
 
 let
   cfg = config.${namespace}.waybar;
+  palette = lib.${namespace}.palette;
+
+  style = ''
+    * {
+      font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
+      font-size: 16px;
+      min-height: 0;
+    }
+
+    window#waybar {
+      background-color: ${palette.bg};
+      border-bottom: 1px solid ${palette.accent};
+      color: ${palette.text};
+    }
+
+    #workspaces { margin: 0 4px; }
+
+    #workspaces button {
+      all: unset;
+      padding: 0 10px;
+      margin: 4px 1px;
+      background-color: ${palette.surface};
+      color: ${palette.muted};
+      border-radius: 2px;
+      border: 1px solid ${palette.border};
+      min-width: 24px;
+      transition: all 0.1s ease;
+    }
+
+    #workspaces button:hover {
+      background-color: ${palette.border};
+      color: ${palette.text};
+      border-color: #333333;
+    }
+
+    #workspaces button.active {
+      background-color: ${palette.accent};
+      color: ${palette.text};
+      border-color: ${palette.accent};
+      font-weight: bold;
+    }
+
+    #workspaces button.urgent {
+      background-color: ${palette.urgent};
+      color: ${palette.bg};
+      border-color: ${palette.urgent};
+    }
+
+    #mpris {
+      padding: 0 12px;
+      margin: 4px 1px;
+      background-color: ${palette.surface};
+      border: 1px solid ${palette.border};
+      border-radius: 2px;
+      color: ${palette.text};
+      font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
+    }
+    #mpris.paused { color: ${palette.muted}; }
+
+    #clock,
+    #pulseaudio,
+    #network,
+    #custom-vpn,
+    #battery,
+    #cpu,
+    #temperature,
+    #custom-nightshift,
+    #custom-cpugov,
+    #tray {
+      padding: 0 12px;
+      margin: 4px 1px;
+      background-color: ${palette.surface};
+      border: 1px solid ${palette.border};
+      border-radius: 2px;
+      color: ${palette.text};
+    }
+
+    #clock { font-weight: bold; letter-spacing: 0.5px; }
+
+    #pulseaudio       { color: ${palette.text}; }
+    #pulseaudio.muted { color: ${palette.muted}; }
+
+    #network              { color: ${palette.text}; }
+    #network.disconnected { color: ${palette.accent}; }
+
+    #battery,
+    #battery-bat0,
+    #battery-bat1     { color: ${palette.text}; }
+    #battery.warning,
+    #battery-bat0.warning,
+    #battery-bat1.warning  { color: ${palette.warning}; }
+    #battery.critical,
+    #battery-bat0.critical,
+    #battery-bat1.critical { color: ${palette.accent}; }
+    #battery.charging,
+    #battery-bat0.charging,
+    #battery-bat1.charging { color: ${palette.ok}; }
+
+    #cpu { color: ${palette.text}; }
+
+    #temperature          { color: ${palette.text}; }
+    #temperature.critical { color: ${palette.accent}; }
+
+    #custom-vpn.connected { color: ${palette.ok}; }
+    #custom-vpn.off       { color: transparent; padding: 0; margin: 0; min-width: 0; border: none; }
+
+    #custom-nightshift.on  { color: ${palette.warning}; }
+    #custom-nightshift.off { color: ${palette.muted}; }
+
+    #custom-cpugov.perf { color: ${palette.accent}; }
+    #custom-cpugov.save { color: ${palette.ok}; }
+
+    #tray > .needs-attention { border-color: ${palette.accent}; }
+
+    tooltip {
+      background-color: ${palette.bg};
+      border: 1px solid ${palette.accent};
+      border-radius: 4px;
+      padding: 8px;
+    }
+
+    tooltip label { font-size: 16px; color: ${palette.text}; }
+
+    #custom-power {
+      padding: 0 10px;
+      margin: 4px 1px;
+      background-color: ${palette.surface};
+      border: 1px solid ${palette.border};
+      border-radius: 2px;
+      color: ${palette.muted};
+      transition: all 0.1s ease;
+    }
+
+    #custom-power:hover {
+      background-color: #1a0000;
+      color: ${palette.urgent};
+      border-color: ${palette.accent};
+    }
+  '';
 in
 {
   options.${namespace}.waybar.enable = lib.mkEnableOption "Waybar status bar";
 
   config = lib.mkIf cfg.enable {
+    # Restart loop: Waybar occasionally exits on monitor changes.
+    wayland.windowManager.hyprland.settings.exec-once = [
+      "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
+    ];
+
     programs.waybar = {
       enable = true;
       systemd.enable = false;
@@ -79,10 +222,10 @@ in
             calendar = {
               mode = "month";
               format = {
-                months = "<span color='#cc2222'><b>{}</b></span>";
-                days = "<span color='#dedede'>{}</span>";
-                weekdays = "<span color='#7a7a7a'><b>{}</b></span>";
-                today = "<span color='#e63329'><b><u>{}</u></b></span>";
+                months = "<span color='${palette.accent}'><b>{}</b></span>";
+                days = "<span color='${palette.text}'>{}</span>";
+                weekdays = "<span color='${palette.muted}'><b>{}</b></span>";
+                today = "<span color='${palette.urgent}'><b><u>{}</u></b></span>";
               };
             };
           };
@@ -226,148 +369,7 @@ in
         }
       ];
 
-      style = ''
-              * {
-                font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
-                font-size: 16px;
-                min-height: 0;
-              }
-
-              window#waybar {
-                background-color: #0d0d0d;
-                border-bottom: 1px solid #cc2222;
-                color: #dedede;
-              }
-
-              /* ── Workspaces ─────────────────────────────────── */
-              #workspaces { margin: 0 4px; }
-
-              #workspaces button {
-                all: unset;
-                padding: 0 10px;
-                margin: 4px 1px;
-                background-color: #171717;
-                color: #7a7a7a;
-                border-radius: 2px;
-                border: 1px solid #222222;
-                min-width: 24px;
-                transition: all 0.1s ease;
-              }
-
-              #workspaces button:hover {
-                background-color: #222222;
-                color: #dedede;
-                border-color: #333333;
-              }
-
-              #workspaces button.active {
-                background-color: #cc2222;
-                color: #dedede;
-                border-color: #cc2222;
-                font-weight: bold;
-              }
-
-              #workspaces button.urgent {
-                background-color: #e63329;
-                color: #0d0d0d;
-                border-color: #e63329;
-              }
-
-        /* ── Media player ──────────────────────────────── */
-              #mpris {
-                padding: 0 12px;
-                margin: 4px 1px;
-                background-color: #171717;
-                border: 1px solid #222222;
-                border-radius: 2px;
-                color: #dedede;
-                font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
-              }
-              #mpris.paused { color: #7a7a7a; }
-
-              /* ── Shared module base ─────────────────────────── */
-              #clock,
-              #pulseaudio,
-              #network,
-              #custom-vpn,
-              #battery,
-              #cpu,
-              #temperature,
-              #custom-nightshift,
-              #custom-cpugov,
-              #tray {
-                padding: 0 12px;
-                margin: 4px 1px;
-                background-color: #171717;
-                border: 1px solid #222222;
-                border-radius: 2px;
-                color: #dedede;
-              }
-
-              #clock { font-weight: bold; letter-spacing: 0.5px; }
-
-              #pulseaudio       { color: #dedede; }
-              #pulseaudio.muted { color: #7a7a7a; }
-
-              #network              { color: #dedede; }
-              #network.disconnected { color: #cc2222; }
-
-              #battery,
-              #battery-bat0,
-              #battery-bat1     { color: #dedede; }
-              #battery.warning,
-              #battery-bat0.warning,
-              #battery-bat1.warning  { color: #e8a045; }
-              #battery.critical,
-              #battery-bat0.critical,
-              #battery-bat1.critical { color: #cc2222; }
-              #battery.charging,
-              #battery-bat0.charging,
-              #battery-bat1.charging { color: #5a9e5a; }
-
-              #cpu { color: #dedede; }
-
-              #temperature          { color: #dedede; }
-              #temperature.critical { color: #cc2222; }
-
-              #custom-vpn.connected { color: #5a9e5a; }
-              #custom-vpn.off       { color: transparent; padding: 0; margin: 0; min-width: 0; border: none; }
-
-              #custom-nightshift.on  { color: #e8a045; }
-              #custom-nightshift.off { color: #7a7a7a; }
-
-              #custom-cpugov.perf { color: #cc2222; }
-              #custom-cpugov.save { color: #5a9e5a; }
-
-              #tray > .needs-attention { border-color: #cc2222; }
-
-              /* ── Calendar tooltip ───────────────────────────── */
-              tooltip {
-                background-color: #0d0d0d;
-                border: 1px solid #cc2222;
-                border-radius: 4px;
-                padding: 8px;
-              }
-
-              tooltip label { font-size: 16px; color: #dedede; }
-
-              /* ── Power button ───────────────────────────────── */
-              #custom-power {
-                padding: 0 10px;
-                margin: 4px 1px;
-                background-color: #171717;
-                border: 1px solid #222222;
-                border-radius: 2px;
-                color: #7a7a7a;
-                transition: all 0.1s ease;
-              }
-
-              #custom-power:hover {
-                background-color: #1a0000;
-                color: #e63329;
-                border-color: #cc2222;
-              }
-      '';
+      inherit style;
     };
   };
 }

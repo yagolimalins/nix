@@ -1,5 +1,6 @@
-# User package orchestrator. `enable` turns on direnv and defaults every
-# group to on; override with e.g. `mine.packages.ides.enable = false`.
+# User package orchestrator. `enable` turns on direnv, defaults every group
+# to on, and gates all group installs — leaf `*.enable = true` alone is not
+# enough. Override with e.g. `mine.packages.ides.enable = false`.
 {
   config,
   lib,

@@ -1,7 +1,12 @@
-# Monitors/workspaces: osConfig.${namespace}.host
-# Wallpaper: config.${namespace}.user
-# Portal stub also in home profile — xdg-desktop-portal only scans the first
+#
+# hyprland — Compositor (pairs with NixOS mine.display)
+#
+# Monitors/workspaces: osConfig.mine.host. Wallpaper: mine.user.
+# Autostart for waybar/mako/hypridle/input-remapper/tumblerd lives in those
+# modules. Portal stub also in HM — xdg-desktop-portal only scans the first
 # portals/ dir on XDG_DATA_DIRS (~/.nix-profile shadows /run/current-system).
+# Cursor: mine.theme.
+#
 {
   config,
   lib,
@@ -16,20 +21,15 @@ let
   hostCfg = osConfig.${namespace}.host;
   userCfg = config.${namespace}.user;
   gtkPortal = lib.${namespace}.mkGtkHyprlandPortal pkgs;
+  palette = lib.${namespace}.palette;
+  accentRgb = builtins.substring 1 6 palette.accent;
+  borderRgb = builtins.substring 1 6 palette.border;
 in
 {
   options.${namespace}.hyprland.enable =
-    lib.mkEnableOption "Hyprland compositor config (monitors, keybinds, autostart)";
+    lib.mkEnableOption "Hyprland compositor config (monitors, keybinds, session bootstrap)";
 
   config = lib.mkIf cfg.enable {
-    home.pointerCursor = {
-      gtk.enable = true;
-      x11.enable = true;
-      name = "Bibata-Modern-Classic";
-      package = pkgs.bibata-cursors;
-      size = 24;
-    };
-
     home.packages = [
       pkgs.swaybg
       pkgs.hyprpolkitagent
@@ -47,27 +47,21 @@ in
         monitor = hostCfg.monitors;
         workspace = hostCfg.workspaces;
 
+        # Session bootstrap only — feature modules append their own exec-once.
         exec-once = [
           "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
           "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
           "bash -c 'systemctl --user start xdg-desktop-portal-gtk.service; sleep 1; systemctl --user restart xdg-desktop-portal.service'"
           "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
-          "bash -c 'while true; do ${pkgs.waybar}/bin/waybar; sleep 1; done'"
           "swaybg -i ${userCfg.wallpaper} -m fill"
           "fcitx5 -d"
-          "mako"
           "nm-applet --indicator"
           "blueman-applet"
-          "hypridle"
-          "tumblerd"
-          "input-remapper-control --command autoload"
         ];
 
         env = [
           "QT_IM_MODULE,fcitx"
           "XMODIFIERS,@im=fcitx"
-          "XCURSOR_THEME,Bibata-Modern-Classic"
-          "XCURSOR_SIZE,24"
           "GDK_BACKEND,wayland,x11,*"
           "QT_QPA_PLATFORM,wayland;xcb"
           "MOZ_ENABLE_WAYLAND,1"
@@ -78,8 +72,8 @@ in
           gaps_in = 4;
           gaps_out = 8;
           border_size = 1;
-          "col.active_border" = "rgba(cc2222ff)";
-          "col.inactive_border" = "rgba(222222ff)";
+          "col.active_border" = "rgba(${accentRgb}ff)";
+          "col.inactive_border" = "rgba(${borderRgb}ff)";
           layout = "dwindle";
           resize_on_border = true;
         };

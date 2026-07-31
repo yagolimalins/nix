@@ -1,3 +1,4 @@
+# Package group: media, creator, audio (gated by mine.packages.enable).
 {
   config,
   lib,
@@ -8,24 +9,25 @@
 
 let
   cfg = config.${namespace}.packages;
+  on = group: cfg.enable && cfg.${group}.enable;
 in
 {
   config = lib.mkMerge [
-    (lib.mkIf cfg.media.enable {
+    (lib.mkIf (on "media") {
       home.packages = with pkgs; [
         vlc
         popcorntime
       ];
     })
 
-    (lib.mkIf cfg.creator.enable {
+    (lib.mkIf (on "creator") {
       home.packages = with pkgs; [
         obs-studio
         kdePackages.kdenlive
       ];
     })
 
-    (lib.mkIf cfg.audio.enable {
+    (lib.mkIf (on "audio") {
       xdg.desktopEntries.reaper = {
         name = "REAPER";
         exec = "pw-jack reaper %U";

@@ -1,7 +1,5 @@
 #
-# notifications.nix — Mako notification daemon
-#
-# Dark theme matching the system red/charcoal palette.
+# notifications — Mako + Hyprland autostart
 #
 {
   config,
@@ -12,18 +10,21 @@
 
 let
   cfg = config.${namespace}.notifications;
+  palette = lib.${namespace}.palette;
 in
 {
   options.${namespace}.notifications.enable = lib.mkEnableOption "Mako notification daemon";
 
   config = lib.mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings.exec-once = [ "mako" ];
+
     services.mako = {
       enable = true;
       settings = {
         font = "JetBrainsMono Nerd Font 14";
-        "background-color" = "#0d0d0d";
-        "border-color" = "#cc2222";
-        "text-color" = "#dedede";
+        "background-color" = palette.bg;
+        "border-color" = palette.accent;
+        "text-color" = palette.text;
         "border-size" = 1;
         "border-radius" = 3;
         "default-timeout" = 5000;

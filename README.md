@@ -43,7 +43,7 @@ Hyprland + Waybar on ThinkPad T480 (NixOS 26.05):
 | `homes/` | Users: HM entry points; username = directory name |
 | `modules/nixos/` | Opt-in NixOS features (boot, audio, display, …) |
 | `modules/home/` | Opt-in HM features (hyprland, shell, packages, …) |
-| `lib/` | Shared Nix functions under `lib.mine` |
+| `lib/` | Shared Nix functions under `lib.mine` (incl. `palette`) |
 | `overlays/` | *(unused)* — add Snowfall overlays here if needed |
 | `packages/` | *(unused)* — Snowfall custom packages output, not HM package lists |
 
@@ -68,16 +68,27 @@ A home **without** `@host` applies on every machine. Use `user@host` only when y
 
 ### 🧩 Modules
 
-- **NixOS:** boot, networking, locale, display, desktop, audio, bluetooth, printing, users, virtualisation, security-related (lanzaboote via boot), services (dns, postgresql, tailscale, …).
-- **Home:** shell, terminal (kitty), desktop (hyprland, waybar, theme, …), development (`packages` groups), services (mail, nightshift, …).
+- **NixOS:** boot, networking, locale, display, desktop, audio, bluetooth, printing, users, virtualisation, services (dns, postgresql, tailscale, …).
+- **Home:** shell, terminal (kitty), session (hyprland, waybar, theme, xdg, …), development (`packages` groups), services (mail, nightshift, …).
 
 Facts modules (`mine.host`, `mine.user`) are options-only and always imported.
+
+**Module pairs (don’t merge across layers):**
+
+| Pair | Role |
+|------|------|
+| `display` ↔ `hyprland` | System session (greetd/portals) ↔ user WM config |
+| `desktop` | Session integration only (Thunar system bits, keyring, upower) — not the WM |
+| `input-remapper` (nixos + home) | Daemon/polkit ↔ declarative presets + login autoload |
+| `mail` vs `packages.mail` | Proton Bridge service ↔ Thunderbird package group |
+
+Shared UI colours live in `lib.mine.palette`. Cursor/XCURSOR comes from `mine.theme`.
 
 ### 📦 Packages
 
 HM module `mine.packages` — not a Snowfall `packages/` flake output.
 
-- `mine.packages.enable` → direnv + all groups default on
+- `mine.packages.enable` → direnv + all groups default on; **required** for any group to install
 - Groups live under `modules/home/packages/groups/` (`system`, `desktop`, `dev`, `apps`, `media`)
 - Opt out: `mine.packages.ides.enable = false`
 
@@ -88,6 +99,7 @@ Integrated by Snowfall as a NixOS module (same generation as the system). Homes 
 ### 📚 Lib
 
 `lib.mine.enable-modules` — batch-enable modules  
+`lib.mine.palette` — shared UI colours  
 `lib.mine.mkDualMonitorHost` — shared HDMI+eDP Hyprland layout  
 `lib.mine.mkGtkHyprlandPortal` — GTK portal stub for Hyprland (`UseIn=gnome` workaround)
 

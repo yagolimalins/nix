@@ -1,3 +1,4 @@
+# Package group: databases … communication (gated by mine.packages.enable).
 {
   config,
   lib,
@@ -8,40 +9,41 @@
 
 let
   cfg = config.${namespace}.packages;
+  on = group: cfg.enable && cfg.${group}.enable;
 in
 {
   config = lib.mkMerge [
-    (lib.mkIf cfg.databases.enable {
+    (lib.mkIf (on "databases") {
       home.packages = with pkgs; [
         dbeaver-bin
         beekeeper-studio
       ];
     })
 
-    (lib.mkIf cfg.api.enable {
+    (lib.mkIf (on "api") {
       home.packages = [ pkgs.insomnia ];
     })
 
-    (lib.mkIf cfg.office.enable {
+    (lib.mkIf (on "office") {
       home.packages = [ pkgs.libreoffice-fresh ];
     })
 
-    (lib.mkIf cfg.notes.enable {
+    (lib.mkIf (on "notes") {
       home.packages = with pkgs; [
         marktext
         glow
       ];
     })
 
-    (lib.mkIf cfg.learning.enable {
+    (lib.mkIf (on "learning") {
       home.packages = [ pkgs.anki ];
     })
 
-    (lib.mkIf cfg.browsers.enable {
+    (lib.mkIf (on "browsers") {
       home.packages = [ pkgs.chromium ];
     })
 
-    (lib.mkIf cfg.proton.enable {
+    (lib.mkIf (on "proton") {
       home.packages = with pkgs; [
         proton-vpn
         proton-pass
@@ -49,11 +51,11 @@ in
       ];
     })
 
-    (lib.mkIf cfg.mail.enable {
+    (lib.mkIf (on "mail") {
       home.packages = [ pkgs.thunderbird ];
     })
 
-    (lib.mkIf cfg.communication.enable {
+    (lib.mkIf (on "communication") {
       home.packages = with pkgs; [
         zoom-us
         discord

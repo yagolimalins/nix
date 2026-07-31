@@ -18,6 +18,8 @@ in
   options.${namespace}.thunar.enable = lib.mkEnableOption "Thunar file manager user-level config";
 
   config = lib.mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings.exec-once = [ "tumblerd" ];
+
     # Tell Thunar's exo-open which terminal to launch from the context menu.
     xdg.configFile."xfce4/helpers.rc".text = ''
       TerminalEmulator=kitty

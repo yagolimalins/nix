@@ -1,3 +1,4 @@
+# Package group: editors … gtk/dotnet + rust/gtk env (gated by mine.packages.enable).
 {
   config,
   lib,
@@ -8,6 +9,7 @@
 
 let
   cfg = config.${namespace}.packages;
+  on = group: cfg.enable && cfg.${group}.enable;
 
   waylandLibs = [
     pkgs.wayland
@@ -54,18 +56,18 @@ let
 in
 {
   config = lib.mkMerge [
-    (lib.mkIf cfg.editors.enable {
+    (lib.mkIf (on "editors") {
       home.packages = [ pkgs.neovim ];
     })
 
-    (lib.mkIf cfg.ides.enable {
+    (lib.mkIf (on "ides") {
       home.packages = with pkgs; [
         vscode
         code-cursor
       ];
     })
 
-    (lib.mkIf cfg.cli.enable {
+    (lib.mkIf (on "cli") {
       home.packages = with pkgs; [
         ripgrep
         fd
@@ -73,19 +75,19 @@ in
       ];
     })
 
-    (lib.mkIf cfg.c.enable {
+    (lib.mkIf (on "c") {
       home.packages = [ pkgs.gcc ];
     })
 
-    (lib.mkIf cfg.python.enable {
+    (lib.mkIf (on "python") {
       home.packages = [ pkgs.uv ];
     })
 
-    (lib.mkIf cfg.ai.enable {
+    (lib.mkIf (on "ai") {
       home.packages = [ pkgs.claude-code ];
     })
 
-    (lib.mkIf cfg.vcs.enable {
+    (lib.mkIf (on "vcs") {
       home.packages = with pkgs; [
         git
         gh
@@ -93,7 +95,7 @@ in
       ];
     })
 
-    (lib.mkIf cfg.js.enable {
+    (lib.mkIf (on "js") {
       home.packages = with pkgs; [
         typescript
         nodejs
@@ -102,11 +104,11 @@ in
       ];
     })
 
-    (lib.mkIf cfg.jvm.enable {
+    (lib.mkIf (on "jvm") {
       home.packages = [ pkgs.maven ];
     })
 
-    (lib.mkIf cfg.rust.enable (
+    (lib.mkIf (on "rust") (
       let
         # Binary toolchain with wasm target (nixpkgs rustc has host only).
         rustToolchain = pkgs.rust-bin.stable.latest.default.override {
@@ -145,11 +147,11 @@ in
       }
     ))
 
-    (lib.mkIf cfg.gtk.enable {
+    (lib.mkIf (on "gtk") {
       home.packages = gtkLibs;
     })
 
-    (lib.mkIf cfg.dotnet.enable {
+    (lib.mkIf (on "dotnet") {
       home.packages = with pkgs; [
         dotnet-sdk_10
         dotnet-ef
@@ -157,14 +159,14 @@ in
     })
 
     # Single assignments so rust/gtk/wayland groups don't clash under mkMerge.
-    (lib.mkIf (cfg.rust.enable || cfg.gtk.enable) {
+    (lib.mkIf (cfg.enable && (cfg.rust.enable || cfg.gtk.enable)) {
       home.sessionVariables.PKG_CONFIG_PATH = lib.makeSearchPath "lib/pkgconfig" (
         lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
         ++ lib.optionals cfg.gtk.enable gtkPkgConfig
       );
     })
 
-    (lib.mkIf (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) {
+    (lib.mkIf (cfg.enable && (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable)) {
       home.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath (
         lib.optionals (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) (
           if cfg.rust.enable then rustNativeLibs else waylandLibs

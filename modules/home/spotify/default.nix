@@ -15,10 +15,11 @@
 let
   cfg = config.${namespace}.spotify;
 
+  p = lib.${namespace}.palette;
   palette = {
-    bg = "#0d0d0d";
-    fg = "#dedede";
-    red = "#cc2222";
+    bg = p.bg;
+    fg = p.text;
+    red = p.accent;
     red-bright = "#e03333";
     muted = "#777777";
     grey = "#aaaaaa";

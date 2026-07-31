@@ -1,8 +1,5 @@
 #
-# launchers.nix — Wofi application launcher
-#
-# drun launcher styled to match the system red/charcoal palette; also
-# used as a dmenu for the Waybar power menu.
+# wofi — Application launcher (drun + Waybar power menu dmenu)
 #
 {
   config,
@@ -12,10 +9,11 @@
 }:
 
 let
-  cfg = config.${namespace}.launchers;
+  cfg = config.${namespace}.wofi;
+  palette = lib.${namespace}.palette;
 in
 {
-  options.${namespace}.launchers.enable = lib.mkEnableOption "Wofi application launcher";
+  options.${namespace}.wofi.enable = lib.mkEnableOption "Wofi application launcher";
 
   config = lib.mkIf cfg.enable {
     programs.wofi = {
@@ -30,18 +28,18 @@ in
       };
       style = ''
         window {
-          background-color: #0d0d0d;
-          border: 1px solid #cc2222;
+          background-color: ${palette.bg};
+          border: 1px solid ${palette.accent};
           border-radius: 4px;
         }
 
         #input {
           all: unset;
           border: none;
-          border-bottom: 1px solid #cc2222;
+          border-bottom: 1px solid ${palette.accent};
           border-radius: 3px 3px 0 0;
           padding: 10px 14px;
-          color: #dedede;
+          color: ${palette.text};
           font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
           font-size: 16px;
           font-weight: bold;
@@ -59,7 +57,7 @@ in
         #entry {
           padding: 7px 12px;
           border-radius: 2px;
-          color: #dedede;
+          color: ${palette.text};
         }
 
         #entry:selected {
@@ -70,11 +68,11 @@ in
         #text {
           font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
           font-size: 16px;
-          color: #dedede;
+          color: ${palette.text};
         }
 
         #text:selected {
-          color: #cc2222;
+          color: ${palette.accent};
           font-weight: bold;
         }
 

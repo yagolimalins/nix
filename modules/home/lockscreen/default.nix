@@ -1,4 +1,6 @@
-# hyprlock + hypridle (lock on idle and before sleep).
+#
+# lockscreen — hyprlock + hypridle (idle/sleep) + Hyprland autostart
+#
 {
   config,
   lib,
@@ -8,11 +10,17 @@
 
 let
   cfg = config.${namespace}.lockscreen;
+  palette = lib.${namespace}.palette;
+  accentRgb = builtins.substring 1 6 palette.accent;
+  bgRgb = builtins.substring 1 6 palette.bg;
+  textRgb = builtins.substring 1 6 palette.text;
 in
 {
   options.${namespace}.lockscreen.enable = lib.mkEnableOption "hyprlock + hypridle screen locking";
 
   config = lib.mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings.exec-once = [ "hypridle" ];
+
     programs.hyprlock = {
       enable = true;
       settings = {
@@ -37,9 +45,9 @@ in
             halign = "center";
             valign = "center";
             outline_thickness = 1;
-            outer_color = "rgb(cc2222)";
-            inner_color = "rgb(0d0d0d)";
-            font_color = "rgb(dedede)";
+            outer_color = "rgb(${accentRgb})";
+            inner_color = "rgb(${bgRgb})";
+            font_color = "rgb(${textRgb})";
             fade_on_empty = false;
             placeholder_text = "";
             rounding = 4;
@@ -51,7 +59,7 @@ in
             text = "$TIME";
             font_family = "JetBrains Mono";
             font_size = 48;
-            color = "rgba(dedede, 1.0)";
+            color = "rgba(${textRgb}, 1.0)";
             position = "0, 80";
             halign = "center";
             valign = "center";

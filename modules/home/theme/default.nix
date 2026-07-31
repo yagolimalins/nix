@@ -1,4 +1,6 @@
-# WhiteSur GTK/icons + Bibata cursor; portal color-scheme for Firefox/etc.
+#
+# theme — WhiteSur GTK/icons + Bibata cursor (source of truth for XCURSOR_*)
+#
 {
   config,
   lib,
@@ -9,11 +11,31 @@
 
 let
   cfg = config.${namespace}.theme;
+  cursorName = "Bibata-Modern-Classic";
+  cursorSize = 24;
 in
 {
   options.${namespace}.theme.enable = lib.mkEnableOption "WhiteSur GTK theme + Bibata cursor";
 
   config = lib.mkIf cfg.enable {
+    home.pointerCursor = {
+      gtk.enable = true;
+      x11.enable = true;
+      name = cursorName;
+      package = pkgs.bibata-cursors;
+      size = cursorSize;
+    };
+
+    home.sessionVariables = {
+      XCURSOR_THEME = cursorName;
+      XCURSOR_SIZE = toString cursorSize;
+    };
+
+    wayland.windowManager.hyprland.settings.env = [
+      "XCURSOR_THEME,${cursorName}"
+      "XCURSOR_SIZE,${toString cursorSize}"
+    ];
+
     gtk = {
       enable = true;
       theme = {
@@ -27,9 +49,9 @@ in
         package = pkgs.whitesur-icon-theme;
       };
       cursorTheme = {
-        name = "Bibata-Modern-Classic";
+        name = cursorName;
         package = pkgs.bibata-cursors;
-        size = 24;
+        size = cursorSize;
       };
       # WhiteSur GTK4 CSS lives in gtk.gresource; HM file:// import of the
       # stub gtk.css cannot see that resource.

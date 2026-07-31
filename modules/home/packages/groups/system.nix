@@ -1,3 +1,4 @@
+# Package group: nix, monitoring (gated by mine.packages.enable).
 {
   config,
   lib,
@@ -8,10 +9,11 @@
 
 let
   cfg = config.${namespace}.packages;
+  on = group: cfg.enable && cfg.${group}.enable;
 in
 {
   config = lib.mkMerge [
-    (lib.mkIf cfg.nix.enable {
+    (lib.mkIf (on "nix") {
       home.packages = with pkgs; [
         nixfmt
         nixd
@@ -19,7 +21,7 @@ in
       ];
     })
 
-    (lib.mkIf cfg.monitoring.enable {
+    (lib.mkIf (on "monitoring") {
       home.packages = with pkgs; [
         btop
         fastfetch
