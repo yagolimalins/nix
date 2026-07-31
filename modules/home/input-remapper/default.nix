@@ -1,4 +1,7 @@
 # HM-managed presets are store symlinks — edit here and rebuild (GUI can't save).
+# Login: Hyprland exec-once. Rebuild: NixOS input-remapper ExecStartPost.
+# Avoid a user oneshot here — HM waits on it during switch while the system
+# daemon is still restarting, which added ~1min of failed retries per activate.
 {
   config,
   lib,
