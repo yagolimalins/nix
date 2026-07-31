@@ -23,6 +23,9 @@ in
         seahorse
         tumbler
       ];
+
+      xdg.dataFile."icons/hicolor/scalable/apps/blueman-device.svg".source =
+        "${pkgs.blueman}/share/icons/hicolor/scalable/devices/blueman-device.svg";
     })
 
     (lib.mkIf (on "clipboard") {

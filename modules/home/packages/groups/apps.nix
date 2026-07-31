@@ -49,6 +49,9 @@ in
         proton-pass
         protonmail-bridge
       ];
+
+      xdg.dataFile."icons/hicolor/48x48/apps/proton-pass.png".source =
+        "${pkgs.proton-pass}/share/proton-pass/assets/logo.png";
     })
 
     (lib.mkIf (on "mail") {

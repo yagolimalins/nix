@@ -53,6 +53,20 @@ let
     pkgs.harfbuzz.dev
     pkgs.vulkan-loader.dev
   ];
+
+  cursorIcons =
+    pkgs.runCommand "cursor-app-icons"
+      {
+        nativeBuildInputs = [ pkgs.imagemagick ];
+      }
+      ''
+        src=${pkgs.code-cursor}/share/pixmaps/cursor.png
+        for size in 32 48 64; do
+          mkdir -p "$out/share/icons/hicolor/''${size}x''${size}/apps"
+          magick "$src" -filter Lanczos -resize "''${size}x''${size}" \
+            "$out/share/icons/hicolor/''${size}x''${size}/apps/cursor.png"
+        done
+      '';
 in
 {
   config = lib.mkMerge [
@@ -61,9 +75,10 @@ in
     })
 
     (lib.mkIf (on "ides") {
-      home.packages = with pkgs; [
-        vscode
-        code-cursor
+      home.packages = [
+        pkgs.vscode
+        pkgs.code-cursor
+        cursorIcons
       ];
     })
 

@@ -38,6 +38,7 @@ in
           line-height = 22;
           icon-theme = "WhiteSur-dark";
           icons-enabled = "yes";
+          scaling-filter = "lanczos3";
         };
         colors = {
           background = hex palette.bg "ff";
