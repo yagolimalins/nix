@@ -11,6 +11,16 @@ let
   cfg = config.${namespace}.packages;
   on = group: cfg.enable && cfg.${group}.enable;
 
+  # zlib (and some others) put .pc files in share/pkgconfig, not lib/pkgconfig.
+  mkPkgConfigPath =
+    packages:
+    lib.concatStringsSep ":" (
+      lib.filter (p: p != "") [
+        (lib.makeSearchPath "lib/pkgconfig" packages)
+        (lib.makeSearchPath "share/pkgconfig" packages)
+      ]
+    );
+
   waylandLibs = [
     pkgs.wayland
     pkgs.libxkbcommon
@@ -36,11 +46,18 @@ let
     pkgs.webkitgtk_4_1
     pkgs.gtk3
     pkgs.libayatana-appindicator
+    pkgs.zlib
   ];
 
+  # gtk3's .pc files pull zlib/atk/epoxy/etc. — without these, gdk-sys fails.
   wryDesktopPkgConfig = [
     pkgs.webkitgtk_4_1.dev
     pkgs.gtk3.dev
+    pkgs.zlib.dev
+    pkgs.atk.dev
+    pkgs.libepoxy.dev
+    pkgs.libffi.dev
+    pkgs.pcre2.dev
   ];
 
   # Tauri v2 Linux extras beyond the wry stack (see tauri.app prerequisites).
@@ -49,11 +66,13 @@ let
     pkgs.xdotool
     pkgs.libsoup_3
     pkgs.glib-networking
+    pkgs.dbus
   ];
 
   tauriPkgConfig = wryDesktopPkgConfig ++ [
     pkgs.librsvg.dev
     pkgs.libsoup_3.dev
+    pkgs.dbus.dev
   ];
 
   gtkLibs = [
@@ -226,7 +245,7 @@ in
     (lib.mkIf (
       cfg.enable && (cfg.rust.enable || cfg.gtk.enable || cfg.dioxus.enable || cfg.tauri.enable)
     ) {
-      home.sessionVariables.PKG_CONFIG_PATH = lib.makeSearchPath "lib/pkgconfig" (
+      home.sessionVariables.PKG_CONFIG_PATH = mkPkgConfigPath (
         lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
         ++ lib.optionals cfg.gtk.enable gtkPkgConfig
         ++ lib.optionals cfg.dioxus.enable wryDesktopPkgConfig
