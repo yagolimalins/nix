@@ -226,8 +226,9 @@ in
         pkgs.xdotool
       ];
 
-      # Common NixOS + WebKitGTK workaround for blank/broken webviews.
-      home.sessionVariables.WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+      home.sessionVariables = {
+        WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+      };
     })
 
     (lib.mkIf (on "gtk") {
