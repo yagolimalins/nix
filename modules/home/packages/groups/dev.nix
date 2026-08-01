@@ -111,6 +111,20 @@ let
             "$out/share/icons/hicolor/''${size}x''${size}/apps/cursor.png"
         done
       '';
+
+  # WebKitGTK on NixOS reads wrong font/DPI settings without schema paths + TLS GIO
+  # modules (https://github.com/tauri-apps/tauri/issues/7354).
+  webkitGtkSessionVars = {
+    GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules";
+    XDG_DATA_DIRS = lib.concatStringsSep ":" [
+      "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}"
+      "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}"
+      "${config.home.profileDirectory}/share"
+      "/etc/profiles/per-user/${config.home.username}/share"
+      "/nix/var/nix/profiles/default/share"
+      "/run/current-system/sw/share"
+    ];
+  };
 in
 {
   config = lib.mkMerge [
@@ -214,7 +228,12 @@ in
         (lib.hiPrio pkgs.wasm-bindgen-cli_0_2_126)
         pkgs.binaryen
         pkgs.lld
+        pkgs.gsettings-desktop-schemas
       ] ++ wryDesktopLibs;
+    })
+
+    (lib.mkIf (cfg.enable && (cfg.dioxus.enable || cfg.tauri.enable)) {
+      home.sessionVariables = webkitGtkSessionVars;
     })
 
     (lib.mkIf (on "tauri") {
@@ -224,11 +243,12 @@ in
         pkgs.cargo-tauri
         pkgs.${namespace}.create-tauri-app
         pkgs.xdotool
+        pkgs.gsettings-desktop-schemas
       ];
 
-      home.sessionVariables = {
-        WEBKIT_DISABLE_DMABUF_RENDERER = "1";
-      };
+      # DMABUF workaround for NVIDIA blank WebKit windows only.
+      # Do NOT set WEBKIT_DISABLE_COMPOSITING_MODE — breaks CSS scale on Intel/Wayland.
+      home.sessionVariables.WEBKIT_DISABLE_DMABUF_RENDERER = "1";
     })
 
     (lib.mkIf (on "gtk") {
