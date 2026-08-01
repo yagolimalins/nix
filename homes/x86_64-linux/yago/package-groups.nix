@@ -39,7 +39,7 @@ let
     communication = true;
 
     # media
-    media = false;
+    media = true;
     creator = false;
     audio = false;
   };
