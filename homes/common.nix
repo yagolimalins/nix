@@ -15,12 +15,9 @@
     "notifications"
     "lockscreen"
     "nightshift"
-    "mail"
     "thunar"
-    "spotify"
     "theme"
     "packages"
     "input-remapper"
-    "zed"
   ];
 }

@@ -1,4 +1,4 @@
-# Shared helpers merged into `lib.${namespace}` by Snowfall Lib.
+  # Shared helpers merged into `lib.${namespace}` by Snowfall Lib.
 { lib, ... }:
 
 {
@@ -8,6 +8,45 @@
     lib.genAttrs names (_: {
       enable = true;
     });
+
+  # Keep in sync with modules/home/packages/default.nix options.
+  packageGroupNames = [
+    "nix"
+    "monitoring"
+    "wayland"
+    "clipboard"
+    "viewers"
+    "fonts"
+    "editors"
+    "ides"
+    "cli"
+    "c"
+    "python"
+    "ai"
+    "vcs"
+    "js"
+    "jvm"
+    "rust"
+    "dioxus"
+    "tauri"
+    "gtk"
+    "dotnet"
+    "databases"
+    "api"
+    "office"
+    "notes"
+    "learning"
+    "browsers"
+    "proton"
+    "mail"
+    "communication"
+    "media"
+    "creator"
+    "audio"
+  ];
+
+  # Home toggle file: { rust = true; creator = false; } → mine.packages.*.enable
+  packageGroupsFromToggles = toggles: lib.mapAttrs (_: on: { enable = on; }) toggles;
 
   # Shared UI palette (Hyprland / Waybar / Kitty / Mako / …).
   palette = {

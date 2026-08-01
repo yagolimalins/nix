@@ -52,6 +52,23 @@ in
 
       xdg.dataFile."icons/hicolor/48x48/apps/proton-pass.png".source =
         "${pkgs.proton-pass}/share/proton-pass/assets/logo.png";
+
+      systemd.user.services.protonmail-bridge = {
+        Unit = {
+          Description = "Proton Mail Bridge";
+          After = [
+            "network-online.target"
+            "gnome-keyring-daemon.service"
+          ];
+          Wants = [ "gnome-keyring-daemon.service" ];
+        };
+        Service = {
+          ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --noninteractive";
+          Restart = "on-failure";
+          RestartSec = "5";
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+      };
     })
 
     (lib.mkIf (on "mail") {

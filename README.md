@@ -77,7 +77,7 @@ Then `nh os switch -H myhost`. Shared modules come from `systems/common.nix`.
 
 Folder name = option name. In `homes/common.nix` use literal `mine` (HM freeformType cycle with `${namespace}`).
 
-`mine.packages.enable` is required for any package group; opt out of a leaf with e.g. `mine.packages.ides.enable = false`.
+`mine.packages.enable` is required for any package group. Toggle groups in `homes/x86_64-linux/<user>/package-groups.nix`.
 
 ## Conventions
 

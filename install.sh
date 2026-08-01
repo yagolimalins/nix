@@ -384,7 +384,59 @@ step "3 — Home Manager user"
 
 USER_DIR="${HOMES_DIR}/${OWNER_USER}"
 HOME_DEFAULT="${USER_DIR}/default.nix"
+PACKAGE_GROUPS="${USER_DIR}/package-groups.nix"
 mkdir -p "$USER_DIR"
+
+if [[ ! -f "$PACKAGE_GROUPS" ]]; then
+    cat >"$PACKAGE_GROUPS" <<'EOF'
+# Flip groups on/off here, then `nh os switch`.
+{ lib, ... }:
+
+let
+  toggles = {
+    nix = true;
+    monitoring = true;
+    wayland = true;
+    clipboard = true;
+    viewers = true;
+    fonts = true;
+    editors = true;
+    ides = true;
+    cli = true;
+    c = true;
+    python = true;
+    ai = true;
+    vcs = true;
+    js = true;
+    jvm = true;
+    rust = true;
+    dioxus = true;
+    tauri = true;
+    gtk = true;
+    dotnet = true;
+    databases = true;
+    api = true;
+    office = true;
+    notes = true;
+    learning = true;
+    browsers = true;
+    proton = true;
+    mail = true;
+    communication = true;
+    media = true;
+    creator = true;
+    audio = true;
+  };
+in
+{
+  mine.packages = lib.recursiveUpdate {
+    enable = true;
+  } (lib.mine.packageGroupsFromToggles toggles);
+}
+EOF
+    git_stage "$PACKAGE_GROUPS"
+    success "Created ${PACKAGE_GROUPS}"
+fi
 
 if [[ -f "$HOME_DEFAULT" ]]; then
     success "Keeping existing ${HOME_DEFAULT}"
@@ -394,7 +446,8 @@ else
 { ... }:
 
 {
-  # Optional: mine.packages.creator.enable = false;
+  imports = [ ./package-groups.nix ];
+
   # Optional: mine.user.wallpaper = ./wall.png;
 }
 EOF

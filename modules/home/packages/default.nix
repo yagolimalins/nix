@@ -1,6 +1,5 @@
-# User package orchestrator. `enable` turns on direnv, defaults every group
-# to on, and gates all group installs — leaf `*.enable = true` alone is not
-# enough. Override with e.g. `mine.packages.ides.enable = false`.
+# User package orchestrator. Groups default to on when `enable` is set; override
+# toggles in homes/x86_64-linux/<user>/package-groups.nix.
 {
   config,
   lib,
@@ -11,41 +10,7 @@
 let
   cfg = config.${namespace}.packages;
   mkGroup = lib.mkEnableOption;
-
-  groupNames = [
-    "nix"
-    "monitoring"
-    "wayland"
-    "clipboard"
-    "viewers"
-    "fonts"
-    "editors"
-    "ides"
-    "cli"
-    "c"
-    "python"
-    "ai"
-    "vcs"
-    "js"
-    "jvm"
-    "rust"
-    "dioxus"
-    "tauri"
-    "gtk"
-    "dotnet"
-    "databases"
-    "api"
-    "office"
-    "notes"
-    "learning"
-    "browsers"
-    "proton"
-    "mail"
-    "communication"
-    "media"
-    "creator"
-    "audio"
-  ];
+  groupNames = lib.${namespace}.packageGroupNames;
 in
 {
   imports = [
@@ -68,7 +33,7 @@ in
     fonts.enable = mkGroup "user fonts";
 
     editors.enable = mkGroup "lightweight editors (neovim)";
-    ides.enable = mkGroup "heavy IDEs";
+    ides.enable = mkGroup "heavy IDEs (VS Code, Cursor, Zed)";
     cli.enable = mkGroup "CLI search tools";
     c.enable = mkGroup "C toolchain (gcc)";
     python.enable = mkGroup "Python tooling (uv)";
@@ -88,11 +53,11 @@ in
     notes.enable = mkGroup "markdown / notes";
     learning.enable = mkGroup "flashcards / study";
     browsers.enable = mkGroup "browsers";
-    proton.enable = mkGroup "Proton suite";
+    proton.enable = mkGroup "Proton suite (VPN, Pass, Mail Bridge)";
     mail.enable = mkGroup "mail client";
     communication.enable = mkGroup "communication apps";
 
-    media.enable = mkGroup "media playback";
+    media.enable = mkGroup "media playback (VLC, Popcorn Time, spotify-player)";
     creator.enable = mkGroup "recording / editing";
     audio.enable = mkGroup "audio production";
   };
