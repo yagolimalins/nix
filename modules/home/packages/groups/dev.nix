@@ -47,6 +47,7 @@ let
     pkgs.gtk3
     pkgs.libayatana-appindicator
     pkgs.zlib
+    pkgs.xdotool # libxdo — dioxus-desktop / muda link -lxdo
   ];
 
   # gtk3's .pc files pull zlib/atk/epoxy/etc. — without these, gdk-sys fails.
@@ -58,6 +59,7 @@ let
     pkgs.libepoxy.dev
     pkgs.libffi.dev
     pkgs.pcre2.dev
+    pkgs.xdotool
   ];
 
   # Tauri v2 Linux extras beyond the wry stack (see tauri.app prerequisites).
@@ -308,10 +310,27 @@ in
           RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
         };
 
-        home.file.".cargo/config.toml".text = ''
-          [target.x86_64-unknown-linux-gnu]
-          rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=-B${pkgs.mold}/bin"]
-        '';
+        home.file.".cargo/config.toml".text =
+          let
+            moldFlags = [
+              "-C"
+              "link-arg=-fuse-ld=mold"
+              "-C"
+              "link-arg=-B${pkgs.mold}/bin"
+            ];
+            xdoFlags = lib.optionals (cfg.dioxus.enable || cfg.tauri.enable) [
+              "-C"
+              "link-arg=-L${pkgs.xdotool}/lib"
+            ];
+            rustflags = moldFlags ++ xdoFlags;
+            flagsToml = lib.concatMapStringsSep ",\n    " (f: ''"${f}"'') rustflags;
+          in
+          ''
+            [target.x86_64-unknown-linux-gnu]
+            rustflags = [
+                ${flagsToml}
+            ]
+          '';
       }
     ))
 
@@ -328,7 +347,12 @@ in
     })
 
     (lib.mkIf (cfg.enable && (cfg.dioxus.enable || cfg.tauri.enable)) {
-      home.sessionVariables = webkitGtkSessionVars;
+      home.sessionVariables = webkitGtkSessionVars // {
+        # mold/cc need this at link time for -lxdo (libxdo ships inside xdotool).
+        LIBRARY_PATH = lib.makeSearchPath "lib" (
+          if cfg.tauri.enable then tauriLibs else wryDesktopLibs
+        );
+      };
     })
 
     (lib.mkIf (on "tauri") {
