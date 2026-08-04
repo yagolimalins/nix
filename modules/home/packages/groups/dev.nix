@@ -271,6 +271,7 @@ in
         nodejs
         deno
         tsx
+        tailwindcss
       ];
     })
 
