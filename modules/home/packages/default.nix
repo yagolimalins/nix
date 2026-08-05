@@ -32,7 +32,7 @@ in
     viewers.enable = mkGroup "light file viewers";
     fonts.enable = mkGroup "user fonts";
 
-    editors.enable = mkGroup "lightweight editors (neovim)";
+    editors.enable = mkGroup "lightweight editors (neovim, helix)";
     ides.enable = mkGroup "heavy IDEs (VS Code, Cursor, Zed)";
     cli.enable = mkGroup "CLI search tools";
     c.enable = mkGroup "C toolchain (gcc)";

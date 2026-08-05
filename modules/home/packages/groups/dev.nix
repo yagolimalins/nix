@@ -131,7 +131,10 @@ in
 {
   config = lib.mkMerge [
     (lib.mkIf (on "editors") {
-      home.packages = [ pkgs.neovim ];
+      home.packages = with pkgs; [
+        neovim
+        helix
+      ];
     })
 
     (lib.mkIf (on "ides") {
