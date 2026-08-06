@@ -298,6 +298,7 @@ in
       {
         home.packages = with pkgs; [
           rustToolchain
+          cargo-watch
           trunk
           sqlx-cli
           sea-orm-cli
