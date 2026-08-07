@@ -7,18 +7,34 @@
 {
   config,
   lib,
+  pkgs,
   namespace,
   ...
 }:
 
 let
   cfg = config.${namespace}.thunar;
+
+  # Thunar owns thunar.xml at runtime — set hidden-bookmarks via xfconf instead.
+  hideRecentScript = pkgs.writeShellScript "thunar-hide-recent" ''
+    ${pkgs.xfconf}/bin/xfconf-query \
+      -c thunar -p /hidden-bookmarks -n -t string -s "recent:///" -a
+  '';
 in
 {
   options.${namespace}.thunar.enable = lib.mkEnableOption "Thunar file manager user-level config";
 
   config = lib.mkIf cfg.enable {
-    wayland.windowManager.hyprland.settings.exec-once = [ "tumblerd" ];
+    xfconf.settings = {
+      thunar = {
+        "hidden-bookmarks" = [ "recent:///" ];
+      };
+    };
+
+    wayland.windowManager.hyprland.settings.exec-once = [
+      "${hideRecentScript}"
+      "tumblerd"
+    ];
 
     # Tell Thunar's exo-open which terminal to launch from the context menu.
     xdg.configFile."xfce4/helpers.rc".text = ''

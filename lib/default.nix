@@ -168,6 +168,7 @@
   };
 
   gtkStormThemeName = "Tokyonight-Dark-Storm";
+  numixSquareThemeName = "Numix-Square";
 
   # Tokyo Night Storm — accent = selection/active; semantic colors for status only.
   palette = {

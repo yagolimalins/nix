@@ -28,6 +28,7 @@ in
     security.pam.services.tuigreet.enableGnomeKeyring = true;
 
     programs.dconf.enable = true; # GTK apps persist settings here
+    programs.xfconf.enable = true; # Thunar sidebar prefs (hidden-bookmarks)
 
     programs.thunar = {
       enable = true;

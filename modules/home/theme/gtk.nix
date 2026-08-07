@@ -78,8 +78,8 @@ in
       enable = true;
       theme = gtkThemeConfig;
       iconTheme = {
-        name = "WhiteSur-dark";
-        package = pkgs.whitesur-icon-theme;
+        name = lib.${namespace}.numixSquareThemeName;
+        package = pkgs.${namespace}.numix-square-storm;
       };
       cursorTheme = {
         name = cursor.name;

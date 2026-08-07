@@ -36,7 +36,7 @@ in
           vertical-pad = 8;
           inner-pad = 4;
           line-height = 22;
-          icon-theme = "WhiteSur-dark";
+          icon-theme = lib.${namespace}.numixSquareThemeName;
           icons-enabled = "yes";
           scaling-filter = "lanczos3";
         };
