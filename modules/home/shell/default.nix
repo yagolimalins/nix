@@ -74,16 +74,15 @@ in
           style_root = "bold ${palette.urgent}";
         };
         hostname = {
-          style = "bold #aaaaaa";
+          style = "bold ${palette.muted}";
         };
         nix_shell = {
           style = "bold ${palette.ok}";
         };
 
-        # character has colors embedded in the symbol strings.
         character = {
-          success_symbol = "[❯](bold #5a9e5a)";
-          error_symbol = "[❯](bold #e63329)";
+          success_symbol = "[❯](bold ${palette.accent})";
+          error_symbol = "[❯](bold ${palette.urgent})";
         };
       };
     };

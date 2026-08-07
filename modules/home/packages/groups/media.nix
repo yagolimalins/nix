@@ -69,22 +69,22 @@ in
         [themes.palette]
         background     = "${p.bg}"
         foreground     = "${p.text}"
-        black          = "${p.bg}"
-        red            = "${p.accent}"
+        black          = "${p.border}"
+        red            = "${p.urgent}"
         green          = "${p.ok}"
         yellow         = "${p.warning}"
-        blue           = "${p.muted}"
-        magenta        = "${p.accent}"
-        cyan           = "${p.muted}"
+        blue           = "${p.accent}"
+        magenta        = "${p.purple}"
+        cyan           = "${p.cyan}"
         white          = "${p.text}"
-        bright_black   = "${p.border}"
+        bright_black   = "${p.muted}"
         bright_red     = "${p.urgent}"
         bright_green   = "${p.ok}"
         bright_yellow  = "${p.warning}"
-        bright_blue    = "${p.text}"
-        bright_magenta = "${p.urgent}"
-        bright_cyan    = "${p.text}"
-        bright_white   = "#ffffff"
+        bright_blue    = "${p.accent}"
+        bright_magenta = "${p.purple}"
+        bright_cyan    = "${p.cyan}"
+        bright_white   = "${p.text}"
 
         [themes.component_style]
         block_title                  = { fg = "${p.accent}", modifiers = ["Bold"] }
@@ -101,7 +101,7 @@ in
         page_desc                    = { fg = "${p.accent}", modifiers = ["Bold"] }
         playlist_desc                = { fg = "${p.muted}", modifiers = ["Dim"] }
         table_header                 = { fg = "${p.muted}" }
-        selection                    = { fg = "${p.bg}", bg = "${p.accent}", modifiers = ["Bold"] }
+        selection                    = { fg = "${p.onAccent}", bg = "${p.accent}", modifiers = ["Bold"] }
         secondary_row                = { bg = "${p.surface}" }
         like                         = { fg = "${p.urgent}" }
         lyrics_played                = { fg = "${p.muted}", modifiers = ["Dim"] }

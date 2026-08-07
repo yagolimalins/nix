@@ -3,6 +3,4 @@
 
 {
   imports = [ ./package-groups.nix ];
-
-  # Optional: mine.user.wallpaper = ./wall.png;
 }

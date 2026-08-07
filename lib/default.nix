@@ -48,17 +48,20 @@
   # Home toggle file: { rust = true; creator = false; } → mine.packages.*.enable
   packageGroupsFromToggles = toggles: lib.mapAttrs (_: on: { enable = on; }) toggles;
 
-  # Shared UI palette (Hyprland / Waybar / Kitty / Mako / …).
+  # Tokyo Night Storm — accent = selection/active; semantic colors for status only.
   palette = {
-    bg = "#0d0d0d";
-    surface = "#171717";
-    border = "#222222";
-    text = "#dedede";
-    muted = "#7a7a7a";
-    accent = "#cc2222";
-    urgent = "#e63329";
-    warning = "#e8a045";
-    ok = "#5a9e5a";
+    bg = "#24283b";
+    surface = "#1f2335";
+    border = "#414868";
+    text = "#c0caf5";
+    muted = "#565f89";
+    accent = "#7aa2f7";
+    cyan = "#7dcfff";
+    onAccent = "#1f2335";
+    urgent = "#f7768e";
+    warning = "#e0af68";
+    ok = "#9ece6a";
+    purple = "#bb9af7"; # terminal ANSI magenta only
   };
 
   # Ultrawide HDMI + internal eDP layout shared by thinkpad/laptop hosts.

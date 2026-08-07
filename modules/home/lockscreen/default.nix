@@ -41,7 +41,7 @@ in
         input-field = [
           {
             size = "300, 40";
-            position = "0, -60";
+            position = "0, 0";
             halign = "center";
             valign = "center";
             outline_thickness = 1;
@@ -50,19 +50,7 @@ in
             font_color = "rgb(${textRgb})";
             fade_on_empty = false;
             placeholder_text = "";
-            rounding = 4;
-          }
-        ];
-
-        label = [
-          {
-            text = "$TIME";
-            font_family = "JetBrains Mono";
-            font_size = 48;
-            color = "rgba(${textRgb}, 1.0)";
-            position = "0, 80";
-            halign = "center";
-            valign = "center";
+            rounding = 6;
           }
         ];
       };

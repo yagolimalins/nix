@@ -26,7 +26,7 @@ in
         "border-color" = palette.accent;
         "text-color" = palette.text;
         "border-size" = 1;
-        "border-radius" = 3;
+        "border-radius" = 6;
         "default-timeout" = 5000;
         padding = "10,14";
         width = 320;

@@ -146,6 +146,7 @@ in
 
       programs.zed-editor = {
         enable = true;
+        mutableUserSettings = false;
 
         extensions = [
           "csharp"
@@ -153,6 +154,7 @@ in
           "java"
           "nix"
           "sql"
+          "tokyo-night"
           "toml"
           "xml"
         ];
@@ -193,7 +195,7 @@ in
           theme = {
             mode = "dark";
             light = "One Light";
-            dark = "One Dark";
+            dark = "Tokyo Night Storm";
           };
 
           lsp.rust-analyzer.initialization_options = {

@@ -18,7 +18,7 @@ let
   style = ''
     * {
       font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
-      font-size: 16px;
+      font-size: 15px;
       min-height: 0;
     }
 
@@ -28,45 +28,45 @@ let
       color: ${palette.text};
     }
 
-    #workspaces { margin: 0 4px; }
+    #workspaces { margin: 0 6px; }
 
     #workspaces button {
       all: unset;
-      padding: 0 10px;
-      margin: 4px 1px;
+      padding: 0 12px;
+      margin: 4px 2px;
       background-color: ${palette.surface};
       color: ${palette.muted};
-      border-radius: 2px;
+      border-radius: 6px;
       border: 1px solid ${palette.border};
-      min-width: 24px;
-      transition: all 0.1s ease;
+      min-width: 28px;
+      transition: all 0.15s ease;
     }
 
     #workspaces button:hover {
       background-color: ${palette.border};
       color: ${palette.text};
-      border-color: #333333;
+      border-color: ${palette.accent};
     }
 
     #workspaces button.active {
       background-color: ${palette.accent};
-      color: ${palette.text};
+      color: ${palette.onAccent};
       border-color: ${palette.accent};
       font-weight: bold;
     }
 
     #workspaces button.urgent {
       background-color: ${palette.urgent};
-      color: ${palette.bg};
+      color: ${palette.onAccent};
       border-color: ${palette.urgent};
     }
 
     #mpris {
-      padding: 0 12px;
-      margin: 4px 1px;
+      padding: 0 14px;
+      margin: 4px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 2px;
+      border-radius: 6px;
       color: ${palette.text};
       font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
     }
@@ -83,20 +83,26 @@ let
     #custom-cpugov,
     #tray {
       padding: 0 12px;
-      margin: 4px 1px;
+      margin: 4px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 2px;
+      border-radius: 6px;
       color: ${palette.text};
     }
 
-    #clock { font-weight: bold; letter-spacing: 0.5px; }
+    #clock {
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: ${palette.text};
+      background-color: ${palette.surface};
+      border-color: ${palette.accent};
+    }
 
     #pulseaudio       { color: ${palette.text}; }
     #pulseaudio.muted { color: ${palette.muted}; }
 
     #network              { color: ${palette.text}; }
-    #network.disconnected { color: ${palette.accent}; }
+    #network.disconnected { color: ${palette.urgent}; }
 
     #battery,
     #battery-bat0,
@@ -106,7 +112,7 @@ let
     #battery-bat1.warning  { color: ${palette.warning}; }
     #battery.critical,
     #battery-bat0.critical,
-    #battery-bat1.critical { color: ${palette.accent}; }
+    #battery-bat1.critical { color: ${palette.urgent}; }
     #battery.charging,
     #battery-bat0.charging,
     #battery-bat1.charging { color: ${palette.ok}; }
@@ -114,7 +120,7 @@ let
     #cpu { color: ${palette.text}; }
 
     #temperature          { color: ${palette.text}; }
-    #temperature.critical { color: ${palette.accent}; }
+    #temperature.critical { color: ${palette.urgent}; }
 
     #custom-vpn.connected { color: ${palette.ok}; }
     #custom-vpn.off       { color: transparent; padding: 0; margin: 0; min-width: 0; border: none; }
@@ -130,26 +136,26 @@ let
     tooltip {
       background-color: ${palette.bg};
       border: 1px solid ${palette.accent};
-      border-radius: 4px;
-      padding: 8px;
+      border-radius: 6px;
+      padding: 10px;
     }
 
-    tooltip label { font-size: 16px; color: ${palette.text}; }
+    tooltip label { font-size: 15px; color: ${palette.text}; }
 
     #custom-power {
-      padding: 0 10px;
-      margin: 4px 1px;
+      padding: 0 12px;
+      margin: 4px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 2px;
+      border-radius: 6px;
       color: ${palette.muted};
-      transition: all 0.1s ease;
+      transition: all 0.15s ease;
     }
 
     #custom-power:hover {
-      background-color: #1a0000;
-      color: ${palette.urgent};
-      border-color: ${palette.accent};
+      background-color: ${palette.urgent};
+      color: ${palette.onAccent};
+      border-color: ${palette.urgent};
     }
   '';
 in

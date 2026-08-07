@@ -44,19 +44,18 @@ in
           background = hex palette.bg "ff";
           text = hex palette.text "ff";
           match = hex palette.accent "ff";
-          selection = hex palette.surface "ff";
-          selection-text = hex palette.accent "ff";
-          selection-match = hex palette.accent "ff";
+          selection = hex palette.accent "ff";
+          selection-text = hex palette.onAccent "ff";
+          selection-match = hex palette.onAccent "ff";
           border = hex palette.accent "ff";
         };
         border = {
           width = 1;
-          radius = 4;
+          radius = 6;
         };
       };
     };
 
-    # Imperative/previous generations leave a real file; let HM replace it.
     xdg.configFile."fuzzel/fuzzel.ini".force = true;
   };
 }

@@ -1,5 +1,5 @@
 #
-# kitty — Terminal (tango-dark ANSI + lib.mine.palette chrome)
+# kitty — Terminal (Tokyo Night Storm palette)
 #
 {
   config,
@@ -14,7 +14,7 @@ let
 in
 {
   options.${namespace}.kitty.enable =
-    lib.mkEnableOption "Kitty terminal (JetBrains Mono, tango-dark palette)";
+    lib.mkEnableOption "Kitty terminal (FiraCode Nerd Font, Tokyo Night Storm)";
 
   config = lib.mkIf cfg.enable {
     programs.kitty = {
@@ -26,29 +26,28 @@ in
       settings = {
         foreground = palette.text;
         background = palette.bg;
-        selection_foreground = palette.bg;
+        selection_foreground = palette.onAccent;
         selection_background = palette.accent;
         cursor = palette.accent;
-        cursor_text_color = palette.bg;
+        cursor_text_color = palette.onAccent;
         url_color = palette.accent;
 
-        # Terminal color palette (tango-dark base)
-        color0 = "#2e2e2e";
-        color8 = "#555753"; # Black
-        color1 = "#cc0000";
-        color9 = "#ef2929"; # Red
-        color2 = "#4e9a06";
-        color10 = "#8ae234"; # Green
-        color3 = "#c4a000";
-        color11 = "#fce94f"; # Yellow
-        color4 = "#3465a4";
-        color12 = "#729fcf"; # Blue
-        color5 = "#75507b";
-        color13 = "#ad7fa8"; # Magenta
-        color6 = "#06989a";
-        color14 = "#34e2e2"; # Cyan
-        color7 = "#d3d7cf";
-        color15 = "#eeeeec"; # White
+        color0 = palette.border;
+        color8 = palette.muted;
+        color1 = palette.urgent;
+        color9 = palette.urgent;
+        color2 = palette.ok;
+        color10 = palette.ok;
+        color3 = palette.warning;
+        color11 = palette.warning;
+        color4 = palette.accent;
+        color12 = palette.accent;
+        color5 = palette.purple;
+        color13 = palette.purple;
+        color6 = palette.cyan;
+        color14 = palette.cyan;
+        color7 = palette.text;
+        color15 = palette.text;
 
         window_padding_width = 12;
 
@@ -58,14 +57,14 @@ in
         cursor_blink_interval = "0.5";
         scrollback_lines = 10000;
 
-        tab_bar_style = "separator";
-        tab_separator = "  │  ";
-        tab_bar_background = "#0a0a0a";
-        active_tab_foreground = palette.accent;
-        active_tab_background = palette.bg;
+        tab_bar_style = "powerline";
+        tab_bar_background = palette.bg;
+        tab_bar_margin_height = "0 0";
+        active_tab_foreground = palette.onAccent;
+        active_tab_background = palette.accent;
         active_tab_font_style = "bold";
-        inactive_tab_foreground = "#444444";
-        inactive_tab_background = palette.bg;
+        inactive_tab_foreground = palette.muted;
+        inactive_tab_background = palette.surface;
       };
     };
   };

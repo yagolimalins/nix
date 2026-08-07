@@ -79,15 +79,15 @@ in
         };
 
         decoration = {
-          rounding = 4;
+          rounding = 6;
           active_opacity = 1.0;
-          inactive_opacity = 0.96;
+          inactive_opacity = 0.97;
 
           shadow = {
             enabled = true;
-            range = 10;
+            range = 12;
             render_power = 2;
-            color = "rgba(00000099)";
+            color = "rgba(${accentRgb}33)";
           };
 
           blur = {
