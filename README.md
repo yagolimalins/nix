@@ -4,11 +4,12 @@ Flakes + [Snowfall Lib](https://snowfall.org) + Home Manager as a NixOS module. 
 
 ## Screenshots
 
-Hyprland + Waybar (NixOS 26.05):
+Tokyo Night Storm on Hyprland (NixOS 26.05):
 
 ![Desktop](screenshots/desktop.png)
-![fastfetch](screenshots/fastfetch.png)
+![Fuzzel](screenshots/fuzzel.png)
 ![btop](screenshots/btop.png)
+![Spotify](screenshots/spotify.png)
 
 ## Layout
 
