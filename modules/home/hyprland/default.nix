@@ -81,17 +81,17 @@ in
         decoration = {
           rounding = 6;
           active_opacity = 1.0;
-          inactive_opacity = 0.97;
+          inactive_opacity = 1.0;
 
           shadow = {
             enabled = true;
-            range = 12;
-            render_power = 2;
-            color = "rgba(${accentRgb}33)";
+            range = 8;
+            render_power = 1;
+            color = "rgba(00000040)";
           };
 
           blur = {
-            enabled = true;
+            enabled = false;
             size = 6;
             passes = 2;
           };
@@ -106,14 +106,14 @@ in
           ];
           animation = [
             "windows,         1, 3,  snap,    popin 90%"
-            "windowsOut,      1, 2,  easeOut, popin 90%"
+            "windowsOut,      0, 0,  default"
             "windowsMove,     1, 3,  snap"
             "fade,            1, 3,  easeOut"
-            "fadeSwitch,      1, 2,  easeOut"
+            "fadeSwitch,      0, 0,  default"
             "fadeDim,         1, 3,  easeOut"
 
-            "workspaces,      1, 4,  snap,    slidefade 20%"
-            "workspacesOut,   1, 3,  easeOut, slidefade 20%"
+            "workspaces,      1, 4,  snap,    slide"
+            "workspacesOut,   1, 3,  easeOut, slide"
             "layers,          1, 3,  snap,    popin 80%"
             "layersOut,       1, 2,  easeOut, popin 90%"
           ];
@@ -137,7 +137,7 @@ in
         misc = {
           force_default_wallpaper = 0;
           disable_hyprland_logo = true;
-          animate_manual_resizes = true;
+          animate_manual_resizes = false;
           enable_swallow = true;
           swallow_regex = "^(kitty)$";
           focus_on_activate = true;
@@ -252,7 +252,6 @@ in
           "center on, match:title Warning"
           "float on,  match:title Error"
           "center on, match:title Error"
-          "opacity 0.95 0.90, match:class kitty"
 
           # Reaper (XWayland) — tile main window, center known dialogs.
           # Titles use .* wildcards for partial/version-independent matching.

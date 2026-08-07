@@ -18,7 +18,7 @@ let
   style = ''
     * {
       font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
-      font-size: 15px;
+      font-size: 14px;
       min-height: 0;
     }
 
@@ -28,17 +28,17 @@ let
       color: ${palette.text};
     }
 
-    #workspaces { margin: 0 6px; }
+    #workspaces { margin: 0 5px; }
 
     #workspaces button {
       all: unset;
-      padding: 0 12px;
-      margin: 4px 2px;
+      padding: 0 10px;
+      margin: 3px 2px;
       background-color: ${palette.surface};
       color: ${palette.muted};
-      border-radius: 6px;
+      border-radius: 5px;
       border: 1px solid ${palette.border};
-      min-width: 28px;
+      min-width: 25px;
       transition: all 0.15s ease;
     }
 
@@ -62,12 +62,13 @@ let
     }
 
     #mpris {
-      padding: 0 14px;
-      margin: 4px 2px;
+      padding: 0 10px;
+      margin: 3px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 6px;
+      border-radius: 5px;
       color: ${palette.text};
+      font-size: 13px;
       font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
     }
     #mpris.paused { color: ${palette.muted}; }
@@ -82,20 +83,20 @@ let
     #custom-nightshift,
     #custom-cpugov,
     #tray {
-      padding: 0 12px;
-      margin: 4px 2px;
+      padding: 0 10px;
+      margin: 3px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 6px;
+      border-radius: 5px;
       color: ${palette.text};
     }
 
     #clock {
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 0.75px;
       color: ${palette.text};
       background-color: ${palette.surface};
-      border-color: ${palette.accent};
+      border-color: ${palette.border};
     }
 
     #pulseaudio       { color: ${palette.text}; }
@@ -140,14 +141,14 @@ let
       padding: 10px;
     }
 
-    tooltip label { font-size: 15px; color: ${palette.text}; }
+    tooltip label { font-size: 14px; color: ${palette.text}; }
 
     #custom-power {
-      padding: 0 12px;
-      margin: 4px 2px;
+      padding: 0 10px;
+      margin: 3px 2px;
       background-color: ${palette.surface};
       border: 1px solid ${palette.border};
-      border-radius: 6px;
+      border-radius: 5px;
       color: ${palette.muted};
       transition: all 0.15s ease;
     }
@@ -176,7 +177,7 @@ in
         {
           layer = "top";
           position = "top";
-          height = 40;
+          height = 34;
           spacing = 0;
 
           modules-left = [
@@ -215,7 +216,7 @@ in
               stopped = "";
             };
             interval = 1;
-            max-length = 50;
+            max-length = 42;
             on-click = "playerctl play-pause";
             on-click-right = "playerctl next";
             on-click-middle = "playerctl previous";
@@ -368,8 +369,8 @@ in
           };
 
           tray = {
-            spacing = 8;
-            icon-size = 15;
+            spacing = 6;
+            icon-size = 14;
           };
 
         }

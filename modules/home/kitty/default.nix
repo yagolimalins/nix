@@ -51,6 +51,11 @@ in
 
         window_padding_width = 12;
 
+        # Wayland/Hyprland: reduce glyph flicker during open + resize.
+        sync_to_monitor = "no";
+        resize_debounce_time = 0.08;
+        repaint_delay = 4;
+
         confirm_os_window_close = 0;
         enable_audio_bell = false;
         cursor_shape = "beam";
