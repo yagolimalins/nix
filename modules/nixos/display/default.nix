@@ -41,7 +41,7 @@ in
             --greeting "  ${config.networking.hostName}" \
             --asterisks \
             --cmd "start-hyprland &>/dev/null" \
-            --theme "border=${palette.accent};text=${palette.text};prompt=${palette.muted};time=${palette.text};action=${palette.muted};button=${palette.surface};container=${palette.surface};input=${palette.text}"
+            --theme 'border=lightblue;text=lightcyan;prompt=gray;time=lightcyan;action=gray;button=black;container=black;input=lightcyan'
         '';
         user = "greeter";
       };

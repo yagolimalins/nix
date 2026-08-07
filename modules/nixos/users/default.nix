@@ -47,6 +47,7 @@ in
     users.groups.realtime = { };
 
     home-manager.backupFileExtension = "backup";
+    home-manager.overwriteBackup = true;
 
     users.users = lib.genAttrs (lib.attrNames config.snowfallorg.users) (_name: {
       shell = cfg.shell;

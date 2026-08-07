@@ -130,16 +130,8 @@ let
 in
 {
   config = lib.mkMerge [
-    (lib.mkIf (on "editors") {
-      home.packages = with pkgs; [
-        neovim
-        helix
-      ];
-    })
-
     (lib.mkIf (on "ides") {
       home.packages = [
-        pkgs.vscode
         pkgs.code-cursor
         cursorIcons
       ];

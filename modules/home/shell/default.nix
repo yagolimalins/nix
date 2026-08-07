@@ -49,6 +49,20 @@ in
 
         preexec_functions+=( preexec_track )
         precmd_functions+=( precmd_newline )
+
+        # Tokyo Night Storm — zsh-syntax-highlighting + autosuggestions
+        typeset -A ZSH_HIGHLIGHT_STYLES
+        ZSH_HIGHLIGHT_STYLES[default]="fg=${palette.text}"
+        ZSH_HIGHLIGHT_STYLES[command]="fg=${palette.accent},bold"
+        ZSH_HIGHLIGHT_STYLES[alias]="fg=${palette.cyan}"
+        ZSH_HIGHLIGHT_STYLES[builtin]="fg=${palette.accent}"
+        ZSH_HIGHLIGHT_STYLES[function]="fg=${palette.accent}"
+        ZSH_HIGHLIGHT_STYLES[path]="fg=${palette.text},underline"
+        ZSH_HIGHLIGHT_STYLES[globbing]="fg=${palette.warning},bold"
+        ZSH_HIGHLIGHT_STYLES[comment]="fg=${palette.muted}"
+        ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=${palette.urgent}"
+        ZSH_HIGHLIGHT_STYLES[redirection]="fg=${palette.cyan}"
+        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.muted}"
       '';
     };
 
