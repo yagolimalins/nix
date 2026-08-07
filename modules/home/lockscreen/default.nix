@@ -48,7 +48,7 @@ in
             outer_color = "rgb(${accentRgb})";
             inner_color = "rgb(${bgRgb})";
             font_color = "rgb(${textRgb})";
-            fade_on_empty = false;
+            fade_on_empty = true;
             placeholder_text = "";
             rounding = 6;
           }
