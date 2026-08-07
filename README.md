@@ -25,6 +25,7 @@ homes/
 modules/
   nixos/<name>/           # → mine.<name>.enable
   home/<name>/            # → mine.<name>.enable
+  home/theme/             # mine.theme — gtk, editors, vscode-profiles, monitoring, …
   home/packages/groups/   # mine.packages.* leaves
 ```
 
@@ -36,7 +37,7 @@ Snowfall expects these directory names (`systems/`, `homes/`, `modules/`, `lib/`
 - **Facts over conditionals:** hosts set `mine.host` / hostname; modules read `osConfig` — no `if host ==`.
 - **Same generation:** HM ships with `nixos-rebuild` / `nh os switch` — no separate home-manager switch.
 - **Pairs:** `display` (greetd/portals) ↔ `hyprland` (WM); `desktop` = keyring/Thunar/upower, not the WM; `mine.packages` is HM groups, not a Snowfall `packages/` output.
-- **Shared UI:** `lib.mine.palette`; cursor via `mine.theme`; XDG/mime via `mine.xdg`.
+- **Shared UI:** `lib.mine.palette`; theme helpers in `lib.mine.*`; GTK/Qt via `mine.theme`; XDG/mime via `mine.xdg`.
 
 ## Rebuild
 
