@@ -13,27 +13,15 @@ let
 in
 {
   config = lib.mkIf (cfg.enable && on "editors") {
-    programs.neovim = {
-      enable = true;
-      viAlias = true;
-      vimAlias = true;
-      defaultEditor = false;
-      plugins = with pkgs.vimPlugins; [
-        {
-          plugin = tokyonight-nvim;
-          type = "lua";
-          config = ''
-            require("tokyonight").setup({ style = "storm" })
-            vim.cmd.colorscheme("tokyonight-storm")
-          '';
-        }
-      ];
-    };
-
-    programs.helix = {
-      enable = true;
-      defaultEditor = false;
-      settings.theme = "tokyonight_storm";
-    };
+    programs.neovim.plugins = with pkgs.vimPlugins; [
+      {
+        plugin = tokyonight-nvim;
+        type = "lua";
+        config = ''
+          require("tokyonight").setup({ style = "storm" })
+          vim.cmd.colorscheme("tokyonight-storm")
+        '';
+      }
+    ];
   };
 }

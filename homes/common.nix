@@ -18,6 +18,8 @@
       "nightshift"
       "thunar"
       "theme"
+      "helix"
+      "neovim"
       "firefox"
       "packages"
       "input-remapper"
