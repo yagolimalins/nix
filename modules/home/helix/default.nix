@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  pkgs,
   namespace,
   ...
 }:
@@ -12,6 +13,55 @@ let
   cfg = config.${namespace}.helix;
   themeCfg = config.${namespace}.theme;
   on = lib.${namespace}.packageGroupOn config.${namespace}.packages;
+
+  lldbDap = "${pkgs.lldb}/bin/lldb-dap";
+
+  # Merged with Helix built-in languages.toml — overrides Rust debugger + formatter only.
+  rustLanguage = {
+    name = "rust";
+    "auto-format" = true;
+    formatter = {
+      command = "rustfmt";
+    };
+    debugger = {
+      name = "lldb-dap";
+      transport = "stdio";
+      command = lldbDap;
+      templates = [
+        {
+          name = "binary";
+          request = "launch";
+          completion = [
+            {
+              name = "binary";
+              completion = "filename";
+            }
+          ];
+          args.program = "{0}";
+        }
+        {
+          name = "binary (terminal)";
+          request = "launch";
+          completion = [
+            {
+              name = "binary";
+              completion = "filename";
+            }
+          ];
+          args = {
+            program = "{0}";
+            runInTerminal = true;
+          };
+        }
+        {
+          name = "attach";
+          request = "attach";
+          completion = [ "pid" ];
+          args.pid = "{0}";
+        }
+      ];
+    };
+  };
 
   # Shift hjkl one key right on ABNT2: j/k/l/ç = ← ↓ ↑ →
   abnt2Dirs = {
@@ -167,6 +217,13 @@ in
     programs.helix = {
       enable = true;
       defaultEditor = false;
+      extraPackages = [
+        pkgs.lldb
+        pkgs.rustfmt
+      ];
+      languages = {
+        language = [ rustLanguage ];
+      };
       settings =
         {
           keys = abnt2Movement;
