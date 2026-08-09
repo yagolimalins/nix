@@ -15,6 +15,20 @@ let
   cfg = config.${namespace}.display;
   gtkPortal = lib.${namespace}.mkGtkHyprlandPortal pkgs;
   palette = lib.${namespace}.palette;
+  # tuigreet only accepts ANSI names; console.colors remaps VT 0–15 to Storm.
+  strip = lib.removePrefix "#";
+  tuigreetTheme = lib.concatStringsSep ";" [
+    "border=lightblue" # accent
+    "title=lightblue"
+    "text=white" # text
+    "greet=lightcyan" # cyan
+    "time=lightcyan"
+    "prompt=darkgray" # muted (gray is ANSI 7 / white in ratatui)
+    "action=darkgray"
+    "button=lightblue"
+    "container=black" # bg
+    "input=white"
+  ];
 in
 {
   options.${namespace}.display.enable =
@@ -30,6 +44,26 @@ in
       HandlePowerKey = "suspend";
     };
 
+    # ANSI 0–15 → Storm (color0 = bg so tuigreet container=black is the Storm background).
+    console.colors = map strip [
+      palette.bg
+      palette.urgent
+      palette.ok
+      palette.warning
+      palette.accent
+      palette.purple
+      palette.cyan
+      palette.text
+      palette.muted
+      palette.urgent
+      palette.ok
+      palette.warning
+      palette.accent
+      palette.purple
+      palette.cyan
+      palette.text
+    ];
+
     services.greetd = {
       enable = true;
       settings.default_session = {
@@ -41,7 +75,7 @@ in
             --greeting "  ${config.networking.hostName}" \
             --asterisks \
             --cmd "start-hyprland &>/dev/null" \
-            --theme 'border=lightblue;text=lightcyan;prompt=gray;time=lightcyan;action=gray;button=black;container=black;input=lightcyan'
+            --theme '${tuigreetTheme}'
         '';
         user = "greeter";
       };
