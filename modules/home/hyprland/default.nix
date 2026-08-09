@@ -203,12 +203,6 @@ in
 
           # Session
           "$mod, L, exec, hyprlock"
-
-          # Brightness (ThinkPad Fn keys)
-          ", XF86MonBrightnessUp,   exec, brightnessctl s 5%+"
-          ", XF86MonBrightnessDown, exec, brightnessctl s 5%-"
-          ", XF86KbdBrightnessUp,   exec, brightnessctl -d *::kbd_backlight s 10%+"
-          ", XF86KbdBrightnessDown, exec, brightnessctl -d *::kbd_backlight s 10%-"
         ];
 
         # Works even on locked screen (l = locked)
@@ -229,6 +223,11 @@ in
           "$mod, bracketright,      exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
           ", XF86AudioRaiseVolume,  exec, wpctl set-volume --limit 1.0 @DEFAULT_AUDIO_SINK@ 5%+"
           ", XF86AudioLowerVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+          # Brightness (ThinkPad Fn keys)
+          ", XF86MonBrightnessUp,   exec, brightnessctl s 2%+"
+          ", XF86MonBrightnessDown, exec, brightnessctl s 2%-"
+          ", XF86KbdBrightnessUp,   exec, brightnessctl -d *::kbd_backlight s 10%+"
+          ", XF86KbdBrightnessDown, exec, brightnessctl -d *::kbd_backlight s 10%-"
         ];
 
         bindm = [
