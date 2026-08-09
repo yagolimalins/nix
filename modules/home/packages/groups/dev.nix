@@ -114,6 +114,13 @@ let
         done
       '';
 
+  # nixpkgs ships cursor-agent; upstream CLI entrypoint is also named agent.
+  cursorAgentCli = pkgs.symlinkJoin {
+    name = "cursor-agent-cli";
+    paths = [ pkgs.cursor-cli ];
+    postBuild = "ln -s cursor-agent $out/bin/agent";
+  };
+
   # WebKitGTK on NixOS reads wrong font/DPI settings without schema paths + TLS GIO
   # modules (https://github.com/tauri-apps/tauri/issues/7354).
   webkitGtkSessionVars = {
@@ -251,7 +258,10 @@ in
     })
 
     (lib.mkIf (on "ai") {
-      home.packages = [ pkgs.claude-code ];
+      home.packages = [
+        pkgs.claude-code
+        cursorAgentCli
+      ];
     })
 
     (lib.mkIf (on "vcs") {
