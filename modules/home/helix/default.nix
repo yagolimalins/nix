@@ -131,26 +131,47 @@ let
     "C-ç" = right;
   };
 
-  # Alt = jump, Ctrl = swap — from normal mode (no Ctrl-w prefix)
-  abnt2WindowJump = {
-    left,
-    down,
-    up,
-    right,
-  }: {
-    "A-j" = left;
-    "A-k" = down;
-    "A-l" = up;
-    "A-ç" = right;
+  # Alt + JKLÇ — movement in any mode (especially insert, where j/k/l/ç type chars)
+  abnt2AltMove =
+    {
+      left,
+      down,
+      up,
+      right,
+    }: {
+      "A-j" = left;
+      "A-k" = down;
+      "A-l" = up;
+      "A-ç" = right;
+    };
+
+  # Ctrl + JKLÇ — jump split from normal mode (swap stays under Ctrl-w / Space w)
+  abnt2GlobalJump =
+    {
+      left,
+      down,
+      up,
+      right,
+    }: {
+      "C-j" = left;
+      "C-k" = down;
+      "C-l" = up;
+      "C-ç" = right;
+    };
+
+  abnt2Move = {
+    left = "move_char_left";
+    down = "move_line_down";
+    up = "move_line_up";
+    right = "move_char_right";
   };
 
-  abnt2WindowSwap =
-    abnt2Swap {
-      left = "swap_view_left";
-      down = "swap_view_down";
-      up = "swap_view_up";
-      right = "swap_view_right";
-    };
+  abnt2Extend = {
+    left = "extend_char_left";
+    down = "extend_line_down";
+    up = "extend_line_up";
+    right = "extend_char_right";
+  };
 
   windowMode =
     abnt2Dirs {
@@ -174,19 +195,14 @@ let
 
   abnt2Movement = {
     normal =
-      abnt2Dirs {
-        left = "move_char_left";
-        down = "move_line_down";
-        up = "move_line_up";
-        right = "move_char_right";
-      }
-      // abnt2WindowJump {
+      abnt2Dirs abnt2Move
+      // abnt2AltMove abnt2Move
+      // abnt2GlobalJump {
         left = "jump_view_left";
         down = "jump_view_down";
         up = "jump_view_up";
         right = "jump_view_right";
       }
-      // abnt2WindowSwap
       // {
         g = abnt2Dirs {
           left = "goto_line_start";
@@ -201,12 +217,10 @@ let
           w = windowMode;
         };
       };
-    select = abnt2Dirs {
-      left = "extend_char_left";
-      down = "extend_line_down";
-      up = "extend_line_up";
-      right = "extend_char_right";
-    };
+    select =
+      abnt2Dirs abnt2Extend
+      // abnt2AltMove abnt2Extend;
+    insert = abnt2AltMove abnt2Move;
   };
 in
 {

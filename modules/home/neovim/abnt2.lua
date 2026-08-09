@@ -3,13 +3,28 @@ local map = vim.keymap.set
 local opts = { silent = true }
 local nop = "<Nop>"
 
+local move = { j = "h", k = "j", l = "k", ç = "l" }
+local arrows = { j = "<Left>", k = "<Down>", l = "<Up>", ç = "<Right>" }
+
 -- Normal + visual: j/k/l/ç = ← ↓ ↑ →
 for _, mode in ipairs({ "n", "v" }) do
   map(mode, "h", nop, opts)
-  map(mode, "j", "h", vim.tbl_extend("force", opts, { desc = "←" }))
-  map(mode, "k", "j", vim.tbl_extend("force", opts, { desc = "↓" }))
-  map(mode, "l", "k", vim.tbl_extend("force", opts, { desc = "↑" }))
-  map(mode, "ç", "l", vim.tbl_extend("force", opts, { desc = "→" }))
+  for key, motion in pairs(move) do
+    map(mode, key, motion, vim.tbl_extend("force", opts, { desc = "move" }))
+  end
+end
+
+-- Insert + replace: Alt + JKLÇ = arrows
+for _, mode in ipairs({ "i", "R" }) do
+  for key, motion in pairs(arrows) do
+    map(mode, "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
+  end
+end
+
+-- Normal: Alt + JKLÇ = same movement (consistent across modes)
+for key, motion in pairs(move) do
+  map("n", "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
+  map("v", "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
 end
 
 -- g prefix (helix goto mode) — use normal! to bypass JKLÇ remaps
@@ -28,17 +43,11 @@ map("n", "zj", nop, opts)
 map("n", "zk", "<C-e>", vim.tbl_extend("force", opts, { desc = "Scroll down" }))
 map("n", "zl", "<C-y>", vim.tbl_extend("force", opts, { desc = "Scroll up" }))
 
--- Window: jump split without Ctrl-w (Alt + JKLÇ)
-map("n", "<A-j>", "<C-w>j", vim.tbl_extend("force", opts, { desc = "Win ←" }))
-map("n", "<A-k>", "<C-w>k", vim.tbl_extend("force", opts, { desc = "Win ↓" }))
-map("n", "<A-l>", "<C-w>l", vim.tbl_extend("force", opts, { desc = "Win ↑" }))
-map("n", "<A-ç>", "<C-w>ç", vim.tbl_extend("force", opts, { desc = "Win →" }))
-
--- Window: swap split without Ctrl-w (Ctrl + JKLÇ)
-map("n", "<C-j>", "<C-w>H", vim.tbl_extend("force", opts, { desc = "Swap ←" }))
-map("n", "<C-k>", "<C-w>J", vim.tbl_extend("force", opts, { desc = "Swap ↓" }))
-map("n", "<C-l>", "<C-w>K", vim.tbl_extend("force", opts, { desc = "Swap ↑" }))
-map("n", "<C-ç>", "<C-w>L", vim.tbl_extend("force", opts, { desc = "Swap →" }))
+-- Window: jump split without Ctrl-w (Ctrl + JKLÇ)
+map("n", "<C-j>", "<C-w>j", vim.tbl_extend("force", opts, { desc = "Win ←" }))
+map("n", "<C-k>", "<C-w>k", vim.tbl_extend("force", opts, { desc = "Win ↓" }))
+map("n", "<C-l>", "<C-w>l", vim.tbl_extend("force", opts, { desc = "Win ↑" }))
+map("n", "<C-ç>", "<C-w>ç", vim.tbl_extend("force", opts, { desc = "Win →" }))
 
 -- Window: jump split (Ctrl-w + JKLÇ)
 map("n", "<C-w>h", nop, opts)
@@ -47,7 +56,7 @@ map("n", "<C-w>k", "<C-w>j", vim.tbl_extend("force", opts, { desc = "Win ↓" })
 map("n", "<C-w>l", "<C-w>k", vim.tbl_extend("force", opts, { desc = "Win ↑" }))
 map("n", "<C-w>ç", "<C-w>l", vim.tbl_extend("force", opts, { desc = "Win →" }))
 
--- Window: swap split (Ctrl + same key as jump)
+-- Window: swap split (Ctrl-w prefix only)
 map("n", "<C-w>H", nop, opts)
 map("n", "<C-w>J", nop, opts)
 map("n", "<C-w>K", nop, opts)
