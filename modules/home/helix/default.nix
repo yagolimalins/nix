@@ -16,13 +16,10 @@ let
 
   lldbDap = "${pkgs.lldb}/bin/lldb-dap";
 
-  # Merged with Helix built-in languages.toml — overrides Rust debugger + formatter only.
+  # Merged with Helix built-in languages.toml — debugger override only; format via rust-analyzer.
   rustLanguage = {
     name = "rust";
     "auto-format" = true;
-    formatter = {
-      command = "rustfmt";
-    };
     debugger = {
       name = "lldb-dap";
       transport = "stdio";
@@ -233,13 +230,15 @@ in
       defaultEditor = false;
       extraPackages = [
         pkgs.lldb
-        pkgs.rustfmt
       ];
       languages = {
         language = [ rustLanguage ];
       };
       settings =
         {
+          editor = {
+            "auto-format" = true;
+          };
           keys = abnt2Movement;
         }
         // lib.optionalAttrs themeCfg.enable {
