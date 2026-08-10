@@ -3,7 +3,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./gpu.nix
+    ./custom.nix
   ];
 
   networking.hostName = "laptop";

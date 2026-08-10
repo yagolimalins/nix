@@ -24,8 +24,6 @@ in
       keep-outputs = true;
     };
 
-    nix.daemonCPUSchedPolicy = "idle";
-
     nix.gc = {
       automatic = true;
       dates = "daily";
