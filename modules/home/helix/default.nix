@@ -238,6 +238,9 @@ in
         {
           editor = {
             "auto-format" = true;
+            lsp = {
+              "display-progress-messages" = true;
+            };
           };
           keys = abnt2Movement;
         }
