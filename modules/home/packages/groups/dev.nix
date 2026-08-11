@@ -344,11 +344,11 @@ in
     ))
 
     (lib.mkIf (on "dioxus") {
-      # Local dx 0.7.10 + wasm-bindgen 0.2.126 (nixpkgs dx is 0.7.9 / older bindgen).
+      # Local dx 0.7.10 + wasm-bindgen 0.2.127 (nixpkgs dx is 0.7.9 / older bindgen).
       # dioxus-cli and deno both ship `bin/dx` — prefer Dioxus.
       home.packages = [
         (lib.hiPrio pkgs.${namespace}.dioxus-cli)
-        (lib.hiPrio pkgs.wasm-bindgen-cli_0_2_126)
+        (lib.hiPrio pkgs.${namespace}.wasm-bindgen-cli_0_2_127)
         pkgs.binaryen
         pkgs.lld
         pkgs.gsettings-desktop-schemas

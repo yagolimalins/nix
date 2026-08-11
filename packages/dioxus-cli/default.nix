@@ -1,8 +1,9 @@
-# dioxus-cli matching current Dioxus 0.7.10 + wasm-bindgen 0.2.126.
+# dioxus-cli matching current Dioxus 0.7.10 + wasm-bindgen 0.2.127.
 # nixpkgs 26.05 still ships dx 0.7.9 with an older wasm-bindgen-cli on PATH.
 {
   lib,
   pkgs,
+  namespace,
   ...
 }:
 
@@ -40,7 +41,7 @@ pkgs.rustPlatform.buildRustPackage (finalAttrs: {
       --prefix PATH : ${
         lib.makeBinPath [
           pkgs.esbuild
-          pkgs.wasm-bindgen-cli_0_2_126
+          pkgs.${namespace}.wasm-bindgen-cli_0_2_127
         ]
       }
   '';
