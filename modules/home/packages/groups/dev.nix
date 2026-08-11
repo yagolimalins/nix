@@ -152,6 +152,7 @@ in
           "html"
           "java"
           "nix"
+          "prisma"
           "sql"
           "tokyo-night"
           "toml"
@@ -279,7 +280,13 @@ in
         deno
         tsx
         tailwindcss_4
+        prisma
       ];
+
+      # Prisma 7 CLI wraps schema-engine; export for project-local `npx prisma` too.
+      home.sessionVariables = {
+        PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+      };
     })
 
     (lib.mkIf (on "jvm") {
