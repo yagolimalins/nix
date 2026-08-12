@@ -153,6 +153,7 @@ in
           "java"
           "nix"
           "prisma"
+          "proto"
           "sql"
           "tokyo-night"
           "toml"
