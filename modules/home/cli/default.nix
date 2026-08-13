@@ -97,6 +97,31 @@ in
 
     programs.tealdeer.enable = true;
 
+    xdg.configFile."yazi/plugins/smart-enter.yazi/main.lua".text = ''
+      --- @since 25.5.31
+      --- @sync entry
+
+      local function setup(self, opts) self.open_multi = opts.open_multi end
+
+      local function entry(self)
+        local h = cx.active.current.hovered
+        ya.emit(h and h.cha.is_dir and "enter" or "open", { hovered = not self.open_multi })
+      end
+
+      return { entry = entry, setup = setup }
+    '';
+
+    xdg.configFile."yazi/keymap.toml" = {
+      force = true;
+      text = ''
+      # Enter: enter directories, open files (Yazi default Enter always runs open).
+      [mgr]
+      prepend_keymap = [
+        { on = "<Enter>", run = "plugin smart-enter", desc = "Enter directory or open file" },
+      ]
+      '';
+    };
+
     xdg.configFile."yazi/yazi.toml" = {
       force = true;
       text = ''
@@ -126,7 +151,7 @@ in
 
       [open]
       prepend_rules = [
-        { url = "*/", use = "folder" },
+        { url = "*/", use = [ "open", "reveal", "folder" ] },
         { mime = "text/html", use = "browser" },
         { mime = "application/xhtml+xml", use = "browser" },
         { mime = "application/pdf", use = "zathura" },
@@ -136,7 +161,7 @@ in
         { mime = "text/*", use = "edit" },
         { url = "*.{rs,toml,nix,md,json,yaml,yml,ts,tsx,js,jsx,css,html,sh}", use = "edit" },
       ]
-    '';
+      '';
     };
   };
 }
