@@ -1,103 +1,97 @@
 # ❄ NixOS Multi-Host Configuration
 
-Flakes + [Snowfall Lib](https://snowfall.org) + Home Manager as a NixOS module. Namespace: `mine`.
+Personal [NixOS](https://nixos.org) flake with [Home Manager](https://github.com/nix-community/home-manager) on [Snowfall Lib](https://snowfall.org). NixOS 26.05, Hyprland, Tokyo Night Storm theme. Namespace: `mine`.
+
+One rebuild applies system and user config together — no separate `home-manager switch`.
+
+## Quick start
+
+```bash
+nh os switch              # default host (see programs.nh.flake)
+nh os switch -H thinkpad  # explicit host
+```
+
+Flake attribute = directory name under `systems/x86_64-linux/` (e.g. `thinkpad` → `.#thinkpad`).
+
+Alternative:
+
+```bash
+sudo nixos-rebuild switch --flake ~/.nix#thinkpad
+```
+
+Toggle installed software in `homes/x86_64-linux/<user>/package-groups.nix`. Group names live in `lib/packages.nix`. Format changed files with `nix fmt`.
 
 ## Screenshots
-
-Tokyo Night Storm on Hyprland (NixOS 26.05):
 
 ![Desktop](screenshots/desktop.png)
 ![Fuzzel](screenshots/fuzzel.png)
 ![btop](screenshots/btop.png)
 ![Spotify](screenshots/spotify.png)
 
-## Layout
+## Fresh install
 
-```
-flake.nix                 # inputs + Snowfall wiring
-install.sh                # bootstrap a new machine
-lib/                      # lib.mine.* (enable-modules, palette, helpers)
-systems/
-  common.nix              # shared NixOS mine.*.enable
-  x86_64-linux/<host>/    # hostname, hardware, mine.host facts
-homes/
-  common.nix              # shared HM mine.*.enable (+ stateVersion)
-  x86_64-linux/<user>/    # username = directory name
-modules/
-  nixos/<name>/           # → mine.<name>.enable
-  home/<name>/            # → mine.<name>.enable
-  home/theme/             # mine.theme — gtk, editors, vscode-profiles, monitoring, …
-  home/packages/groups/   # mine.packages.* leaves
-```
+From a minimal NixOS system, run `./install.sh` at the repo root. It:
 
-Snowfall expects these directory names (`systems/`, `homes/`, `modules/`, `lib/`).
+1. Generates `systems/<arch>/<host>/hardware-configuration.nix` (strips Docker/Podman overlay mounts)
+2. Scaffolds host and user dirs if missing — never overwrites an existing host `default.nix`
+3. Enables flakes in `~/.config/nix/nix.conf`
+4. Creates Lanzaboote Secure Boot keys when appropriate
+5. Runs `nixos-rebuild switch --flake .#<host>`
 
-## Mental model
+Requires a git repository; the script `git add`s new files because flakes ignore untracked paths.
 
-- **Opt-in:** nothing applies unless `mine.<module>.enable` (batched via `lib.mine.enable-modules` in `*/common.nix`).
-- **Facts over conditionals:** hosts set `mine.host` / hostname; modules read `osConfig` — no `if host ==`.
-- **Same generation:** HM ships with `nixos-rebuild` / `nh os switch` — no separate home-manager switch.
-- **Pairs:** `display` (greetd/portals) ↔ `hyprland` (WM); `desktop` = keyring/Thunar/upower, not the WM; `mine.packages` is HM groups, not a Snowfall `packages/` output.
-- **Shared UI:** `lib.mine.palette`; theme helpers in `lib.mine.*`; GTK/Qt via `mine.theme`; XDG/mime via `mine.xdg`.
+BIOS or no ESP at `/boot` → scaffolds GRUB. VMs default to `secureBoot = false`.
 
-## Rebuild
-
-```bash
-nh os switch              # uses programs.nh.flake (~/.nix/)
-nh os switch -H laptop
-sudo nixos-rebuild switch --flake ~/.nix#thinkpad
-```
-
-Flake attribute = `systems/x86_64-linux/<host>` directory name.
+Secure Boot on bare metal: firmware Setup Mode → `sudo sbctl enroll-keys -m` → enable Secure Boot in firmware. Skip with `mine.boot.secureBoot = false` in the host config.
 
 ## Recipes
 
-### Host
+New host — run `./install.sh` or copy `systems/x86_64-linux/<host>/`. Shared NixOS modules are enabled in `systems/common.nix`.
 
-`systems/x86_64-linux/<host>/default.nix`:
+Dual monitor (ultrawide + laptop panel, used on thinkpad/laptop):
 
 ```nix
-{ lib, namespace, ... }:
-{
-  imports = [ ./hardware-configuration.nix ];
-  networking.hostName = "myhost";
-  # ${namespace}.host = lib.${namespace}.mkDualMonitorHost "HDMI-A-1";
-}
+imports = [
+  ./hardware-configuration.nix
+  (lib.${namespace}.dualMonitorHostModule "HDMI-A-1")
+];
 ```
 
-Then `nh os switch -H myhost`. Shared modules come from `systems/common.nix`.
+New user — create `homes/x86_64-linux/<username>/` (directory name must match the Unix user):
 
-### User
+```nix
+{ ... }: { imports = [ ./package-groups.nix ]; }
+```
 
-`homes/x86_64-linux/<username>/default.nix` (name must match the Unix user). Optional overrides only; shared modules from `homes/common.nix`. Use `user@host` only for host-specific homes.
+Shared Home Manager modules come from `homes/common.nix`.
 
-### Module
+New module — add `modules/nixos/<name>/` or `modules/home/<name>/` with `options.mine.<name>.enable`, then enable in `systems/common.nix` or `homes/common.nix`. Folder name = option name.
 
-1. `modules/nixos/<name>/default.nix` or `modules/home/<name>/default.nix`
-2. `options.${namespace}.<name>.enable` + `lib.mkIf cfg.enable`
-3. Enable in `systems/common.nix` or `homes/common.nix` (or per host/user)
+## Layout
 
-Folder name = option name. In `homes/common.nix` use literal `mine` (HM freeformType cycle with `${namespace}`).
+```
+flake.nix                          inputs + Snowfall wiring
+install.sh                         bootstrap new hosts
+lib/                               lib.mine.* helpers
+  modules.nix                      enable-modules
+  packages.nix                     package groups, Thunar/Yazi openers
+  theme.nix                        Tokyo Night Storm palette
+  host.nix                         dual-monitor layout, Hyprland portal
+systems/common.nix                 shared NixOS mine.* toggles
+systems/x86_64-linux/<host>/       hostname, hardware, mine.host facts
+homes/common.nix                   shared HM mine.* toggles
+homes/x86_64-linux/<user>/         package-groups.nix + overrides
+modules/nixos|home/<name>/         → mine.<name>.enable
+modules/home/packages/groups/      packages per group
+packages/                          custom derivations (≠ mine.packages)
+```
 
-`mine.packages.enable` is required for any package group. Toggle groups in `homes/x86_64-linux/<user>/package-groups.nix`.
+Hosts: `thinkpad`, `laptop`, `desktop`.
 
 ## Conventions
 
-| | |
-|--|--|
-| Namespace | `mine` |
-| Enable | `mine.<module>.enable` / `lib.mine.enable-modules` |
-| Host / user facts | `mine.host.*` / `mine.user.*` |
-| Comments | Architecture, workarounds, Nix limits only |
-| Format | `nix fmt` (treefmt + nixfmt); `.githooks/pre-commit` |
-| stateVersion | Keep aligned with nixpkgs channel (`26.05`) |
-
-Principles: Snowfall layout is source of truth; opt-in modules; facts over conditionals; behaviour-preserving refactors; forkable (no hardcoded username).
-
-## Secure Boot
-
-`mine.boot.secureBoot` (default `true`) → Lanzaboote; keys in `/var/lib/sbctl`. Bail out: `mine.boot.secureBoot = false`. No ESP: `mine.boot.efi = false` (GRUB). Enrollment: Setup Mode → `sudo sbctl enroll-keys -m` → enable Secure Boot in firmware.
-
-## Bootstrap
-
-From a minimal NixOS install: `./install.sh` — detects EFI/BIOS, generates hardware config, scaffolds host/user if missing, optional Lanzaboote keys, then `nixos-rebuild switch`.
+- Opt-in modules via `mine.<name>.enable`, batched with `lib.mine.enable-modules` in `*/common.nix`
+- Host facts on `mine.host.*` — shared modules read `osConfig`, not `if host ==`
+- `homes/common.nix` uses literal `mine`, not `${namespace}` (Home Manager freeformType cycle)
+- `packages/` = custom flake derivations; `mine.packages` = Home Manager user package groups
+- stateVersion `26.05` · format with `nix fmt` (treefmt + nixfmt)

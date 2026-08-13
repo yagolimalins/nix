@@ -49,6 +49,59 @@ git_stage() {
     git add "$@"
 }
 
+# Derive toggle lines from lib/packages.nix (single source of truth).
+package_group_toggle_lines() {
+    local repo_root="$1" lines
+    if lines="$(
+        nix eval --impure --raw --expr "
+          let
+            pkgs = import <nixpkgs> {};
+            packages = import ${repo_root}/lib/packages.nix { lib = pkgs.lib; };
+          in builtins.concatStringsSep \"\\n\" (
+            map (n: \"    \" + n + \" = true;\") packages.packageGroupNames
+          )
+        " 2>/dev/null
+    )"; then
+        printf '%s\n' "$lines"
+        return 0
+    fi
+    warn "Could not read lib/packages.nix — using a built-in package group list."
+    cat <<'EOF'
+    nix = true;
+    monitoring = true;
+    wayland = true;
+    clipboard = true;
+    viewers = true;
+    fonts = true;
+    editors = true;
+    ides = true;
+    cli = true;
+    c = true;
+    python = true;
+    ai = true;
+    vcs = true;
+    js = true;
+    jvm = true;
+    rust = true;
+    dioxus = true;
+    tauri = true;
+    gtk = true;
+    dotnet = true;
+    databases = true;
+    api = true;
+    office = true;
+    notes = true;
+    learning = true;
+    browsers = true;
+    proton = true;
+    mail = true;
+    communication = true;
+    media = true;
+    creator = true;
+    audio = true;
+EOF
+}
+
 # ── Environment ──────────────────────────────────────────────────────────────
 
 detect_system() {
@@ -359,7 +412,8 @@ if [[ ! -f "$DEFAULT_FILE" ]]; then
 
   networking.hostName = "${HOST}";
 
-  # Optional: \${namespace}.host = lib.\${namespace}.mkDualMonitorHost "HDMI-A-1";
+  # Dual monitor (ultrawide + laptop panel) — add to imports above:
+  # (lib.\${namespace}.dualMonitorHostModule "HDMI-A-1")
 EOF
         boot_block_for_new_host "$WANT_SB"
         echo "}"
@@ -388,44 +442,15 @@ PACKAGE_GROUPS="${USER_DIR}/package-groups.nix"
 mkdir -p "$USER_DIR"
 
 if [[ ! -f "$PACKAGE_GROUPS" ]]; then
-    cat >"$PACKAGE_GROUPS" <<'EOF'
-# Flip groups on/off here, then `nh os switch`.
+    TOGGLE_LINES="$(package_group_toggle_lines "$(pwd)")"
+    cat >"$PACKAGE_GROUPS" <<EOF
+# Flip groups on/off here, then \`nh os switch\`.
+# Group names come from lib/packages.nix (lib.mine.packageGroups).
 { lib, ... }:
 
 let
   toggles = {
-    nix = true;
-    monitoring = true;
-    wayland = true;
-    clipboard = true;
-    viewers = true;
-    fonts = true;
-    editors = true;
-    ides = true;
-    cli = true;
-    c = true;
-    python = true;
-    ai = true;
-    vcs = true;
-    js = true;
-    jvm = true;
-    rust = true;
-    dioxus = true;
-    tauri = true;
-    gtk = true;
-    dotnet = true;
-    databases = true;
-    api = true;
-    office = true;
-    notes = true;
-    learning = true;
-    browsers = true;
-    proton = true;
-    mail = true;
-    communication = true;
-    media = true;
-    creator = true;
-    audio = true;
+${TOGGLE_LINES}
   };
 in
 {

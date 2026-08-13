@@ -1,5 +1,8 @@
-# User package orchestrator. Groups default to on when `enable` is set; override
-# toggles in homes/x86_64-linux/<user>/package-groups.nix.
+# User package orchestrator (mine.packages.*). Groups default to on when
+# `enable` is set; override toggles in homes/x86_64-linux/<user>/package-groups.nix.
+#
+# Group names and descriptions: lib.mine.packageGroups (lib/packages.nix).
+# Custom flake derivations (dioxus-cli, numix-square-storm, …): top-level packages/.
 {
   config,
   lib,
@@ -10,6 +13,7 @@
 let
   cfg = config.${namespace}.packages;
   mkGroup = lib.mkEnableOption;
+  packageGroups = lib.${namespace}.packageGroups;
   groupNames = lib.${namespace}.packageGroupNames;
 in
 {
@@ -23,44 +27,10 @@ in
 
   options.${namespace}.packages = {
     enable = mkGroup "user package orchestrator (direnv + default groups)";
-
-    nix.enable = mkGroup "Nix tooling (nixfmt, nixd, nil)";
-    monitoring.enable = mkGroup "system monitors (btop, fastfetch)";
-
-    wayland.enable = mkGroup "Wayland session applets and helpers";
-    clipboard.enable = mkGroup "screenshots and clipboard";
-    viewers.enable = mkGroup "light file viewers";
-    fonts.enable = mkGroup "user fonts";
-
-    editors.enable = mkGroup "lightweight editors (neovim, helix)";
-    ides.enable = mkGroup "heavy IDEs (VS Code, Cursor, Zed)";
-    cli.enable = mkGroup "CLI essentials (fzf, bat, yazi, …)";
-    c.enable = mkGroup "C toolchain (gcc)";
-    python.enable = mkGroup "Python tooling (uv)";
-    ai.enable = mkGroup "AI CLI tools";
-    vcs.enable = mkGroup "version control";
-    js.enable = mkGroup "JavaScript / TypeScript";
-    jvm.enable = mkGroup "JVM tooling";
-    rust.enable = mkGroup "Rust toolchain (stable + wasm32-unknown-unknown + trunk)";
-    dioxus.enable = mkGroup "Dioxus CLI + web/desktop native deps";
-    tauri.enable = mkGroup "Tauri CLI, create-tauri-app, + Linux WebKit/GTK deps";
-    gtk.enable = mkGroup "GTK4/Libadwaita (Relm4, …)";
-    dotnet.enable = mkGroup ".NET SDK";
-
-    databases.enable = mkGroup "database GUIs";
-    api.enable = mkGroup "API clients";
-    office.enable = mkGroup "office suite";
-    notes.enable = mkGroup "markdown / notes";
-    learning.enable = mkGroup "flashcards / study";
-    browsers.enable = mkGroup "browsers";
-    proton.enable = mkGroup "Proton suite (VPN, Pass, Mail Bridge)";
-    mail.enable = mkGroup "mail client";
-    communication.enable = mkGroup "communication apps";
-
-    media.enable = mkGroup "media playback (VLC, Popcorn Time, spotify-player)";
-    creator.enable = mkGroup "recording / editing";
-    audio.enable = mkGroup "audio production";
-  };
+  }
+  // lib.mapAttrs (_: description: {
+    enable = mkGroup description;
+  }) packageGroups;
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {

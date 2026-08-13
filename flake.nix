@@ -1,5 +1,7 @@
 {
   description = "Multi-host NixOS flake (Snowfall Lib + Home Manager)";
+  # Snowfall packages/ = custom derivations (flake outputs).
+  # mine.packages = HM user package groups (modules/home/packages/).
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
