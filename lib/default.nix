@@ -51,6 +51,31 @@
   # Gated package group: mine.packages.enable && mine.packages.<group>.enable
   packageGroupOn = pkgCfg: group: pkgCfg.enable && pkgCfg.${group}.enable;
 
+  # Thunar UCA + Yazi folder openers — keep commands identical between both.
+  folderOpenCommands =
+    pkgs:
+    let
+      terminal = lib.getExe pkgs.kitty;
+      cursor = lib.getExe pkgs.code-cursor;
+      vscode = lib.getExe pkgs.vscode;
+      zed = lib.getExe pkgs.zed-editor;
+    in
+    {
+      thunar = {
+        terminal = "${terminal} --working-directory %f";
+        cursor = "${cursor} %f";
+        vscode = "${vscode} --new-window %f";
+        zed = "${zed} -n %f";
+      };
+      yazi = {
+        # --detach opens a new Kitty OS window without blocking the caller.
+        terminal = "${terminal} --detach --working-directory %s";
+        cursor = "${cursor} %s";
+        vscode = "${vscode} --new-window %s";
+        zed = "${zed} -n %s";
+      };
+    };
+
   # --- Tokyo Night Storm theme helpers (used by modules/home/theme/) ---
 
   vscodeTokyoNightSettings = {

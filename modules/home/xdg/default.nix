@@ -14,6 +14,19 @@
 let
   cfg = config.${namespace}.xdg;
 
+  vlcMimeTypes = [
+    "application/ogg"
+    "audio/flac"
+    "audio/mpeg"
+    "audio/ogg"
+    "audio/x-flac"
+    "video/mp4"
+    "video/mpeg"
+    "video/webm"
+    "video/x-matroska"
+    "video/x-msvideo"
+  ];
+
   # Stub overrides in ~/.local/share/applications (wins over system/profile).
   hideFromLauncher = ids: lib.listToAttrs (
     map (id: {
@@ -30,7 +43,11 @@ in
   options.${namespace}.xdg.enable = lib.mkEnableOption "XDG dirs, mime defaults, and HM force flags";
 
   config = lib.mkIf cfg.enable {
-    home.sessionVariables.BROWSER = "firefox";
+    home.sessionVariables = {
+      BROWSER = "firefox";
+      TERMINAL = "kitty";
+      EDITOR = "hx";
+    };
 
     xdg.mimeApps = {
       enable = true;
@@ -39,7 +56,14 @@ in
         "application/xhtml+xml" = [ "firefox.desktop" ];
         "x-scheme-handler/http" = [ "firefox.desktop" ];
         "x-scheme-handler/https" = [ "firefox.desktop" ];
-      };
+        "inode/directory" = [ "thunar.desktop" ];
+        "application/pdf" = [ "org.pwmt.zathura-pdf-mupdf.desktop" ];
+        "image/jpeg" = [ "org.xfce.ristretto.desktop" ];
+        "image/png" = [ "org.xfce.ristretto.desktop" ];
+        "image/webp" = [ "org.xfce.ristretto.desktop" ];
+        "x-scheme-handler/mailto" = [ "thunderbird.desktop" ];
+      }
+      // lib.genAttrs vlcMimeTypes (_: [ "vlc.desktop" ]);
     };
 
     # CLI/demos/helpers that clutter fuzzel — keep Spotify, Blueman Manager, etc.

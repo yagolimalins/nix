@@ -14,6 +14,7 @@
 
 let
   cfg = config.${namespace}.thunar;
+  openers = lib.${namespace}.folderOpenCommands pkgs;
 
   # Thunar owns thunar.xml at runtime — set hidden-bookmarks via xfconf instead.
   hideRecentScript = pkgs.writeShellScript "thunar-hide-recent" ''
@@ -52,7 +53,7 @@ in
             <icon>utilities-terminal</icon>
             <name>Open Terminal Here</name>
             <unique-id>thunar-uca-terminal</unique-id>
-            <command>kitty --working-directory %f</command>
+            <command>${openers.thunar.terminal}</command>
             <description>Open Kitty in this folder</description>
             <range></range>
             <patterns>*</patterns>
@@ -62,7 +63,7 @@ in
             <icon>cursor</icon>
             <name>Open Cursor Here</name>
             <unique-id>thunar-uca-cursor</unique-id>
-            <command>cursor %f</command>
+            <command>${openers.thunar.cursor}</command>
             <description>Open folder in Cursor</description>
             <range></range>
             <patterns>*</patterns>
@@ -72,7 +73,7 @@ in
             <icon>vscode</icon>
             <name>Open VSCode Here</name>
             <unique-id>thunar-uca-vscode</unique-id>
-            <command>code %f</command>
+            <command>${openers.thunar.vscode}</command>
             <description>Open folder in Visual Studio Code</description>
             <range></range>
             <patterns>*</patterns>
@@ -82,7 +83,7 @@ in
             <icon>zed</icon>
             <name>Open Zed Here</name>
             <unique-id>thunar-uca-zed</unique-id>
-            <command>zeditor %f</command>
+            <command>${openers.thunar.zed}</command>
             <description>Open folder in Zed</description>
             <range></range>
             <patterns>*</patterns>

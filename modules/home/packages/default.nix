@@ -19,7 +19,6 @@ in
     ./groups/dev.nix
     ./groups/apps.nix
     ./groups/media.nix
-    ../cli
   ];
 
   options.${namespace}.packages = {
