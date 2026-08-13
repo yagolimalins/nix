@@ -243,14 +243,6 @@ in
       };
     })
 
-    (lib.mkIf (on "cli") {
-      home.packages = with pkgs; [
-        ripgrep
-        fd
-        miniserve
-      ];
-    })
-
     (lib.mkIf (on "c") {
       home.packages = [ pkgs.gcc ];
     })

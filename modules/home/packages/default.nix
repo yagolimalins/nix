@@ -19,6 +19,7 @@ in
     ./groups/dev.nix
     ./groups/apps.nix
     ./groups/media.nix
+    ../cli
   ];
 
   options.${namespace}.packages = {
@@ -34,7 +35,7 @@ in
 
     editors.enable = mkGroup "lightweight editors (neovim, helix)";
     ides.enable = mkGroup "heavy IDEs (VS Code, Cursor, Zed)";
-    cli.enable = mkGroup "CLI search tools";
+    cli.enable = mkGroup "CLI essentials (fzf, bat, yazi, …)";
     c.enable = mkGroup "C toolchain (gcc)";
     python.enable = mkGroup "Python tooling (uv)";
     ai.enable = mkGroup "AI CLI tools";
