@@ -14,6 +14,19 @@
 let
   cfg = config.${namespace}.waybar;
   palette = lib.${namespace}.palette;
+  homeDir = config.home.homeDirectory;
+
+  # Waybar may not inherit HM profile PATH; use store paths. --hold keeps
+  # kitty open after the command exits (dust prints once; duf on q).
+  openDiskDuf = pkgs.writeShellScript "waybar-open-duf" ''
+    exec ${pkgs.kitty}/bin/kitty --class=waybar-disk --hold \
+      -e ${pkgs.duf}/bin/duf
+  '';
+
+  openDiskDust = pkgs.writeShellScript "waybar-open-dust" ''
+    exec ${pkgs.kitty}/bin/kitty --class=waybar-disk --hold \
+      -e ${pkgs.dust}/bin/dust "${homeDir}"
+  '';
 
   style = ''
     * {
@@ -79,6 +92,7 @@ let
     #custom-vpn,
     #battery,
     #cpu,
+    #disk,
     #temperature,
     #custom-nightshift,
     #custom-cpugov,
@@ -119,6 +133,10 @@ let
     #battery-bat1.charging { color: ${palette.ok}; }
 
     #cpu { color: ${palette.text}; }
+
+    #disk          { color: ${palette.text}; }
+    #disk.warning  { color: ${palette.warning}; }
+    #disk.critical { color: ${palette.urgent}; }
 
     #temperature          { color: ${palette.text}; }
     #temperature.critical { color: ${palette.urgent}; }
@@ -191,6 +209,7 @@ in
             "network"
             "battery#bat0"
             "battery#bat1"
+            "disk"
             "cpu"
             "temperature"
             "custom/vpn"
@@ -318,6 +337,19 @@ in
               "󰁹"
             ];
             tooltip-format = "BAT1: {time} remaining";
+          };
+
+          disk = {
+            interval = 30;
+            format = "󰋊 {percentage_used}%";
+            path = "/";
+            states = {
+              warning = 80;
+              critical = 90;
+            };
+            tooltip-format = "{used} / {total} ({percentage_used}%) on {path}";
+            on-click = "${openDiskDuf}";
+            on-click-right = "${openDiskDust}";
           };
 
           cpu = {
