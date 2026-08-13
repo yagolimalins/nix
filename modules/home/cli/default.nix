@@ -19,7 +19,7 @@ let
   zathura = lib.getExe pkgs.zathura;
   vlc = lib.getExe pkgs.vlc;
   ristretto = lib.getExe pkgs.ristretto;
-  firefox = lib.getExe pkgs.firefox;
+  librewolf = lib.getExe pkgs.librewolf;
 
   # VS Code and Zed keep their launcher alive during IPC — background explicitly.
   yaziOpenVscode = pkgs.writeShellScriptBin "yazi-open-vscode" ''
@@ -146,7 +146,7 @@ in
         { run = "${ristretto} %s", desc = "Ristretto", orphan = true },
       ]
       browser = [
-        { run = "${firefox} %s", desc = "Firefox", orphan = true },
+        { run = "${librewolf} %s", desc = "LibreWolf", orphan = true },
       ]
 
       [open]

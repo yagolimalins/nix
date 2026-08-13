@@ -44,7 +44,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.sessionVariables = {
-      BROWSER = "firefox";
+      BROWSER = "librewolf";
       TERMINAL = "kitty";
       EDITOR = "hx";
     };
@@ -52,10 +52,10 @@ in
     xdg.mimeApps = {
       enable = true;
       defaultApplications = {
-        "text/html" = [ "firefox.desktop" ];
-        "application/xhtml+xml" = [ "firefox.desktop" ];
-        "x-scheme-handler/http" = [ "firefox.desktop" ];
-        "x-scheme-handler/https" = [ "firefox.desktop" ];
+        "text/html" = [ "librewolf.desktop" ];
+        "application/xhtml+xml" = [ "librewolf.desktop" ];
+        "x-scheme-handler/http" = [ "librewolf.desktop" ];
+        "x-scheme-handler/https" = [ "librewolf.desktop" ];
         "inode/directory" = [ "thunar.desktop" ];
         "application/pdf" = [ "org.pwmt.zathura-pdf-mupdf.desktop" ];
         "image/jpeg" = [ "org.xfce.ristretto.desktop" ];

@@ -1,7 +1,7 @@
 #
 # programs.nix — System-wide programs
 #
-# Things that need a NixOS module (not just a package): Firefox, the JDK,
+# Things that need a NixOS module (not just a package): the JDK,
 # nix-ld so unpatched dynamic binaries (e.g. .NET tooling) can run, and
 # Zsh (must be registered in /etc/shells for it to be a valid login shell).
 #
@@ -18,11 +18,10 @@ let
 in
 {
   options.${namespace}.programs.enable =
-    lib.mkEnableOption "Firefox, JDK, nix-ld and Zsh registration";
+    lib.mkEnableOption "JDK, nix-ld and Zsh registration";
 
   config = lib.mkIf cfg.enable {
     programs.zsh.enable = true; # registers zsh in /etc/shells
-    programs.firefox.enable = true;
 
     programs.java = {
       enable = true;

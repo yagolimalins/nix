@@ -20,7 +20,7 @@
       "theme"
       "helix"
       "neovim"
-      "firefox"
+      "librewolf"
       "packages"
       "input-remapper"
     ])
