@@ -43,6 +43,7 @@ in
       engrampa
       zip
       unzip
+      unrar
       pipewire.jack
     ];
   };
