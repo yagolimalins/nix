@@ -31,9 +31,11 @@ let
     "browser.sessionstore.privacy_level" = 0;
   };
 
-  # Synced from ~/.librewolf/default/prefs.js (tabs + new tab page).
+  # Vertical tabs + collapsed strip that expands on hover (LibreWolf 153+).
   tabSettings = {
     "sidebar.verticalTabs" = true;
+    "sidebar.visibility" = "expand-on-hover";
+    "sidebar.expandOnHover" = true;
     "browser.ctrlTab.sortByRecentlyUsed" = true;
     "browser.toolbars.bookmarks.visibility" = "newtab";
   };
