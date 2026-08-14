@@ -19,10 +19,13 @@ let
   };
 
   privacySettings = {
-    # Modern fingerprinting stack with color-scheme exempt (see Mozilla bug 1732114).
+    # LibreWolf mozilla.cfg sets ETP strict, which re-enables fingerprintingProtection
+    # (canvas randomization) and breaks image readbacks
+    "browser.contentblocking.category" = "standard";
     "privacy.resistFingerprinting" = false;
-    "privacy.fingerprintingProtection" = true;
-    "privacy.fingerprintingProtection.overrides" = "+AllTargets,-CSSPrefersColorScheme";
+    "privacy.fingerprintingProtection" = false;
+    "privacy.fingerprintingProtection.overrides" = "";
+    "privacy.fingerprintingProtection.remoteOverrides.enabled" = false;
 
     # LibreWolf defaults sanitize on quit and block session cookies — breaks logins.
     "privacy.sanitize.sanitizeOnShutdown" = false;
