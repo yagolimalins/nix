@@ -21,7 +21,20 @@ let
   ristretto = lib.getExe pkgs.ristretto;
   librewolf = lib.getExe pkgs.librewolf;
 
-  # VS Code and Zed keep their launcher alive during IPC — background explicitly.
+  # GUI/IDE launchers must return immediately — otherwise Yazi waits on the child.
+  mkYaziBgOpener =
+    name: bin:
+    pkgs.writeShellScriptBin name ''
+      ${bin} "$@" &
+      disown
+    '';
+
+  yaziOpenZathura = mkYaziBgOpener "yazi-open-zathura" zathura;
+  yaziOpenVlc = mkYaziBgOpener "yazi-open-vlc" vlc;
+  yaziOpenRistretto = mkYaziBgOpener "yazi-open-ristretto" ristretto;
+  yaziOpenLibrewolf = mkYaziBgOpener "yazi-open-librewolf" librewolf;
+  yaziOpenXdg = mkYaziBgOpener "yazi-open-xdg" "${lib.getExe' pkgs.xdg-utils "xdg-open"}";
+  yaziOpenCursor = mkYaziBgOpener "yazi-open-cursor" (lib.getExe pkgs.code-cursor);
   yaziOpenVscode = pkgs.writeShellScriptBin "yazi-open-vscode" ''
     ${lib.getExe pkgs.vscode} --new-window "$@" &
     disown
@@ -43,6 +56,12 @@ in
       xh
       duf
       dust
+      yaziOpenZathura
+      yaziOpenVlc
+      yaziOpenRistretto
+      yaziOpenLibrewolf
+      yaziOpenXdg
+      yaziOpenCursor
       yaziOpenVscode
       yaziOpenZed
     ];
@@ -125,33 +144,43 @@ in
     xdg.configFile."yazi/yazi.toml" = {
       force = true;
       text = ''
-      # orphan = true keeps Yazi usable; edit overrides Yazi preset block = true.
+      # orphan = true detaches from Yazi's task queue; wrappers & disown so the shell returns too.
       [opener]
       edit = [
         { run = "${kitty} --detach --directory %d1 -- ${hx} %s", desc = "Helix", orphan = true },
       ]
+      # Replace Yazi presets — stock xdg-open openers block until the handler exits.
+      open = [
+        { run = "${lib.getExe yaziOpenXdg} %s1", desc = "Open", orphan = true },
+      ]
+      reveal = [
+        { run = "${lib.getExe yaziOpenXdg} %d1", desc = "Reveal", orphan = true },
+      ]
+      play = [
+        { run = "${lib.getExe yaziOpenVlc} %s1", desc = "Play", orphan = true },
+      ]
       folder = [
         { run = "${openers.yazi.terminal}", desc = "Open Terminal Here", orphan = true },
-        { run = "${openers.yazi.cursor}", desc = "Open Cursor Here", orphan = true },
+        { run = "${lib.getExe yaziOpenCursor} %s", desc = "Open Cursor Here", orphan = true },
         { run = "${lib.getExe yaziOpenVscode} %s", desc = "Open VSCode Here", orphan = true },
         { run = "${lib.getExe yaziOpenZed} %s", desc = "Open Zed Here", orphan = true },
       ]
       zathura = [
-        { run = "${zathura} %s", desc = "Zathura", orphan = true },
+        { run = "${lib.getExe yaziOpenZathura} %s", desc = "Zathura", orphan = true },
       ]
       vlc = [
-        { run = "${vlc} %s", desc = "VLC", orphan = true },
+        { run = "${lib.getExe yaziOpenVlc} %s", desc = "VLC", orphan = true },
       ]
       image = [
-        { run = "${ristretto} %s", desc = "Ristretto", orphan = true },
+        { run = "${lib.getExe yaziOpenRistretto} %s", desc = "Ristretto", orphan = true },
       ]
       browser = [
-        { run = "${librewolf} %s", desc = "LibreWolf", orphan = true },
+        { run = "${lib.getExe yaziOpenLibrewolf} %s", desc = "LibreWolf", orphan = true },
       ]
 
       [open]
       prepend_rules = [
-        { url = "*/", use = [ "open", "reveal", "folder" ] },
+        { url = "*/", use = "folder" },
         { mime = "text/html", use = "browser" },
         { mime = "application/xhtml+xml", use = "browser" },
         { mime = "application/pdf", use = "zathura" },
