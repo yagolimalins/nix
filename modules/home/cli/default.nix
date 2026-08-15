@@ -139,6 +139,7 @@ in
         show_startup_tips = false;
         session_serialization = true;
         on_force_close = "quit";
+        auto_layout = false;
         ui.pane_frames.rounded_corners = true;
       };
       # Helix ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
@@ -151,8 +152,6 @@ in
                 bind "Alt k" "Alt Down" { MoveFocus "Down"; }
                 bind "Alt l" "Alt Up" { MoveFocus "Up"; }
                 bind "Alt ç" "Alt Right" { MoveFocusOrTab "Right"; }
-                bind "Alt [" "Alt ," { PreviousSwapLayout; }
-                bind "Alt ]" "Alt ." { NextSwapLayout; }
                 bind "Alt 1" { GoToTab 1; }
                 bind "Alt 2" { GoToTab 2; }
                 bind "Alt 3" { GoToTab 3; }
@@ -274,7 +273,8 @@ in
     };
 
     # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
-    # Alt+1..0 jump tabs 1–10. Alt+] / Alt+. swaps edit to "wide" (files behind editor).
+    # Edit is fixed: files | editor / terminal. No swap layouts.
+    # Alt+1..0 jump tabs 1–10.
     xdg.configFile."zellij/layouts/ide.kdl".text = ''
       layout {
           cwd "."
@@ -322,17 +322,6 @@ in
                   command "${lib.getExe pkgs.gitui}"
                   cwd "."
                   close_on_exit false
-              }
-          }
-          swap_tiled_layout name="wide" {
-              tab {
-                  pane split_direction="horizontal" {
-                      pane stacked=true {
-                          pane
-                          pane expanded=true
-                      }
-                      pane size="28%"
-                  }
               }
           }
       }
