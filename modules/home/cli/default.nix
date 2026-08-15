@@ -305,7 +305,7 @@ in
           tab name="git" {
               pane {
                   name "git"
-                  command "${lib.getExe pkgs.lazygit}"
+                  command "${lib.getExe pkgs.gitui}"
                   cwd "."
                   close_on_exit false
               }
