@@ -14,19 +14,16 @@
 let
   cfg = config.${namespace}.waybar;
   palette = lib.${namespace}.palette;
-  homeDir = config.home.homeDirectory;
 
-  # Waybar may not inherit HM profile PATH; use store paths. --hold keeps
-  # kitty open after the command exits (dust prints once; duf on q).
-  openDiskDuf = pkgs.writeShellScript "waybar-open-duf" ''
-    exec ${pkgs.kitty}/bin/kitty --class=waybar-disk --hold \
-      -e ${pkgs.duf}/bin/duf
-  '';
-
-  openDiskDust = pkgs.writeShellScript "waybar-open-dust" ''
-    exec ${pkgs.kitty}/bin/kitty --class=waybar-disk --hold \
-      -e ${pkgs.dust}/bin/dust "${homeDir}"
-  '';
+  # Waybar may not inherit HM profile PATH; use store paths.
+  # Do not use kitty --hold: after the child exits it starts interactive zsh,
+  # which autostarts Zellij and replaces the TUI.
+  openBtm =
+    widget:
+    pkgs.writeShellScript "waybar-open-btm-${widget}" ''
+      exec ${lib.getExe pkgs.kitty} --class=waybar-btm -- \
+        ${lib.getExe pkgs.bottom} -b --default_widget_type ${lib.escapeShellArg widget}
+    '';
 
   style = ''
     * {
@@ -239,6 +236,7 @@ in
             on-click = "playerctl play-pause";
             on-click-right = "playerctl next";
             on-click-middle = "playerctl previous";
+            tooltip-format = "{title}\n{artist}";
           };
 
           clock = {
@@ -279,7 +277,8 @@ in
             format-ethernet = "󰈀";
             format-disconnected = "󰤭";
             tooltip-format-wifi = "{essid}  {ipaddr}";
-            tooltip-format-ethernet = "{ifname}: {ipaddr}";
+            tooltip-format-ethernet = "{ifname}  {ipaddr}";
+            tooltip-format-disconnected = "Disconnected";
           };
 
           "custom/vpn" = {
@@ -311,7 +310,7 @@ in
               "󰂂"
               "󰁹"
             ];
-            tooltip-format = "BAT0: {time} remaining";
+            tooltip-format = "BAT0  {time}";
           };
 
           "battery#bat1" = {
@@ -336,7 +335,7 @@ in
               "󰂂"
               "󰁹"
             ];
-            tooltip-format = "BAT1: {time} remaining";
+            tooltip-format = "BAT1  {time}";
           };
 
           disk = {
@@ -347,16 +346,14 @@ in
               warning = 80;
               critical = 90;
             };
-            tooltip-format = "{used} / {total} ({percentage_used}%) on {path}";
-            on-click = "${openDiskDuf}";
-            on-click-right = "${openDiskDust}";
+            tooltip-format = "{used} / {total}";
+            on-click = "${openBtm "disk"}";
           };
 
           cpu = {
             format = "󰻠 {usage}%";
             interval = 2;
-            tooltip = false;
-            on-click = "kitty btop";
+            on-click = "${openBtm "cpu"}";
           };
 
           temperature = {
@@ -371,33 +368,33 @@ in
             ];
             critical-threshold = 80;
             interval = 2;
-            tooltip = false;
-            on-click = "kitty btop";
+            tooltip-format = "Temperature";
+            on-click = "${openBtm "temp"}";
           };
 
           # Night shift toggle — starts/stops hyprsunset
           "custom/nightshift" = {
-            exec = ''bash -c 'pgrep hyprsunset > /dev/null && echo "{\"text\":\"󰖔\",\"class\":\"on\"}" || echo "{\"text\":\"󰖙\",\"class\":\"off\"}"' '';
+            exec = ''bash -c 'pgrep hyprsunset > /dev/null && echo "{\"text\":\"󰖔\",\"class\":\"on\",\"tooltip\":\"Night shift\"}" || echo "{\"text\":\"󰖙\",\"class\":\"off\",\"tooltip\":\"Night shift off\"}"' '';
             return-type = "json";
             interval = 3;
             on-click = "bash -c 'pgrep hyprsunset > /dev/null && pkill hyprsunset || hyprsunset -t 3000 &'";
-            tooltip = false;
+            tooltip = true;
           };
 
           # CPU governor toggle — calls /etc/cpugov-toggle via sudo (NOPASSWD)
           "custom/cpugov" = {
-            exec = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"󰓅\",\"class\":\"perf\"}";; *) echo "{\"text\":\"󰾅\",\"class\":\"save\"}";; esac' '';
+            exec = ''bash -c 'GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor); case $GOV in performance) echo "{\"text\":\"󰓅\",\"class\":\"perf\",\"tooltip\":\"Performance\"}";; *) echo "{\"text\":\"󰾅\",\"class\":\"save\",\"tooltip\":\"Powersave\"}";; esac' '';
             return-type = "json";
             interval = 2;
             on-click = "/run/wrappers/bin/sudo /etc/cpugov-toggle";
-            tooltip = false;
+            tooltip = true;
           };
 
           # Power menu — fuzzel dmenu
           "custom/power" = {
             format = "󰐥";
             on-click = ''bash -c 'pkill fuzzel; choice=$(echo -e "Logout\nRestart\nShutdown" | fuzzel --dmenu --minimal-lines --width=12 --prompt "Power> "); case "$choice" in Logout) hyprctl dispatch exit;; Restart) systemctl reboot;; Shutdown) systemctl poweroff;; esac' '';
-            tooltip = false;
+            tooltip-format = "Power";
           };
 
           tray = {

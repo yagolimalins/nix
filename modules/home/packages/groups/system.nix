@@ -24,6 +24,7 @@ in
     (lib.mkIf (on "monitoring") {
       home.packages = with pkgs; [
         btop
+        bottom
         fastfetch
       ];
     })

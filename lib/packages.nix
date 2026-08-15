@@ -6,7 +6,7 @@ let
   # Single source of truth for mine.packages.<group>.enable options.
   packageGroups = {
     nix = "Nix tooling (nixfmt, nixd, nil)";
-    monitoring = "system monitors (btop, fastfetch)";
+    monitoring = "system monitors (btop, bottom, fastfetch)";
 
     wayland = "Wayland session applets and helpers";
     clipboard = "screenshots and clipboard";

@@ -4,7 +4,6 @@ local opts = { silent = true }
 local nop = "<Nop>"
 
 local move = { j = "h", k = "j", l = "k", ç = "l" }
-local arrows = { j = "<Left>", k = "<Down>", l = "<Up>", ç = "<Right>" }
 
 -- Normal + visual: j/k/l/ç = ← ↓ ↑ →
 for _, mode in ipairs({ "n", "v" }) do
@@ -12,19 +11,6 @@ for _, mode in ipairs({ "n", "v" }) do
   for key, motion in pairs(move) do
     map(mode, key, motion, vim.tbl_extend("force", opts, { desc = "move" }))
   end
-end
-
--- Insert + replace: Alt + JKLÇ = arrows
-for _, mode in ipairs({ "i", "R" }) do
-  for key, motion in pairs(arrows) do
-    map(mode, "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
-  end
-end
-
--- Normal: Alt + JKLÇ = same movement (consistent across modes)
-for key, motion in pairs(move) do
-  map("n", "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
-  map("v", "<A-" .. key .. ">", motion, vim.tbl_extend("force", opts, { desc = "move" }))
 end
 
 -- g prefix (helix goto mode) — use normal! to bypass JKLÇ remaps

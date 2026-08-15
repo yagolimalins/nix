@@ -128,20 +128,6 @@ let
     "C-ç" = right;
   };
 
-  # Alt + JKLÇ — movement in any mode (especially insert, where j/k/l/ç type chars)
-  abnt2AltMove =
-    {
-      left,
-      down,
-      up,
-      right,
-    }: {
-      "A-j" = left;
-      "A-k" = down;
-      "A-l" = up;
-      "A-ç" = right;
-    };
-
   # Ctrl + JKLÇ — jump split from normal mode (swap stays under Ctrl-w / Space w)
   abnt2GlobalJump =
     {
@@ -193,7 +179,6 @@ let
   abnt2Movement = {
     normal =
       abnt2Dirs abnt2Move
-      // abnt2AltMove abnt2Move
       // abnt2GlobalJump {
         left = "jump_view_left";
         down = "jump_view_down";
@@ -214,10 +199,7 @@ let
           w = windowMode;
         };
       };
-    select =
-      abnt2Dirs abnt2Extend
-      // abnt2AltMove abnt2Extend;
-    insert = abnt2AltMove abnt2Move;
+    select = abnt2Dirs abnt2Extend;
   };
 in
 {

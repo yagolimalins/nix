@@ -69,6 +69,7 @@ in
     # CLI/demos/helpers that clutter fuzzel — keep Spotify, Blueman Manager, etc.
     xdg.desktopEntries = hideFromLauncher [
       "btop"
+      "bottom"
       "nvim"
       "org.gtk.Demo4"
       "org.gtk.WidgetFactory4"
