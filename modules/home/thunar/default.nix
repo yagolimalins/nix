@@ -60,6 +60,16 @@ in
             <directories/>
           </action>
           <action>
+            <icon>utilities-terminal</icon>
+            <name>Open Zellij here</name>
+            <unique-id>thunar-uca-zellij-ide</unique-id>
+            <command>${openers.thunar.zellijIde}</command>
+            <description>Open the Zellij IDE layout in this folder</description>
+            <range></range>
+            <patterns>*</patterns>
+            <directories/>
+          </action>
+          <action>
             <icon>cursor</icon>
             <name>Open Cursor Here</name>
             <unique-id>thunar-uca-cursor</unique-id>

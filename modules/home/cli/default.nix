@@ -43,6 +43,12 @@ let
     ${lib.getExe pkgs.zed-editor} -n "$@" &
     disown
   '';
+
+  # Narrow Zellij "files" pane: hide parent + preview columns.
+  yaziIde = pkgs.writeShellScript "yazi-ide" ''
+    export YAZI_CONFIG_HOME=${lib.escapeShellArg "${config.xdg.configHome}/yazi-ide"}
+    exec ${lib.getExe pkgs.yazi} "$@"
+  '';
 in
 {
   config = lib.mkIf on {
@@ -116,10 +122,12 @@ in
 
     programs.tealdeer.enable = true;
 
+    programs.zsh.shellAliases.zide = "zellij -l ide";
+
     programs.zellij = {
       enable = true;
-      enableZshIntegration = true;
-      exitShellOnExit = true;
+      enableZshIntegration = false;
+      exitShellOnExit = false;
       settings = {
         default_shell = "zsh";
         theme = "tokyo-night-storm";
@@ -143,6 +151,11 @@ in
                 bind "Alt k" "Alt Down" { MoveFocus "Down"; }
                 bind "Alt l" "Alt Up" { MoveFocus "Up"; }
                 bind "Alt ç" "Alt Right" { MoveFocusOrTab "Right"; }
+                bind "Alt [" "Alt ," { PreviousSwapLayout; }
+                bind "Alt ]" "Alt ." { NextSwapLayout; }
+                bind "Alt 1" { GoToTab 1; }
+                bind "Alt 2" { GoToTab 2; }
+                bind "Alt 3" { GoToTab 3; }
             }
             shared_except "locked" {
                 unbind "Alt h" "Alt j" "Alt k" "Alt l"
@@ -150,6 +163,9 @@ in
                 bind "Alt k" "Alt Down" { MoveFocus "Down"; }
                 bind "Alt l" "Alt Up" { MoveFocus "Up"; }
                 bind "Alt ç" "Alt Right" { MoveFocusOrTab "Right"; }
+                bind "Alt 1" { GoToTab 1; }
+                bind "Alt 2" { GoToTab 2; }
+                bind "Alt 3" { GoToTab 3; }
             }
             session {
                 bind "w" {
@@ -243,6 +259,71 @@ in
       '';
     };
 
+    # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
+    # Alt+1/2/3 jump tabs. Alt+] / Alt+. swaps edit to "wide" (files behind editor).
+    xdg.configFile."zellij/layouts/ide.kdl".text = ''
+      layout {
+          cwd "."
+          default_tab_template {
+              children
+              pane size=1 borderless=true {
+                  plugin location="compact-bar"
+              }
+          }
+          tab name="edit" focus=true {
+              pane split_direction="vertical" {
+                  pane size="18%" {
+                      name "files"
+                      command "${yaziIde}"
+                      cwd "."
+                      close_on_exit false
+                  }
+                  pane split_direction="horizontal" {
+                      pane {
+                          name "editor"
+                          command "${hx}"
+                          args "."
+                          cwd "."
+                          close_on_exit false
+                          focus true
+                      }
+                      pane size="28%" {
+                          name "terminal"
+                          cwd "."
+                      }
+                  }
+              }
+          }
+          tab name="agent" {
+              pane {
+                  name "agent"
+                  command "${lib.getExe' pkgs.cursor-cli "cursor-agent"}"
+                  cwd "."
+                  close_on_exit false
+              }
+          }
+          tab name="git" {
+              pane {
+                  name "git"
+                  command "${lib.getExe pkgs.lazygit}"
+                  cwd "."
+                  close_on_exit false
+              }
+          }
+          swap_tiled_layout name="wide" {
+              tab {
+                  pane split_direction="horizontal" {
+                      pane stacked=true {
+                          pane
+                          pane expanded=true
+                      }
+                      pane size="28%"
+                  }
+              }
+          }
+      }
+    '';
+
     xdg.configFile."yazi/plugins/smart-enter.yazi/main.lua".text = ''
       --- @since 25.5.31
       --- @sync entry
@@ -260,10 +341,66 @@ in
     xdg.configFile."yazi/keymap.toml" = {
       force = true;
       text = ''
+        # ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
         # Enter: enter directories, open files (Yazi default Enter always runs open).
         [mgr]
         prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "leave", desc = "Back to parent" },
+          { on = "k", run = "arrow next", desc = "Next file" },
+          { on = "l", run = "arrow prev", desc = "Previous file" },
+          { on = "ç", run = "enter", desc = "Enter directory" },
           { on = "<Enter>", run = "plugin smart-enter", desc = "Enter directory or open file" },
+        ]
+
+        [tasks]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "noop" },
+          { on = "k", run = "arrow next", desc = "Next task" },
+          { on = "l", run = "arrow prev", desc = "Previous task" },
+        ]
+
+        [spot]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "swipe prev", desc = "Swipe to previous file" },
+          { on = "k", run = "arrow next", desc = "Next line" },
+          { on = "l", run = "arrow prev", desc = "Previous line" },
+          { on = "ç", run = "swipe next", desc = "Swipe to next file" },
+        ]
+
+        [pick]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "noop" },
+          { on = "k", run = "arrow next", desc = "Next option" },
+          { on = "l", run = "arrow prev", desc = "Previous option" },
+        ]
+
+        [input]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "move -1", desc = "Move left" },
+          { on = "k", run = "recall 1", desc = "Next input" },
+          { on = "l", run = "recall -1", desc = "Previous input" },
+          { on = "ç", run = "move 1", desc = "Move right" },
+        ]
+
+        [confirm]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "noop" },
+          { on = "k", run = "arrow next", desc = "Next line" },
+          { on = "l", run = "arrow prev", desc = "Previous line" },
+        ]
+
+        [help]
+        prepend_keymap = [
+          { on = "h", run = "noop" },
+          { on = "j", run = "noop" },
+          { on = "k", run = "arrow next", desc = "Next line" },
+          { on = "l", run = "arrow prev", desc = "Previous line" },
         ]
       '';
     };
@@ -288,6 +425,7 @@ in
         ]
         folder = [
           { run = "${openers.yazi.terminal}", desc = "Open Terminal Here", orphan = true },
+          { run = "${openers.yazi.zellijIde}", desc = "Open Zellij here", orphan = true },
           { run = "${lib.getExe yaziOpenCursor} %s", desc = "Open Cursor Here", orphan = true },
           { run = "${lib.getExe yaziOpenVscode} %s", desc = "Open VSCode Here", orphan = true },
           { run = "${lib.getExe yaziOpenZed} %s", desc = "Open Zed Here", orphan = true },
@@ -319,5 +457,24 @@ in
         ]
       '';
     };
+
+    xdg.configFile."yazi-ide/yazi.toml" = {
+      force = true;
+      text = ''
+        [mgr]
+        ratio = [ 0, 1, 0 ]
+        linemode = "none"
+
+        ${config.xdg.configFile."yazi/yazi.toml".text}
+      '';
+    };
+
+    xdg.configFile."yazi-ide/keymap.toml" = {
+      force = true;
+      text = config.xdg.configFile."yazi/keymap.toml".text;
+    };
+
+    xdg.configFile."yazi-ide/plugins/smart-enter.yazi/main.lua".text =
+      config.xdg.configFile."yazi/plugins/smart-enter.yazi/main.lua".text;
   };
 }

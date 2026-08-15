@@ -59,6 +59,7 @@ in
     pkgs:
     let
       terminal = lib.getExe pkgs.kitty;
+      zellij = lib.getExe pkgs.zellij;
       cursor = lib.getExe pkgs.code-cursor;
       vscode = lib.getExe pkgs.vscode;
       zed = lib.getExe pkgs.zed-editor;
@@ -66,6 +67,7 @@ in
     {
       thunar = {
         terminal = "${terminal} --working-directory %f";
+        zellijIde = "${terminal} --working-directory %f -- ${zellij} -l ide";
         cursor = "${cursor} %f";
         vscode = "${vscode} --new-window %f";
         zed = "${zed} -n %f";
@@ -73,6 +75,7 @@ in
       yazi = {
         # --detach opens a new Kitty OS window without blocking the caller.
         terminal = "${terminal} --detach --working-directory %s";
+        zellijIde = "${terminal} --detach --working-directory %s -- ${zellij} -l ide";
         cursor = "${cursor} %s";
         vscode = "${vscode} --new-window %s";
         zed = "${zed} -n %s";
