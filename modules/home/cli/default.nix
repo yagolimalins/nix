@@ -156,6 +156,13 @@ in
                 bind "Alt 1" { GoToTab 1; }
                 bind "Alt 2" { GoToTab 2; }
                 bind "Alt 3" { GoToTab 3; }
+                bind "Alt 4" { GoToTab 4; }
+                bind "Alt 5" { GoToTab 5; }
+                bind "Alt 6" { GoToTab 6; }
+                bind "Alt 7" { GoToTab 7; }
+                bind "Alt 8" { GoToTab 8; }
+                bind "Alt 9" { GoToTab 9; }
+                bind "Alt 0" { GoToTab 10; }
             }
             shared_except "locked" {
                 unbind "Alt h" "Alt j" "Alt k" "Alt l"
@@ -166,6 +173,13 @@ in
                 bind "Alt 1" { GoToTab 1; }
                 bind "Alt 2" { GoToTab 2; }
                 bind "Alt 3" { GoToTab 3; }
+                bind "Alt 4" { GoToTab 4; }
+                bind "Alt 5" { GoToTab 5; }
+                bind "Alt 6" { GoToTab 6; }
+                bind "Alt 7" { GoToTab 7; }
+                bind "Alt 8" { GoToTab 8; }
+                bind "Alt 9" { GoToTab 9; }
+                bind "Alt 0" { GoToTab 10; }
             }
             session {
                 bind "w" {
@@ -260,7 +274,7 @@ in
     };
 
     # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
-    # Alt+1/2/3 jump tabs. Alt+] / Alt+. swaps edit to "wide" (files behind editor).
+    # Alt+1..0 jump tabs 1–10. Alt+] / Alt+. swaps edit to "wide" (files behind editor).
     xdg.configFile."zellij/layouts/ide.kdl".text = ''
       layout {
           cwd "."
