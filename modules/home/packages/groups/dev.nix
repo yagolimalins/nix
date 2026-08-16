@@ -192,7 +192,7 @@ in
           git_panel.dock = "left";
 
           ui_font_size = 16;
-          buffer_font_size = 15;
+          buffer_font_size = 16;
           theme = {
             mode = "dark";
             light = "One Light";

@@ -72,8 +72,17 @@ plus the options declaration, and each submodule owns one concern and repeats th
 
 ## Verifying a change
 
+Agents finish with:
+
 ```bash
 nix fmt && nix flake check
+```
+
+Do **not** run host toplevel builds unless the user asks. The user rebuilds locally when ready.
+
+When you want a full build (e.g. before switching, or to compare closures after a refactor):
+
+```bash
 for h in thinkpad laptop desktop; do
   nix build --no-link --print-out-paths ".#nixosConfigurations.$h.config.system.build.toplevel"
 done

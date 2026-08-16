@@ -22,14 +22,8 @@ for architecture and [README.md](../../README.md) for the layout.
 
 - `git add` new files. Flakes ignore untracked paths, so a new module does not exist as far as
   `nix flake check` is concerned until it is staged.
-- Finish with `nix fmt && nix flake check`.
-- For anything touching multiple hosts, rebuild all three:
-
-```bash
-for h in thinkpad laptop desktop; do
-  nix build --no-link --print-out-paths ".#nixosConfigurations.$h.config.system.build.toplevel"
-done
-```
+- Finish with `nix fmt && nix flake check`. Do **not** run host toplevel builds unless the user
+  asks — they rebuild locally.
 
 ## Verification gotcha
 
