@@ -428,7 +428,7 @@ in
           }
           ui name="edit" focus=true {
               pane split_direction="vertical" {
-                  pane size=25 {
+                  pane size=36 {
                       name "files"
                       command "${lib.getExe pkgs.broot}"
                       cwd "."
