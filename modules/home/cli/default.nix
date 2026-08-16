@@ -14,12 +14,51 @@ let
   on = pkgCfg.enable && pkgCfg.cli.enable;
 
   openers = lib.${namespace}.folderOpenCommands pkgs;
+  themeCfg = config.${namespace}.theme;
+  palette = lib.${namespace}.palette;
   hx = lib.getExe pkgs.helix;
   kitty = lib.getExe pkgs.kitty;
   zathura = lib.getExe pkgs.zathura;
   vlc = lib.getExe pkgs.vlc;
   ristretto = lib.getExe pkgs.ristretto;
   librewolf = lib.getExe pkgs.librewolf;
+  zellij = lib.getExe pkgs.zellij;
+  jq = lib.getExe pkgs.jq;
+
+  # #rrggbb → broot rgb(r, g, b)
+  rgb =
+    hex:
+    let
+      h = lib.removePrefix "#" hex;
+      dec = s: toString (lib.fromHexString s);
+    in
+    "rgb(${dec (builtins.substring 0 2 h)}, ${dec (builtins.substring 2 2 h)}, ${dec (builtins.substring 4 2 h)})";
+
+  brootStormSkin = {
+    default = "${rgb palette.text} ${rgb palette.bg}";
+    tree = "${rgb palette.muted} none";
+    parent = "${rgb palette.muted} none";
+    file = "${rgb palette.text} none";
+    directory = "${rgb palette.accent} none bold";
+    exe = "${rgb palette.ok} none";
+    link = "${rgb palette.purple} none";
+    selected_line = "none ${rgb palette.border}";
+    char_match = "${rgb palette.ok} none bold";
+    file_error = "${rgb palette.urgent} none";
+    input = "${rgb palette.text} ${rgb palette.surface}";
+    flag_label = "${rgb palette.muted} ${rgb palette.surface}";
+    flag_value = "${rgb palette.cyan} ${rgb palette.surface}";
+    status_normal = "${rgb palette.muted} ${rgb palette.surface}";
+    status_error = "${rgb palette.text} ${rgb palette.urgent}";
+    status_italic = "${rgb palette.cyan} ${rgb palette.surface}";
+    status_bold = "${rgb palette.accent} ${rgb palette.surface} bold";
+    git_status_modified = "${rgb palette.warning} none";
+    git_status_new = "${rgb palette.ok} none bold";
+    git_status_conflicted = "${rgb palette.urgent} none";
+    mode_command_mark = "${rgb palette.onAccent} ${rgb palette.accent} bold";
+    scrollbar_thumb = "${rgb palette.accent} none";
+    scrollbar_track = "${rgb palette.border} none";
+  };
 
   # GUI/IDE launchers must return immediately — otherwise Yazi waits on the child.
   mkYaziBgOpener =
@@ -44,10 +83,41 @@ let
     disown
   '';
 
-  # Narrow Zellij "files" pane: hide parent + preview columns.
-  yaziIde = pkgs.writeShellScript "yazi-ide" ''
-    export YAZI_CONFIG_HOME=${lib.escapeShellArg "${config.xdg.configHome}/yazi-ide"}
-    exec ${lib.getExe pkgs.yazi} "$@"
+  # Open a file in the Zellij pane named "editor" (Helix). Falls back to hx.
+  # pane_command is often the LSP (nixd); the hx binary is in terminal_command ("hx .").
+  # send-keys wants "Esc", not "Escape" (the latter aborts the script).
+  brootOpenInHelix = pkgs.writeShellScript "broot-open-in-helix" ''
+    set -eu
+    file=''${1-}
+    if [ -z "$file" ]; then
+      exit 1
+    fi
+
+    if [ -z "''${ZELLIJ-}" ]; then
+      exec ${hx} "$file"
+    fi
+
+    panes=$(${zellij} action list-panes -j -a) || exit 1
+    pane_id=$(printf '%s' "$panes" | ${jq} -r '
+      def is_hx:
+        test("(?:^|[\\s/])hx(?:\\s|$)|helix");
+      [ .[] | select(.is_plugin == false) ]
+      | (
+          map(select(.title == "editor"))
+          + map(select((.terminal_command // "") | is_hx))
+          + map(select((.pane_command // "") | is_hx))
+        )
+      | .[0].id // empty
+    ') || exit 1
+    if [ -z "$pane_id" ]; then
+      exit 1
+    fi
+
+    target="terminal_$pane_id"
+    ${zellij} action send-keys --pane-id "$target" Esc
+    ${zellij} action write-chars --pane-id "$target" ":open $file"
+    ${zellij} action send-keys --pane-id "$target" Enter
+    ${zellij} action focus-pane-id "$target"
   '';
 in
 {
@@ -121,6 +191,70 @@ in
     };
 
     programs.tealdeer.enable = true;
+
+    # Modal: j/k/l/ç are verbs (type-to-filter would eat them). Search with / or space.
+    programs.broot = {
+      enable = true;
+      enableZshIntegration = true;
+      settings = {
+        modal = true;
+        initial_mode = "command";
+        default_flags = "-g";
+        icon_theme = "nerdfont";
+        show_selection_mark = true;
+        auto_open_staging_area = false;
+        quit_on_last_cancel = false;
+        cols_order = [
+          "mark"
+          "git"
+          "branch"
+          "name"
+        ];
+        verbs = [
+          {
+            key = "h";
+            execution = ":mode_command";
+          }
+          {
+            key = "j";
+            execution = ":parent";
+          }
+          {
+            key = "k";
+            execution = ":line_down";
+          }
+          {
+            key = "l";
+            execution = ":line_up";
+          }
+          {
+            key = "ç";
+            apply_to = "directory";
+            execution = ":focus";
+          }
+          {
+            key = "enter";
+            apply_to = "directory";
+            execution = ":focus";
+          }
+          {
+            invocation = "helix";
+            key = "enter";
+            apply_to = "file";
+            external = [
+              "${brootOpenInHelix}"
+              "{file}"
+            ];
+            leave_broot = false;
+            switch_terminal = false;
+          }
+        ];
+      }
+      // lib.optionalAttrs themeCfg.enable {
+        skin = brootStormSkin;
+        syntax_theme = "OceanDark";
+      };
+    };
 
     programs.zsh.shellAliases.zide = "zellij -l ide";
 
@@ -296,7 +430,7 @@ in
               pane split_direction="vertical" {
                   pane size=25 {
                       name "files"
-                      command "${yaziIde}"
+                      command "${lib.getExe pkgs.broot}"
                       cwd "."
                       close_on_exit false
                   }
@@ -483,23 +617,5 @@ in
       '';
     };
 
-    xdg.configFile."yazi-ide/yazi.toml" = {
-      force = true;
-      text = ''
-        [mgr]
-        ratio = [ 0, 1, 0 ]
-        linemode = "none"
-
-        ${config.xdg.configFile."yazi/yazi.toml".text}
-      '';
-    };
-
-    xdg.configFile."yazi-ide/keymap.toml" = {
-      force = true;
-      text = config.xdg.configFile."yazi/keymap.toml".text;
-    };
-
-    xdg.configFile."yazi-ide/plugins/smart-enter.yazi/main.lua".text =
-      config.xdg.configFile."yazi/plugins/smart-enter.yazi/main.lua".text;
   };
 }

@@ -15,7 +15,7 @@ let
 
     editors = "lightweight editors (neovim, helix)";
     ides = "heavy IDEs (VS Code, Cursor, Zed)";
-    cli = "CLI essentials (fzf, bat, yazi, …)";
+    cli = "CLI essentials (fzf, bat, broot, yazi, …)";
     c = "C toolchain (gcc)";
     python = "Python tooling (uv)";
     ai = "AI CLI tools";
