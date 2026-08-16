@@ -315,7 +315,7 @@ in
                 bind "Alt 8" { GoToTab 8; }
                 bind "Alt 9" { GoToTab 9; }
                 bind "Alt 0" { GoToTab 10; }
-                bind "Alt f" { NextSwapLayout; }
+                bind "Alt f" { ToggleFocusFullscreen; }
             }
             shared_except "locked" {
                 unbind "Alt h" "Alt j" "Alt k" "Alt l"
@@ -333,7 +333,7 @@ in
                 bind "Alt 8" { GoToTab 8; }
                 bind "Alt 9" { GoToTab 9; }
                 bind "Alt 0" { GoToTab 10; }
-                bind "Alt f" { NextSwapLayout; }
+                bind "Alt f" { ToggleFocusFullscreen; }
             }
             session {
                 bind "w" {
@@ -428,7 +428,7 @@ in
     };
 
     # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
-    # Edit: files | editor / terminal. Alt+f stacks files behind the editor.
+    # Edit: files | editor / terminal. Alt+f toggles fullscreen on the focused pane.
     # Alt+1..0 jump tabs 1–10.
     xdg.configFile."zellij/layouts/ide.kdl".text = ''
       layout {
@@ -462,7 +462,7 @@ in
                           close_on_exit false
                           focus true
                       }
-                      pane size=6 {
+                      pane size=10 {
                           name "terminal"
                           cwd "."
                       }
@@ -483,20 +483,6 @@ in
                   command "${lib.getExe pkgs.gitui}"
                   cwd "."
                   close_on_exit false
-              }
-          }
-          swap_tiled_layout name="editor" {
-              ui exact_panes=3 {
-                  pane split_direction="horizontal" {
-                      pane stacked=true { children; }
-                      pane size=6
-                  }
-              }
-              ui exact_panes=4 {
-                  pane split_direction="horizontal" {
-                      pane stacked=true { children; }
-                      pane size=6
-                  }
               }
           }
       }
