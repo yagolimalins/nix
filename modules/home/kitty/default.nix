@@ -49,7 +49,7 @@ in
         color7 = palette.text;
         color15 = palette.text;
 
-        window_padding_width = 12;
+        window_padding_width = 8;
 
         # Wayland/Hyprland: reduce glyph flicker during open + resize.
         sync_to_monitor = "no";

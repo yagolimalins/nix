@@ -354,11 +354,30 @@ let
         right = "jump_view_right";
       }
       // {
-        g = abnt2Dirs {
-          left = "goto_line_start";
-          down = "move_line_down";
-          up = "move_line_up";
-          right = "goto_line_end";
+        g =
+          abnt2Dirs {
+            left = "goto_line_start";
+            down = "move_line_down";
+            up = "move_line_up";
+            right = "goto_line_end";
+          }
+          // {
+            d = "goto_definition";
+            r = "goto_reference";
+            i = "goto_implementation";
+            y = "goto_type_definition";
+          };
+        "," = {
+          d = "goto_definition";
+          r = "goto_reference";
+          i = "goto_implementation";
+          t = "goto_type_definition";
+          a = "code_action";
+          n = "goto_next_diag";
+          p = "goto_prev_diag";
+          h = "hover";
+          s = "symbol_picker";
+          "/" = "global_search";
         };
         z = viewMode;
         Z = viewMode;
@@ -390,7 +409,14 @@ in
       settings = {
         editor = {
           "auto-format" = true;
+          bufferline = "multiple";
+          "clipboard-provider" = "wayland";
+          "end-of-line-diagnostics" = "error";
+          inline-diagnostics = {
+            cursor-line = "warning";
+          };
           lsp = {
+            "display-messages" = true;
             "display-progress-messages" = true;
           };
         };

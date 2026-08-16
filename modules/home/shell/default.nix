@@ -33,23 +33,6 @@ in
       };
 
       initContent = ''
-        # Print a blank line before each prompt except after opening the
-        # terminal or running `clear`.
-        _first_prompt=1
-        _last_cmd=""
-
-        preexec_track() { _last_cmd="$1"; }
-        precmd_newline() {
-          if (( _first_prompt )); then
-            _first_prompt=0
-          elif [[ "$_last_cmd" != "clear" ]]; then
-            print ""
-          fi
-        }
-
-        preexec_functions+=( preexec_track )
-        precmd_functions+=( precmd_newline )
-
         # Tokyo Night Storm — zsh-syntax-highlighting + autosuggestions
         typeset -A ZSH_HIGHLIGHT_STYLES
         ZSH_HIGHLIGHT_STYLES[default]="fg=${palette.text}"

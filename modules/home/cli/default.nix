@@ -200,14 +200,11 @@ in
       settings = {
         modal = true;
         initial_mode = "command";
-        default_flags = "-g";
-        icon_theme = "nerdfont";
-        show_selection_mark = true;
+        default_flags = "";
+        show_selection_mark = false;
         auto_open_staging_area = false;
         quit_on_last_cancel = false;
         cols_order = [
-          "mark"
-          "git"
           "branch"
           "name"
         ];
@@ -293,7 +290,10 @@ in
         session_serialization = true;
         on_force_close = "quit";
         auto_layout = false;
+        pane_frames = true;
         ui.pane_frames.rounded_corners = true;
+        ui.pane_frames.hide_session_name = true;
+        ui.pane_frames.hide_plugin_names = true;
       };
       # Helix ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
       # default_mode is locked: only Ctrl+g plus whatever we bind here.
@@ -447,7 +447,7 @@ in
           }
           ui name="edit" focus=true {
               pane split_direction="vertical" {
-                  pane size=32 {
+                  pane size=24 {
                       name "files"
                       command "${lib.getExe pkgs.broot}"
                       cwd "."
@@ -462,7 +462,7 @@ in
                           close_on_exit false
                           focus true
                       }
-                      pane size=8 {
+                      pane size=6 {
                           name "terminal"
                           cwd "."
                       }
@@ -489,13 +489,13 @@ in
               ui exact_panes=3 {
                   pane split_direction="horizontal" {
                       pane stacked=true { children; }
-                      pane size=8
+                      pane size=6
                   }
               }
               ui exact_panes=4 {
                   pane split_direction="horizontal" {
                       pane stacked=true { children; }
-                      pane size=8
+                      pane size=6
                   }
               }
           }
