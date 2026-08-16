@@ -162,6 +162,7 @@ in
                 bind "Alt 8" { GoToTab 8; }
                 bind "Alt 9" { GoToTab 9; }
                 bind "Alt 0" { GoToTab 10; }
+                bind "Alt f" { NextSwapLayout; }
             }
             shared_except "locked" {
                 unbind "Alt h" "Alt j" "Alt k" "Alt l"
@@ -179,6 +180,7 @@ in
                 bind "Alt 8" { GoToTab 8; }
                 bind "Alt 9" { GoToTab 9; }
                 bind "Alt 0" { GoToTab 10; }
+                bind "Alt f" { NextSwapLayout; }
             }
             session {
                 bind "w" {
@@ -273,7 +275,7 @@ in
     };
 
     # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
-    # Edit is fixed: files | editor / terminal. No swap layouts.
+    # Edit: files | editor / terminal. Alt+f stacks files behind the editor.
     # Alt+1..0 jump tabs 1–10.
     xdg.configFile."zellij/layouts/ide.kdl".text = ''
       layout {
@@ -284,9 +286,15 @@ in
                   plugin location="compact-bar"
               }
           }
-          tab name="edit" focus=true {
+          tab_template name="ui" {
+              children
+              pane size=1 borderless=true {
+                  plugin location="compact-bar"
+              }
+          }
+          ui name="edit" focus=true {
               pane split_direction="vertical" {
-                  pane size="18%" {
+                  pane size=25 {
                       name "files"
                       command "${yaziIde}"
                       cwd "."
@@ -301,14 +309,14 @@ in
                           close_on_exit false
                           focus true
                       }
-                      pane size="28%" {
+                      pane size="18%" {
                           name "terminal"
                           cwd "."
                       }
                   }
               }
           }
-          tab name="agent" {
+          ui name="agent" {
               pane {
                   name "agent"
                   command "${lib.getExe' pkgs.cursor-cli "cursor-agent"}"
@@ -316,12 +324,26 @@ in
                   close_on_exit false
               }
           }
-          tab name="git" {
+          ui name="git" {
               pane {
                   name "git"
                   command "${lib.getExe pkgs.gitui}"
                   cwd "."
                   close_on_exit false
+              }
+          }
+          swap_tiled_layout name="editor" {
+              ui exact_panes=3 {
+                  pane split_direction="horizontal" {
+                      pane stacked=true { children; }
+                      pane size="18%"
+                  }
+              }
+              ui exact_panes=4 {
+                  pane split_direction="horizontal" {
+                      pane stacked=true { children; }
+                      pane size="18%"
+                  }
               }
           }
       }
