@@ -215,9 +215,24 @@ in
             key = "h";
             execution = ":mode_command";
           }
+          # Stay in the launch dir (project cwd). :parent / first-line Enter / :up_tree
+          # would otherwise walk to $HOME or /.
           {
+            invocation = "parent";
             key = "j";
-            execution = ":parent";
+            execution = ":focus {initial-root}";
+          }
+          {
+            invocation = "up_tree";
+            execution = ":focus {initial-root}";
+          }
+          {
+            invocation = "focus_root";
+            execution = ":focus {initial-root}";
+          }
+          {
+            invocation = "focus_user_home";
+            execution = ":focus {initial-root}";
           }
           {
             key = "k";
@@ -271,6 +286,9 @@ in
         mouse_mode = true;
         scroll_buffer_size = 10000;
         show_startup_tips = false;
+        show_release_notes = false;
+        mouse_hover_effects = false;
+        advanced_mouse_actions = false;
         session_serialization = true;
         on_force_close = "quit";
         auto_layout = false;
@@ -428,7 +446,7 @@ in
           }
           ui name="edit" focus=true {
               pane split_direction="vertical" {
-                  pane size=36 {
+                  pane size=32 {
                       name "files"
                       command "${lib.getExe pkgs.broot}"
                       cwd "."
@@ -443,7 +461,7 @@ in
                           close_on_exit false
                           focus true
                       }
-                      pane size="18%" {
+                      pane size=8 {
                           name "terminal"
                           cwd "."
                       }
@@ -470,13 +488,13 @@ in
               ui exact_panes=3 {
                   pane split_direction="horizontal" {
                       pane stacked=true { children; }
-                      pane size="18%"
+                      pane size=8
                   }
               }
               ui exact_panes=4 {
                   pane split_direction="horizontal" {
                       pane stacked=true { children; }
-                      pane size="18%"
+                      pane size=8
                   }
               }
           }
