@@ -9,7 +9,7 @@
 
 let
   cfg = config.${namespace}.packages;
-  on = group: cfg.enable && cfg.${group}.enable;
+  on = lib.${namespace}.packageGroupOn cfg;
 in
 {
   config = lib.mkMerge [

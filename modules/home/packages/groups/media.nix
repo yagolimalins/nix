@@ -9,7 +9,7 @@
 
 let
   cfg = config.${namespace}.packages;
-  on = group: cfg.enable && cfg.${group}.enable;
+  on = lib.${namespace}.packageGroupOn cfg;
   p = lib.${namespace}.palette;
 
   # nixos-26.05 ships 0.23.0, which drops Spotify refresh tokens

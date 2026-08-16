@@ -22,8 +22,8 @@ let
   userCfg = config.${namespace}.user;
   gtkPortal = lib.${namespace}.mkGtkHyprlandPortal pkgs;
   palette = lib.${namespace}.palette;
-  accentRgb = builtins.substring 1 6 palette.accent;
-  borderRgb = builtins.substring 1 6 palette.border;
+  accentRgb = lib.${namespace}.hexBare palette.accent;
+  borderRgb = lib.${namespace}.hexBare palette.border;
 in
 {
   options.${namespace}.hyprland.enable =

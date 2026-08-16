@@ -17,8 +17,7 @@ let
   cfg = config.${namespace}.programs;
 in
 {
-  options.${namespace}.programs.enable =
-    lib.mkEnableOption "JDK, nix-ld and Zsh registration";
+  options.${namespace}.programs.enable = lib.mkEnableOption "JDK, nix-ld and Zsh registration";
 
   config = lib.mkIf cfg.enable {
     programs.zsh.enable = true; # registers zsh in /etc/shells

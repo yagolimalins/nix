@@ -12,7 +12,6 @@
 
 let
   cfg = config.${namespace}.packages;
-  mkGroup = lib.mkEnableOption;
   packageGroups = lib.${namespace}.packageGroups;
   groupNames = lib.${namespace}.packageGroupNames;
 in
@@ -26,23 +25,21 @@ in
   ];
 
   options.${namespace}.packages = {
-    enable = mkGroup "user package orchestrator (direnv + default groups)";
+    enable = lib.mkEnableOption "user package orchestrator (direnv + default groups)";
   }
   // lib.mapAttrs (_: description: {
-    enable = mkGroup description;
+    enable = lib.mkEnableOption description;
   }) packageGroups;
 
-  config = lib.mkMerge [
-    (lib.mkIf cfg.enable {
-      ${namespace}.packages = lib.genAttrs groupNames (_: {
-        enable = lib.mkDefault true;
-      });
+  config = lib.mkIf cfg.enable {
+    ${namespace}.packages = lib.genAttrs groupNames (_: {
+      enable = lib.mkDefault true;
+    });
 
-      programs.direnv = {
-        enable = true;
-        silent = true;
-        nix-direnv.enable = true;
-      };
-    })
-  ];
+    programs.direnv = {
+      enable = true;
+      silent = true;
+      nix-direnv.enable = true;
+    };
+  };
 }

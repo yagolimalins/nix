@@ -2,27 +2,8 @@
 { lib, ... }:
 
 {
-  # Ultrawide HDMI + internal eDP layout shared by thinkpad/laptop hosts.
-  mkDualMonitorHost =
-    hdmi:
-    let
-      external = builtins.genList (
-        i:
-        let
-          n = i + 1;
-        in
-        if n == 1 then "1, monitor:${hdmi}, default:true" else "${toString n}, monitor:${hdmi}"
-      ) 9;
-    in
-    {
-      monitors = [
-        "${hdmi}, 2560x1080@60, 0x0, 1"
-        "eDP-1, 1920x1080@60, 320x1080, 1"
-      ];
-      workspaces = external ++ [ "10, monitor:eDP-1, default:true" ];
-    };
-
   # Parameterized HM/NixOS module: set mine.host from an HDMI output name.
+  # Ultrawide HDMI + internal eDP layout shared by thinkpad/laptop hosts.
   dualMonitorHostModule =
     hdmiPort:
     {
@@ -30,7 +11,18 @@
       ...
     }:
     {
-      ${namespace}.host = lib.${namespace}.mkDualMonitorHost hdmiPort;
+      ${namespace}.host = {
+        monitors = [
+          "${hdmiPort}, 2560x1080@60, 0x0, 1"
+          "eDP-1, 1920x1080@60, 320x1080, 1"
+        ];
+        # Workspaces 1-9 live on the ultrawide, 10 on the internal panel.
+        workspaces =
+          map (
+            n: if n == 1 then "1, monitor:${hdmiPort}, default:true" else "${toString n}, monitor:${hdmiPort}"
+          ) (lib.range 1 9)
+          ++ [ "10, monitor:eDP-1, default:true" ];
+      };
     };
 
   # Stock gtk.portal is UseIn=gnome only; Hyprland sessions need this sibling.

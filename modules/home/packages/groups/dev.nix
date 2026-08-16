@@ -9,7 +9,7 @@
 
 let
   cfg = config.${namespace}.packages;
-  on = group: cfg.enable && cfg.${group}.enable;
+  on = lib.${namespace}.packageGroupOn cfg;
 
   # zlib (and some others) put .pc files in share/pkgconfig, not lib/pkgconfig.
   mkPkgConfigPath =
@@ -352,15 +352,14 @@ in
         pkgs.binaryen
         pkgs.lld
         pkgs.gsettings-desktop-schemas
-      ] ++ wryDesktopLibs;
+      ]
+      ++ wryDesktopLibs;
     })
 
     (lib.mkIf (cfg.enable && (cfg.dioxus.enable || cfg.tauri.enable)) {
       home.sessionVariables = webkitGtkSessionVars // {
         # mold/cc need this at link time for -lxdo (libxdo ships inside xdotool).
-        LIBRARY_PATH = lib.makeSearchPath "lib" (
-          if cfg.tauri.enable then tauriLibs else wryDesktopLibs
-        );
+        LIBRARY_PATH = lib.makeSearchPath "lib" (if cfg.tauri.enable then tauriLibs else wryDesktopLibs);
       };
     })
 
@@ -391,35 +390,35 @@ in
     })
 
     # Single assignments so rust/gtk/wayland/dioxus/tauri groups don't clash under mkMerge.
-    (lib.mkIf (
-      cfg.enable && (cfg.rust.enable || cfg.gtk.enable || cfg.dioxus.enable || cfg.tauri.enable)
-    ) {
-      home.sessionVariables.PKG_CONFIG_PATH = mkPkgConfigPath (
-        lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
-        ++ lib.optionals cfg.gtk.enable gtkPkgConfig
-        ++ lib.optionals cfg.dioxus.enable wryDesktopPkgConfig
-        ++ lib.optionals cfg.tauri.enable tauriPkgConfig
-      );
-    })
+    (lib.mkIf
+      (cfg.enable && (cfg.rust.enable || cfg.gtk.enable || cfg.dioxus.enable || cfg.tauri.enable))
+      {
+        home.sessionVariables.PKG_CONFIG_PATH = mkPkgConfigPath (
+          lib.optionals cfg.rust.enable ([ pkgs.openssl.dev ] ++ rustNativePkgConfig)
+          ++ lib.optionals cfg.gtk.enable gtkPkgConfig
+          ++ lib.optionals cfg.dioxus.enable wryDesktopPkgConfig
+          ++ lib.optionals cfg.tauri.enable tauriPkgConfig
+        );
+      }
+    )
 
-    (lib.mkIf (
-      cfg.enable
-      && (
-        cfg.wayland.enable
-        || cfg.gtk.enable
-        || cfg.rust.enable
-        || cfg.dioxus.enable
-        || cfg.tauri.enable
-      )
-    ) {
-      home.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath (
-        lib.optionals (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) (
-          if cfg.rust.enable then rustNativeLibs else waylandLibs
+    (lib.mkIf
+      (
+        cfg.enable
+        && (
+          cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable || cfg.dioxus.enable || cfg.tauri.enable
         )
-        ++ lib.optionals cfg.gtk.enable gtkLibs
-        ++ lib.optionals cfg.dioxus.enable wryDesktopLibs
-        ++ lib.optionals cfg.tauri.enable tauriLibs
-      );
-    })
+      )
+      {
+        home.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath (
+          lib.optionals (cfg.wayland.enable || cfg.gtk.enable || cfg.rust.enable) (
+            if cfg.rust.enable then rustNativeLibs else waylandLibs
+          )
+          ++ lib.optionals cfg.gtk.enable gtkLibs
+          ++ lib.optionals cfg.dioxus.enable wryDesktopLibs
+          ++ lib.optionals cfg.tauri.enable tauriLibs
+        );
+      }
+    )
   ];
 }

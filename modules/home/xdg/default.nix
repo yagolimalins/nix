@@ -28,16 +28,18 @@ let
   ];
 
   # Stub overrides in ~/.local/share/applications (wins over system/profile).
-  hideFromLauncher = ids: lib.listToAttrs (
-    map (id: {
-      name = id;
-      value = {
+  hideFromLauncher =
+    ids:
+    lib.listToAttrs (
+      map (id: {
         name = id;
-        noDisplay = true;
-        exec = "true";
-      };
-    }) ids
-  );
+        value = {
+          name = id;
+          noDisplay = true;
+          exec = "true";
+        };
+      }) ids
+    );
 in
 {
   options.${namespace}.xdg.enable = lib.mkEnableOption "XDG dirs, mime defaults, and HM force flags";

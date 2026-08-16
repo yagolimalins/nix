@@ -24,12 +24,14 @@ let
   applyProfileThemesScript = pkgs.writeShellScript "vscode-apply-profile-themes" ''
     set -euo pipefail
     theme='${builtins.toJSON vscodeSettings}'
-    tokyoExt='${builtins.toJSON (
-      lib.${namespace}.mkVscodeTokyoNightExtEntry {
-        homeDirectory = config.home.homeDirectory;
-        extVersion = tokyoNightExt.version;
-      }
-    )}'
+    tokyoExt='${
+      builtins.toJSON (
+        lib.${namespace}.mkVscodeTokyoNightExtEntry {
+          homeDirectory = config.home.homeDirectory;
+          extVersion = tokyoNightExt.version;
+        }
+      )
+    }'
     profilesDir="${config.xdg.configHome}/Code/User/profiles"
     globalExt="${config.home.homeDirectory}/.vscode/extensions/extensions.json"
 
@@ -91,9 +93,10 @@ in
     };
 
     home.activation.vscodeProfileThemes =
-      inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run ${applyProfileThemesScript}
-      '';
+      inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ]
+        ''
+          run ${applyProfileThemesScript}
+        '';
 
     xdg.configFile."Cursor/User/settings.json".text = builtins.toJSON vscodeSettings;
 

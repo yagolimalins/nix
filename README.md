@@ -72,16 +72,18 @@ New module — add `modules/nixos/<name>/` or `modules/home/<name>/` with `optio
 ```
 flake.nix                          inputs + Snowfall wiring
 install.sh                         bootstrap new hosts
-lib/                               lib.mine.* helpers
+lib/                               lib.mine.* helpers (collision-checked merge)
   modules.nix                      enable-modules
-  packages.nix                     package groups, Thunar/Yazi openers
-  theme.nix                        Tokyo Night Storm palette
+  packages.nix                     package group names + gating
+  apps.nix                         terminal / Thunar / Yazi launch commands
+  theme.nix                        Tokyo Night Storm palette + hex converters
   host.nix                         dual-monitor layout, Hyprland portal
 systems/common.nix                 shared NixOS mine.* toggles
 systems/x86_64-linux/<host>/       hostname, hardware, mine.host facts
 homes/common.nix                   shared HM mine.* toggles
 homes/x86_64-linux/<user>/         package-groups.nix + overrides
 modules/nixos|home/<name>/         → mine.<name>.enable
+modules/home/cli/                  tools.nix, broot.nix, zellij.nix, yazi.nix
 modules/home/packages/groups/      packages per group
 packages/                          custom derivations (≠ mine.packages)
 ```
@@ -94,4 +96,5 @@ Hosts: `thinkpad`, `laptop`, `desktop`.
 - Host facts on `mine.host.*` — shared modules read `osConfig`, not `if host ==`
 - `homes/common.nix` uses literal `mine`, not `${namespace}` (Home Manager freeformType cycle)
 - `packages/` = custom flake derivations; `mine.packages` = Home Manager user package groups
+- `modules/home/cli/` is the one module with no `mine.<name>.enable` — the `cli` package group gates it
 - stateVersion `26.05` · format with `nix fmt` (treefmt + nixfmt)

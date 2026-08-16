@@ -11,9 +11,9 @@
 let
   cfg = config.${namespace}.lockscreen;
   palette = lib.${namespace}.palette;
-  accentRgb = builtins.substring 1 6 palette.accent;
-  bgRgb = builtins.substring 1 6 palette.bg;
-  textRgb = builtins.substring 1 6 palette.text;
+  accentRgb = lib.${namespace}.hexBare palette.accent;
+  bgRgb = lib.${namespace}.hexBare palette.bg;
+  textRgb = lib.${namespace}.hexBare palette.text;
 in
 {
   options.${namespace}.lockscreen.enable = lib.mkEnableOption "hyprlock + hypridle screen locking";

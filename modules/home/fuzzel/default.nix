@@ -11,12 +11,7 @@
 let
   cfg = config.${namespace}.fuzzel;
   palette = lib.${namespace}.palette;
-  hex =
-    color: alpha:
-    let
-      rgb = lib.removePrefix "#" color;
-    in
-    "${rgb}${alpha}";
+  hex = lib.${namespace}.hexToRgba;
 in
 {
   options.${namespace}.fuzzel.enable = lib.mkEnableOption "Fuzzel application launcher";

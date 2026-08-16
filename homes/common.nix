@@ -5,7 +5,7 @@
 {
   home.stateVersion = "26.05";
 
-  mine =
+  mine = lib.mkMerge [
     (lib.mine.enable-modules [
       "xdg"
       "hyprland"
@@ -24,8 +24,8 @@
       "packages"
       "input-remapper"
     ])
-    // {
-      user.wallpaper =
-        "${pkgs.nixos-artwork.wallpapers.binary-blue}/share/backgrounds/nixos/nix-wallpaper-binary-blue.png";
-    };
+    {
+      user.wallpaper = "${pkgs.nixos-artwork.wallpapers.binary-blue}/share/backgrounds/nixos/nix-wallpaper-binary-blue.png";
+    }
+  ];
 }

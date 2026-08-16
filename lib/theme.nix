@@ -1,5 +1,5 @@
 # Tokyo Night Storm theme helpers (used by modules/home/theme/).
-{ ... }:
+{ lib, ... }:
 
 let
   # Tokyo Night Storm — accent = selection/active; semantic colors for status only.
@@ -17,9 +17,24 @@ let
     ok = "#9ece6a";
     purple = "#bb9af7"; # terminal ANSI magenta only
   };
+
+  # #rrggbb → rrggbb (hyprland, hyprlock)
+  hexBare = lib.removePrefix "#";
 in
 {
-  inherit palette;
+  inherit palette hexBare;
+
+  # #rrggbb → rrggbbaa (fuzzel)
+  hexToRgba = color: alpha: "${hexBare color}${alpha}";
+
+  # #rrggbb → rgb(r, g, b) with decimal channels (broot)
+  hexToRgbFunc =
+    hex:
+    let
+      h = hexBare hex;
+      dec = s: toString (lib.fromHexString s);
+    in
+    "rgb(${dec (builtins.substring 0 2 h)}, ${dec (builtins.substring 2 2 h)}, ${dec (builtins.substring 4 2 h)})";
 
   vscodeTokyoNightSettings = {
     "workbench.colorTheme" = "Tokyo Night Storm";

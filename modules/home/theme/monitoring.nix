@@ -13,8 +13,7 @@ let
 in
 {
   config = lib.mkIf (cfg.enable && on "monitoring") {
-    xdg.configFile."btop/themes/mine-storm.theme".text =
-      lib.${namespace}.mkBtopStormTheme palette;
+    xdg.configFile."btop/themes/mine-storm.theme".text = lib.${namespace}.mkBtopStormTheme palette;
 
     xdg.configFile."btop/btop.conf".text = ''
       color_theme = "mine-storm"
