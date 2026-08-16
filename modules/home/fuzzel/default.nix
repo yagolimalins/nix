@@ -21,7 +21,7 @@ in
       enable = true;
       settings = {
         main = {
-          font = "JetBrainsMono Nerd Font:size=13";
+          font = "JetBrainsMono Nerd Font:size=14";
           dpi-aware = "no";
           terminal = "terminal";
           layer = "overlay";
