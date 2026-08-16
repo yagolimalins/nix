@@ -41,7 +41,7 @@ in
       configType = "hyprlang";
       settings = {
         "$mod" = "SUPER";
-        "$terminal" = "kitty";
+        "$terminal" = "terminal";
         "$launcher" = "pkill fuzzel || fuzzel";
 
         monitor = hostCfg.monitors;

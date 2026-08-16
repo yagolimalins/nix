@@ -28,7 +28,7 @@ in
         main = {
           font = "JetBrainsMono Nerd Font:size=13";
           dpi-aware = "no";
-          terminal = "kitty";
+          terminal = "terminal";
           layer = "overlay";
           width = 32;
           lines = 10;

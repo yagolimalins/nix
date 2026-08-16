@@ -42,6 +42,26 @@ let
     creator = "recording / editing";
     audio = "audio production";
   };
+
+  # Kitty + Zellij — emulator stays kitty; sessions start in zellij.
+  terminalCommands =
+    pkgs:
+    let
+      kitty = lib.getExe pkgs.kitty;
+      zellij = lib.getExe pkgs.zellij;
+      zsh = lib.getExe pkgs.zsh;
+      # Login shell defers zellij until kitty is mapped — avoids stale size on Hyprland open.
+      zellijCmd = "${zsh} -l -c ${lib.escapeShellArg zellij}";
+    in
+    {
+      emulator = "kitty";
+      launch = "${kitty} -- ${zellijCmd}";
+      openInDir = dir: "${kitty} --working-directory ${dir} -- ${zellijCmd}";
+      openDetachInDir = dir: "${kitty} --detach --working-directory ${dir} -- ${zellijCmd}";
+      # Placeholders for Thunar (%f) and Yazi (%s).
+      thunarOpenHere = "${kitty} --working-directory %f -- ${zellijCmd}";
+      yaziOpenHere = "${kitty} --detach --working-directory %s -- ${zellijCmd}";
+    };
 in
 {
   inherit packageGroups;
@@ -54,28 +74,26 @@ in
   # Gated package group: mine.packages.enable && mine.packages.<group>.enable
   packageGroupOn = pkgCfg: group: pkgCfg.enable && pkgCfg.${group}.enable;
 
+  inherit terminalCommands;
+
   # Thunar UCA + Yazi folder openers — keep commands identical between both.
   folderOpenCommands =
     pkgs:
     let
-      terminal = lib.getExe pkgs.kitty;
-      zellij = lib.getExe pkgs.zellij;
+      term = terminalCommands pkgs;
       cursor = lib.getExe pkgs.code-cursor;
       vscode = lib.getExe pkgs.vscode;
       zed = lib.getExe pkgs.zed-editor;
     in
     {
       thunar = {
-        terminal = "${terminal} --working-directory %f";
-        zellijIde = "${terminal} --working-directory %f -- ${zellij} -l ide";
+        terminal = term.thunarOpenHere;
         cursor = "${cursor} %f";
         vscode = "${vscode} --new-window %f";
         zed = "${zed} -n %f";
       };
       yazi = {
-        # --detach opens a new Kitty OS window without blocking the caller.
-        terminal = "${terminal} --detach --working-directory %s";
-        zellijIde = "${terminal} --detach --working-directory %s -- ${zellij} -l ide";
+        terminal = term.yaziOpenHere;
         cursor = "${cursor} %s";
         vscode = "${vscode} --new-window %s";
         zed = "${zed} -n %s";

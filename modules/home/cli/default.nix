@@ -14,6 +14,7 @@ let
   on = pkgCfg.enable && pkgCfg.cli.enable;
 
   openers = lib.${namespace}.folderOpenCommands pkgs;
+  term = lib.${namespace}.terminalCommands pkgs;
   themeCfg = config.${namespace}.theme;
   palette = lib.${namespace}.palette;
   # Profile hx is the extraPackages wrapper. pkgs.helix has no LSPs on PATH.
@@ -23,8 +24,6 @@ let
   vlc = lib.getExe pkgs.vlc;
   ristretto = lib.getExe pkgs.ristretto;
   librewolf = lib.getExe pkgs.librewolf;
-  zellij = lib.getExe pkgs.zellij;
-  jq = lib.getExe pkgs.jq;
 
   # #rrggbb → broot rgb(r, g, b)
   rgb =
@@ -84,41 +83,14 @@ let
     disown
   '';
 
-  # Open a file in the Zellij pane named "editor" (Helix). Falls back to hx.
-  # pane_command is often the LSP (nixd); the hx binary is in terminal_command ("hx .").
-  # send-keys wants "Esc", not "Escape" (the latter aborts the script).
-  brootOpenInHelix = pkgs.writeShellScript "broot-open-in-helix" ''
-    set -eu
-    file=''${1-}
-    if [ -z "$file" ]; then
-      exit 1
+  # Default terminal: kitty hosting zellij. Supports `$TERMINAL -e cmd`.
+  terminalWrapper = pkgs.writeShellScriptBin "terminal" ''
+    if [ "$1" = "-e" ] && [ -n "''${2-}" ]; then
+      shift
+      exec ${kitty} -- "$@"
+    else
+      exec ${term.launch} "$@"
     fi
-
-    if [ -z "''${ZELLIJ-}" ]; then
-      exec ${hx} "$file"
-    fi
-
-    panes=$(${zellij} action list-panes -j -a) || exit 1
-    pane_id=$(printf '%s' "$panes" | ${jq} -r '
-      def is_hx:
-        test("(?:^|[\\s/])hx(?:\\s|$)|helix");
-      [ .[] | select(.is_plugin == false) ]
-      | (
-          map(select(.title == "editor"))
-          + map(select((.terminal_command // "") | is_hx))
-          + map(select((.pane_command // "") | is_hx))
-        )
-      | .[0].id // empty
-    ') || exit 1
-    if [ -z "$pane_id" ]; then
-      exit 1
-    fi
-
-    target="terminal_$pane_id"
-    ${zellij} action send-keys --pane-id "$target" Esc
-    ${zellij} action write-chars --pane-id "$target" ":open $file"
-    ${zellij} action send-keys --pane-id "$target" Enter
-    ${zellij} action focus-pane-id "$target"
   '';
 in
 {
@@ -141,6 +113,7 @@ in
       yaziOpenCursor
       yaziOpenVscode
       yaziOpenZed
+      terminalWrapper
     ];
 
     programs.fzf = {
@@ -255,7 +228,7 @@ in
             key = "enter";
             apply_to = "file";
             external = [
-              "${brootOpenInHelix}"
+              "${hx}"
               "{file}"
             ];
             leave_broot = false;
@@ -269,11 +242,9 @@ in
       };
     };
 
-    programs.zsh.shellAliases.zide = "zellij -l ide";
-
     programs.zellij = {
       enable = true;
-      enableZshIntegration = false;
+      enableZshIntegration = true;
       exitShellOnExit = false;
       settings = {
         default_shell = "zsh";
@@ -286,14 +257,11 @@ in
         show_startup_tips = false;
         show_release_notes = false;
         mouse_hover_effects = false;
-        advanced_mouse_actions = false;
         session_serialization = true;
         on_force_close = "quit";
-        auto_layout = false;
-        pane_frames = true;
-        ui.pane_frames.rounded_corners = true;
-        ui.pane_frames.hide_session_name = true;
-        ui.pane_frames.hide_plugin_names = true;
+        auto_layout = true;
+        pane_frames = false;
+        advanced_mouse_actions = true;
       };
       # Helix ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
       # default_mode is locked: only Ctrl+g plus whatever we bind here.
@@ -301,6 +269,7 @@ in
       extraConfig = ''
         keybinds {
             locked {
+                bind "Ctrl r" { SwitchToMode "Resize"; }
                 bind "Alt j" "Alt Left" { MoveFocusOrTab "Left"; }
                 bind "Alt k" "Alt Down" { MoveFocus "Down"; }
                 bind "Alt l" "Alt Up" { MoveFocus "Up"; }
@@ -394,6 +363,7 @@ in
                 bind "ç" { MovePane "Right"; }
             }
             resize {
+                bind "Esc" "Ctrl g" { SwitchToMode "Locked"; }
                 unbind "h" "j" "k" "l" "H" "J" "K" "L"
                 bind "j" { Resize "Increase Left"; }
                 bind "k" { Resize "Increase Down"; }
@@ -426,67 +396,6 @@ in
         }
       '';
     };
-
-    # IDE layout: edit | agent | git. Start from the project (`zellij -l ide`).
-    # Edit: files | editor / terminal. Alt+f toggles fullscreen on the focused pane.
-    # Alt+1..0 jump tabs 1–10.
-    xdg.configFile."zellij/layouts/ide.kdl".text = ''
-      layout {
-          cwd "."
-          default_tab_template {
-              children
-              pane size=1 borderless=true {
-                  plugin location="compact-bar"
-              }
-          }
-          tab_template name="ui" {
-              children
-              pane size=1 borderless=true {
-                  plugin location="compact-bar"
-              }
-          }
-          ui name="edit" focus=true {
-              pane split_direction="vertical" {
-                  pane size=24 {
-                      name "files"
-                      command "${lib.getExe pkgs.broot}"
-                      cwd "."
-                      close_on_exit false
-                  }
-                  pane split_direction="horizontal" {
-                      pane {
-                          name "editor"
-                          command "${hx}"
-                          args "."
-                          cwd "."
-                          close_on_exit false
-                          focus true
-                      }
-                      pane size=10 {
-                          name "terminal"
-                          cwd "."
-                      }
-                  }
-              }
-          }
-          ui name="agent" {
-              pane {
-                  name "agent"
-                  command "${lib.getExe' pkgs.cursor-cli "cursor-agent"}"
-                  cwd "."
-                  close_on_exit false
-              }
-          }
-          ui name="git" {
-              pane {
-                  name "git"
-                  command "${lib.getExe pkgs.gitui}"
-                  cwd "."
-                  close_on_exit false
-              }
-          }
-      }
-    '';
 
     xdg.configFile."yazi/plugins/smart-enter.yazi/main.lua".text = ''
       --- @since 25.5.31
@@ -589,7 +498,6 @@ in
         ]
         folder = [
           { run = "${openers.yazi.terminal}", desc = "Open Terminal Here", orphan = true },
-          { run = "${openers.yazi.zellijIde}", desc = "Open Zellij here", orphan = true },
           { run = "${lib.getExe yaziOpenCursor} %s", desc = "Open Cursor Here", orphan = true },
           { run = "${lib.getExe yaziOpenVscode} %s", desc = "Open VSCode Here", orphan = true },
           { run = "${lib.getExe yaziOpenZed} %s", desc = "Open Zed Here", orphan = true },
