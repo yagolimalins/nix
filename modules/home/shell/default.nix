@@ -46,6 +46,21 @@ in
         ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=${palette.urgent}"
         ZSH_HIGHLIGHT_STYLES[redirection]="fg=${palette.cyan}"
         ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.muted}"
+
+        # Blank line before the prompt except the first draw in this shell, or right after clear.
+        typeset -g _mine_first_prompt=1
+        _mine_prompt_newline() {
+          if (( _mine_first_prompt )); then
+            _mine_first_prompt=0
+          else
+            print
+          fi
+        }
+        add-zsh-hook precmd _mine_prompt_newline
+        clear() {
+          _mine_first_prompt=1
+          command clear "$@"
+        }
       '';
     };
 

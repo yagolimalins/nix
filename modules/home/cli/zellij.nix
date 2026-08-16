@@ -34,6 +34,7 @@ in
       exitShellOnExit = false;
       settings = {
         default_shell = "zsh";
+        default_layout = "compact";
         theme = "tokyo-night-storm";
         copy_command = lib.getExe' pkgs.wl-clipboard "wl-copy";
         copy_clipboard = "system";
@@ -46,7 +47,8 @@ in
         session_serialization = true;
         on_force_close = "quit";
         auto_layout = true;
-        pane_frames = false;
+        pane_frames = true;
+        hide_session_name = true;
         advanced_mouse_actions = true;
       };
       # Helix ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
