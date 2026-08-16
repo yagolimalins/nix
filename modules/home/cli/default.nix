@@ -16,7 +16,8 @@ let
   openers = lib.${namespace}.folderOpenCommands pkgs;
   themeCfg = config.${namespace}.theme;
   palette = lib.${namespace}.palette;
-  hx = lib.getExe pkgs.helix;
+  # Profile hx is the extraPackages wrapper. pkgs.helix has no LSPs on PATH.
+  hx = "${config.home.profileDirectory}/bin/hx";
   kitty = lib.getExe pkgs.kitty;
   zathura = lib.getExe pkgs.zathura;
   vlc = lib.getExe pkgs.vlc;
