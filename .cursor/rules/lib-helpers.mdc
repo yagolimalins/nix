@@ -1,0 +1,39 @@
+---
+description: Helper placement and merge rules for lib/
+globs: lib/**/*.nix
+alwaysApply: false
+---
+
+# lib/ helpers
+
+Every file here is merged into `lib.mine.*` by `lib/default.nix`. Add a helper to the file matching
+its concern — no manual wiring, no new import to register.
+
+| Concern | File |
+| --- | --- |
+| Module enable batching (`enable-modules`) | `modules.nix` |
+| Package group names, `packageGroupOn`, toggles | `packages.nix` |
+| Terminal / Thunar / Yazi launch commands | `apps.nix` |
+| Palette, hex converters, theme string builders | `theme.nix` |
+| Monitor layout, Hyprland portal | `host.nix` |
+
+## Rules
+
+- **Names must be unique across all files.** `lib/default.nix` folds the parts and throws on
+  duplicate attribute names rather than letting one silently shadow another. A collision is a build
+  error, not a subtle bug — keep it that way.
+- **Launch command strings belong in `apps.nix`**, not `packages.nix`. `packages.nix` is package
+  group metadata and gating only.
+- **`packages.nix` must keep its `{ lib, ... }` signature and export `packageGroupNames`.**
+  `install.sh` imports it standalone, outside the flake:
+
+```nix
+packages = import ${repo_root}/lib/packages.nix { lib = pkgs.lib; };
+```
+
+  Changing the signature or dropping `packageGroupNames` breaks fresh installs silently, because
+  the script falls back to a hardcoded group list.
+
+- **Use the existing hex converters** from `theme.nix` — `hexBare`, `hexToRgba`, `hexToRgbFunc`.
+  Do not inline `builtins.substring` or `lib.removePrefix` on palette colors in a module.
+- Do not add a helper with no consumer. Dead helpers were removed deliberately.

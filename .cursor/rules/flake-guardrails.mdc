@@ -1,0 +1,39 @@
+---
+description: Non-negotiable rules for this NixOS flake
+alwaysApply: true
+---
+
+# Flake guardrails
+
+Snowfall Lib flake, namespace `mine`, Home Manager integrated. See [AGENTS.md](../../AGENTS.md)
+for architecture and [README.md](../../README.md) for the layout.
+
+## Never
+
+- Rename `mine.*` options, module directory names, package group names, or host names.
+  Directory name = option name = flake attribute.
+- Change `flake.lock` or `inputs` unless explicitly asked.
+- Add or remove features during a refactor.
+- Reformat or "tidy" files unrelated to the task. `nix fmt` covers the whole tree; unrelated
+  churn it produces is pre-existing drift and does not belong in your diff.
+- Delete a comment documenting an upstream bug, link flag, schema path, or ordering requirement.
+
+## Always
+
+- `git add` new files. Flakes ignore untracked paths, so a new module does not exist as far as
+  `nix flake check` is concerned until it is staged.
+- Finish with `nix fmt && nix flake check`.
+- For anything touching multiple hosts, rebuild all three:
+
+```bash
+for h in thinkpad laptop desktop; do
+  nix build --no-link --print-out-paths ".#nixosConfigurations.$h.config.system.build.toplevel"
+done
+```
+
+## Verification gotcha
+
+The system toplevel hash changes on **every** edit, including whitespace, because `self` is pinned
+into `nix.registry` and `nixos-version`. Never conclude a change is behavioral from a changed
+toplevel path. Compare the closure with hashes, ignoring self-referential paths; generated Home
+Manager dotfiles appear there as content-addressed `hm_*` entries.

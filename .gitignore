@@ -17,4 +17,6 @@ result-*
 *.swp
 .idea/
 .vscode/
-.cursor/
+# Contents, not the dir — git cannot re-include inside an excluded directory.
+.cursor/*
+!.cursor/rules/

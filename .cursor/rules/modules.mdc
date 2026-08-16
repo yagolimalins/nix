@@ -1,0 +1,56 @@
+---
+description: Module structure and gating conventions
+globs: modules/**/*.nix
+alwaysApply: false
+---
+
+# Module conventions
+
+One concern per directory. **Folder name must equal the option name** — `modules/home/fuzzel/`
+declares `mine.fuzzel.enable`. Enable it in `systems/common.nix` (NixOS) or `homes/common.nix`
+(Home Manager); a module with no toggle there is dead code.
+
+## Skeleton
+
+```nix
+{ config, lib, namespace, ... }:
+let
+  cfg = config.${namespace}.<name>;
+in
+{
+  options.${namespace}.<name>.enable = lib.mkEnableOption "…";
+
+  config = lib.mkIf cfg.enable { … };
+}
+```
+
+## Package group gating
+
+Use the shared helper, partially applied. Never hand-roll `cfg.enable && cfg.<group>.enable`:
+
+```nix
+on = lib.${namespace}.packageGroupOn config.${namespace}.packages;   # then: on "rust"
+```
+
+## Splitting a large module
+
+Follow `modules/home/theme/default.nix`: `default.nix` holds `imports` plus the options
+declaration, and each submodule owns one tool and repeats the same gate. `modules/home/cli/`
+is the other example (`tools.nix`, `broot.nix`, `zellij.nix`, `yazi.nix`).
+
+## The one exception
+
+`modules/home/cli/` declares **no** `options` block and is absent from `homes/common.nix`. It is
+gated entirely by `mine.packages.cli.enable`, and every submodule repeats that gate:
+
+```nix
+on = lib.${namespace}.packageGroupOn config.${namespace}.packages "cli";
+```
+
+Do not "fix" this by adding a `mine.cli.enable` option.
+
+## Other
+
+- Read host facts from `mine.host.*` via `osConfig`. Never branch on `if hostname == …`.
+- Take colors from `lib.${namespace}.palette` and its hex converters, not inline literals.
+- Packages belong in `modules/home/packages/groups/<group>.nix`, not in feature modules.
