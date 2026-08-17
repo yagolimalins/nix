@@ -27,7 +27,6 @@ in
         noto-fonts-cjk-sans
         noto-fonts-color-emoji
         nerd-fonts.fira-code
-        nerd-fonts.jetbrains-mono
       ];
       fontconfig.defaultFonts = {
         sansSerif = [

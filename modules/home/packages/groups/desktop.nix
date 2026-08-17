@@ -44,8 +44,6 @@ in
 
     (lib.mkIf (on "fonts") {
       home.packages = with pkgs; [
-        jetbrains-mono
-        nerd-fonts.jetbrains-mono
         nerd-fonts.fira-code
       ];
     })
