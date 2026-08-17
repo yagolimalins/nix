@@ -27,7 +27,7 @@ let
 
   style = ''
     * {
-      font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
+      font-family: "FiraCode Nerd Font Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
       font-size: 14px;
       min-height: 0;
     }
@@ -79,7 +79,7 @@ let
       border-radius: 5px;
       color: ${palette.text};
       font-size: 13px;
-      font-family: "JetBrainsMono Nerd Font", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
+      font-family: "FiraCode Nerd Font Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
     }
     #mpris.paused { color: ${palette.muted}; }
 

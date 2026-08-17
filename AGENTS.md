@@ -75,12 +75,13 @@ plus the options declaration, and each submodule owns one concern and repeats th
 Agents finish with:
 
 ```bash
-nix fmt && nix flake check
+nh os switch
 ```
 
-Do **not** run host toplevel builds unless the user asks. The user rebuilds locally when ready.
+Do **not** run `nix fmt` or `nix flake check` unless the user asks. The user formats and checks
+locally when ready.
 
-When you want a full build (e.g. before switching, or to compare closures after a refactor):
+When you want a full build without switching (e.g. to compare closures after a refactor):
 
 ```bash
 for h in thinkpad laptop desktop; do
