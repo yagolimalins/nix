@@ -357,12 +357,18 @@ let
         g =
           abnt2Dirs {
             left = "goto_line_start";
-            down = "move_line_down";
-            up = "move_line_up";
+            down = "goto_last_line";
+            up = "goto_file_start";
             right = "goto_line_end";
           }
           // {
+            s = "goto_first_nonwhitespace";
+            f = "goto_file";
+            a = "goto_last_accessed_file";
+            m = "goto_last_modified_file";
+            "." = "goto_last_modification";
             d = "goto_definition";
+            D = "goto_declaration";
             r = "goto_reference";
             i = "goto_implementation";
             y = "goto_type_definition";

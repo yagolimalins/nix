@@ -13,15 +13,11 @@ for _, mode in ipairs({ "n", "v" }) do
   end
 end
 
--- g prefix (helix goto mode) — use normal! to bypass JKLÇ remaps
+-- g prefix (helix goto mode) — 2×2 spatial: j/ç line, k/l file
 map("n", "gj", "0", vim.tbl_extend("force", opts, { desc = "Line start" }))
-map("n", "gk", function()
-  vim.cmd("normal! j")
-end, vim.tbl_extend("force", opts, { desc = "Line down" }))
-map("n", "gl", function()
-  vim.cmd("normal! k")
-end, vim.tbl_extend("force", opts, { desc = "Line up" }))
 map("n", "gç", "$", vim.tbl_extend("force", opts, { desc = "Line end" }))
+map("n", "gl", "gg", vim.tbl_extend("force", opts, { desc = "File start" }))
+map("n", "gk", "G", vim.tbl_extend("force", opts, { desc = "File end" }))
 
 -- z prefix (helix view mode scroll)
 map("n", "zh", nop, opts)
