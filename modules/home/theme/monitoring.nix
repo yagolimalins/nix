@@ -13,12 +13,16 @@ let
 in
 {
   config = lib.mkIf (cfg.enable && on "monitoring") {
-    xdg.configFile."btop/themes/mine-storm.theme".text = lib.${namespace}.mkBtopStormTheme palette;
-
-    xdg.configFile."btop/btop.conf".text = ''
-      color_theme = "mine-storm"
-      theme_background = True
-    '';
+    programs.btop = {
+      enable = true;
+      # Package comes from mine.packages.monitoring.
+      package = null;
+      settings = {
+        color_theme = "mine-storm";
+        theme_background = true;
+      };
+      themes.mine-storm = lib.${namespace}.mkBtopStormTheme palette;
+    };
 
     programs.fastfetch = {
       enable = true;

@@ -325,27 +325,24 @@ in
           RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
         };
 
-        home.file.".cargo/config.toml".text =
-          let
-            moldFlags = [
-              "-C"
-              "link-arg=-fuse-ld=mold"
-              "-C"
-              "link-arg=-B${pkgs.mold}/bin"
-            ];
-            xdoFlags = lib.optionals (cfg.dioxus.enable || cfg.tauri.enable) [
-              "-C"
-              "link-arg=-L${pkgs.xdotool}/lib"
-            ];
-            rustflags = moldFlags ++ xdoFlags;
-            flagsToml = lib.concatMapStringsSep ",\n    " (f: ''"${f}"'') rustflags;
-          in
-          ''
-            [target.x86_64-unknown-linux-gnu]
-            rustflags = [
-                ${flagsToml}
-            ]
-          '';
+        # rust-bin already provides cargo — only manage config.toml.
+        programs.cargo = {
+          enable = true;
+          package = null;
+          settings = {
+            target."x86_64-unknown-linux-gnu".rustflags =
+              [
+                "-C"
+                "link-arg=-fuse-ld=mold"
+                "-C"
+                "link-arg=-B${pkgs.mold}/bin"
+              ]
+              ++ lib.optionals (cfg.dioxus.enable || cfg.tauri.enable) [
+                "-C"
+                "link-arg=-L${pkgs.xdotool}/lib"
+              ];
+          };
+        };
       }
     ))
 

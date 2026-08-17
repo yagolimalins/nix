@@ -19,8 +19,27 @@ in
     programs.zsh = {
       enable = true;
       enableCompletion = true;
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
+
+      autosuggestion = {
+        enable = true;
+        highlight = "fg=${palette.muted}";
+      };
+
+      syntaxHighlighting = {
+        enable = true;
+        styles = {
+          default = "fg=${palette.text}";
+          command = "fg=${palette.accent},bold";
+          alias = "fg=${palette.cyan}";
+          builtin = "fg=${palette.accent}";
+          function = "fg=${palette.accent}";
+          path = "fg=${palette.text},underline";
+          globbing = "fg=${palette.warning},bold";
+          comment = "fg=${palette.muted}";
+          unknown-token = "fg=${palette.urgent}";
+          redirection = "fg=${palette.cyan}";
+        };
+      };
 
       oh-my-zsh = {
         enable = true;
@@ -32,22 +51,8 @@ in
         ];
       };
 
+      # Blank line before the prompt except the first draw in this shell, or right after clear.
       initContent = ''
-        # Tokyo Night Storm — zsh-syntax-highlighting + autosuggestions
-        typeset -A ZSH_HIGHLIGHT_STYLES
-        ZSH_HIGHLIGHT_STYLES[default]="fg=${palette.text}"
-        ZSH_HIGHLIGHT_STYLES[command]="fg=${palette.accent},bold"
-        ZSH_HIGHLIGHT_STYLES[alias]="fg=${palette.cyan}"
-        ZSH_HIGHLIGHT_STYLES[builtin]="fg=${palette.accent}"
-        ZSH_HIGHLIGHT_STYLES[function]="fg=${palette.accent}"
-        ZSH_HIGHLIGHT_STYLES[path]="fg=${palette.text},underline"
-        ZSH_HIGHLIGHT_STYLES[globbing]="fg=${palette.warning},bold"
-        ZSH_HIGHLIGHT_STYLES[comment]="fg=${palette.muted}"
-        ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=${palette.urgent}"
-        ZSH_HIGHLIGHT_STYLES[redirection]="fg=${palette.cyan}"
-        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=${palette.muted}"
-
-        # Blank line before the prompt except the first draw in this shell, or right after clear.
         typeset -g _mine_first_prompt=1
         _mine_prompt_newline() {
           if (( _mine_first_prompt )); then

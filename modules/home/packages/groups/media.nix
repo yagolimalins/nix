@@ -42,8 +42,112 @@ in
       home.packages = with pkgs; [
         vlc
         popcorntime
-        spotify-player
       ];
+
+      programs.spotify-player = {
+        enable = true;
+        package = spotify-player;
+        settings = {
+          theme = "mine";
+          border_type = "Rounded";
+        };
+        themes = [
+          {
+            name = "mine";
+            palette = {
+              background = p.bg;
+              foreground = p.text;
+              black = p.border;
+              red = p.urgent;
+              green = p.ok;
+              yellow = p.warning;
+              blue = p.accent;
+              magenta = p.purple;
+              cyan = p.cyan;
+              white = p.text;
+              bright_black = p.muted;
+              bright_red = p.urgent;
+              bright_green = p.ok;
+              bright_yellow = p.warning;
+              bright_blue = p.accent;
+              bright_magenta = p.purple;
+              bright_cyan = p.cyan;
+              bright_white = p.text;
+            };
+            component_style = {
+              block_title = {
+                fg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+              border = {
+                fg = p.border;
+              };
+              playback_status = {
+                fg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+              playback_track = {
+                fg = p.text;
+                modifiers = [ "Bold" ];
+              };
+              playback_artists = {
+                fg = p.muted;
+              };
+              playback_album = {
+                fg = p.warning;
+              };
+              playback_genres = {
+                fg = p.muted;
+                modifiers = [ "Italic" ];
+              };
+              playback_metadata = {
+                fg = p.muted;
+              };
+              playback_progress_bar = {
+                fg = p.bg;
+                bg = p.accent;
+              };
+              playback_progress_bar_unfilled = {
+                bg = p.surface;
+              };
+              current_playing = {
+                fg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+              page_desc = {
+                fg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+              playlist_desc = {
+                fg = p.muted;
+                modifiers = [ "Dim" ];
+              };
+              table_header = {
+                fg = p.muted;
+              };
+              selection = {
+                fg = p.onAccent;
+                bg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+              secondary_row = {
+                bg = p.surface;
+              };
+              like = {
+                fg = p.urgent;
+              };
+              lyrics_played = {
+                fg = p.muted;
+                modifiers = [ "Dim" ];
+              };
+              lyrics_playing = {
+                fg = p.accent;
+                modifiers = [ "Bold" ];
+              };
+            };
+          }
+        ];
+      };
 
       xdg.desktopEntries.spotify-player = {
         name = "Spotify";
@@ -56,57 +160,6 @@ in
           "Player"
         ];
       };
-
-      xdg.configFile."spotify-player/app.toml".text = ''
-        theme = "mine"
-        border_type = "Rounded"
-      '';
-
-      xdg.configFile."spotify-player/theme.toml".text = ''
-        [[themes]]
-        name = "mine"
-
-        [themes.palette]
-        background     = "${p.bg}"
-        foreground     = "${p.text}"
-        black          = "${p.border}"
-        red            = "${p.urgent}"
-        green          = "${p.ok}"
-        yellow         = "${p.warning}"
-        blue           = "${p.accent}"
-        magenta        = "${p.purple}"
-        cyan           = "${p.cyan}"
-        white          = "${p.text}"
-        bright_black   = "${p.muted}"
-        bright_red     = "${p.urgent}"
-        bright_green   = "${p.ok}"
-        bright_yellow  = "${p.warning}"
-        bright_blue    = "${p.accent}"
-        bright_magenta = "${p.purple}"
-        bright_cyan    = "${p.cyan}"
-        bright_white   = "${p.text}"
-
-        [themes.component_style]
-        block_title                  = { fg = "${p.accent}", modifiers = ["Bold"] }
-        border                       = { fg = "${p.border}" }
-        playback_status              = { fg = "${p.accent}", modifiers = ["Bold"] }
-        playback_track               = { fg = "${p.text}", modifiers = ["Bold"] }
-        playback_artists             = { fg = "${p.muted}" }
-        playback_album               = { fg = "${p.warning}" }
-        playback_genres              = { fg = "${p.muted}", modifiers = ["Italic"] }
-        playback_metadata            = { fg = "${p.muted}" }
-        playback_progress_bar        = { fg = "${p.bg}", bg = "${p.accent}" }
-        playback_progress_bar_unfilled = { bg = "${p.surface}" }
-        current_playing              = { fg = "${p.accent}", modifiers = ["Bold"] }
-        page_desc                    = { fg = "${p.accent}", modifiers = ["Bold"] }
-        playlist_desc                = { fg = "${p.muted}", modifiers = ["Dim"] }
-        table_header                 = { fg = "${p.muted}" }
-        selection                    = { fg = "${p.onAccent}", bg = "${p.accent}", modifiers = ["Bold"] }
-        secondary_row                = { bg = "${p.surface}" }
-        like                         = { fg = "${p.urgent}" }
-        lyrics_played                = { fg = "${p.muted}", modifiers = ["Dim"] }
-        lyrics_playing               = { fg = "${p.accent}", modifiers = ["Bold"] }
-      '';
     })
 
     (lib.mkIf (on "creator") {
