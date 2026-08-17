@@ -13,6 +13,9 @@ let
   on = lib.${namespace}.packageGroupOn config.${namespace}.packages "cli";
   term = lib.${namespace}.terminalCommands pkgs;
   kitty = lib.getExe pkgs.kitty;
+  broot = lib.getExe pkgs.broot;
+  # Profile hx is the extraPackages wrapper. pkgs.helix has no LSPs on PATH.
+  hx = "${config.home.profileDirectory}/bin/hx";
 
   # Default terminal: kitty hosting zellij. Supports `$TERMINAL -e cmd`.
   terminalWrapper = pkgs.writeShellScriptBin "terminal" ''
@@ -51,6 +54,22 @@ in
         hide_session_name = true;
         advanced_mouse_actions = true;
       };
+      # Opt-in: `zellij -l ide`. Inside an auto-started session use a fresh
+      # Kitty / `ZELLIJ=` shell, or `zellij action new-tab --layout ide`.
+      layouts.ide = ''
+        layout {
+            pane size=1 borderless=true {
+                plugin location="zellij:compact-bar"
+            }
+            pane split_direction="vertical" {
+                pane size="15%" name="tree" command="${broot}"
+                pane split_direction="horizontal" {
+                    pane size="80%" name="editor" focus=true command="${hx}"
+                    pane size="20%" name="terminal"
+                }
+            }
+        }
+      '';
       # Helix ABNT2: j/k/l/ç = ← ↓ ↑ → (unbind default h/j/k/l).
       # default_mode is locked: only Ctrl+g plus whatever we bind here.
       # Plugins must SwitchToMode "Locked" or keys NoOp (zellij#3756).
