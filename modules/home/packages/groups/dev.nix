@@ -191,8 +191,14 @@ in
           };
           git_panel.dock = "left";
 
+          ui_font_family = "FiraCode Nerd Font Mono";
           ui_font_size = 16;
+          buffer_font_family = "FiraCode Nerd Font Mono";
           buffer_font_size = 16;
+          terminal = {
+            font_family = "FiraCode Nerd Font Mono";
+            font_size = 16;
+          };
           theme = {
             mode = "dark";
             light = "One Light";

@@ -40,6 +40,12 @@ in
     "workbench.colorTheme" = "Tokyo Night Storm";
     "workbench.preferredDarkColorTheme" = "Tokyo Night Storm";
     "window.autoDetectColorScheme" = false;
+    "editor.fontSize" = 16;
+    "editor.fontFamily" = "FiraCode Nerd Font Mono";
+    "editor.fontLigatures" = true;
+    "terminal.integrated.fontSize" = 16;
+    "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
+    "terminal.integrated.fontLigatures.enabled" = true;
   };
 
   # HM fastfetch replaces the whole config — modules must be explicit.

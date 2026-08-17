@@ -34,11 +34,11 @@ let
     "browser.sessionstore.privacy_level" = 0;
   };
 
-  # Vertical tabs + collapsed strip that expands on hover (LibreWolf 153+).
+  # Vertical tabs without expand-on-hover (LibreWolf 153+).
   tabSettings = {
     "sidebar.verticalTabs" = true;
-    "sidebar.visibility" = "expand-on-hover";
-    "sidebar.expandOnHover" = true;
+    "sidebar.visibility" = "always-show";
+    "sidebar.expandOnHover" = false;
     "browser.ctrlTab.sortByRecentlyUsed" = true;
     "browser.toolbars.bookmarks.visibility" = "newtab";
   };
