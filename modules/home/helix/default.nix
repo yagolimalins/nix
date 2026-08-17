@@ -367,18 +367,6 @@ let
             i = "goto_implementation";
             y = "goto_type_definition";
           };
-        "," = {
-          d = "goto_definition";
-          r = "goto_reference";
-          i = "goto_implementation";
-          t = "goto_type_definition";
-          a = "code_action";
-          n = "goto_next_diag";
-          p = "goto_prev_diag";
-          h = "hover";
-          s = "symbol_picker";
-          "/" = "global_search";
-        };
         z = viewMode;
         Z = viewMode;
         "C-w" = windowMode;
