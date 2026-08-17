@@ -78,7 +78,7 @@ let
       border: 1px solid ${palette.border};
       border-radius: 5px;
       color: ${palette.text};
-      font-size: 13px;
+      font-size: 14px;
       font-family: "FiraCode Nerd Font Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
     }
     #mpris.paused { color: ${palette.muted}; }
