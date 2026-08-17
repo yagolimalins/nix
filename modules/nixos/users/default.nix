@@ -46,6 +46,10 @@ in
   config = lib.mkIf cfg.enable {
     users.groups.realtime = { };
 
+    security.sudo.extraConfig = ''
+      Defaults timestamp_timeout=-1
+    '';
+
     home-manager.backupFileExtension = "backup";
     home-manager.overwriteBackup = true;
 
