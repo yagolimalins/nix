@@ -75,7 +75,7 @@ install.sh                         bootstrap new hosts
 lib/                               lib.mine.* helpers (collision-checked merge)
   modules.nix                      enable-modules
   packages.nix                     package group names + gating
-  apps.nix                         terminal / Thunar / Yazi launch commands
+  apps.nix                         Thunar / Yazi folder-open commands
   theme.nix                        Tokyo Night Storm palette + hex converters
   host.nix                         dual-monitor layout, Hyprland portal
 systems/common.nix                 shared NixOS mine.* toggles

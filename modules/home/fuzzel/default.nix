@@ -23,7 +23,7 @@ in
         main = {
           font = "FiraCode Nerd Font Mono:size=14";
           dpi-aware = "no";
-          terminal = "terminal";
+          terminal = "kitty";
           layer = "overlay";
           width = 32;
           lines = 10;

@@ -47,7 +47,7 @@ in
   config = lib.mkIf cfg.enable {
     home.sessionVariables = {
       BROWSER = "librewolf";
-      TERMINAL = "terminal";
+      TERMINAL = "kitty";
       EDITOR = "hx";
     };
 
