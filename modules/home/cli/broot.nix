@@ -64,24 +64,9 @@ in
             key = "h";
             execution = ":mode_command";
           }
-          # Stay in the launch dir (project cwd). :parent / first-line Enter / :up_tree
-          # would otherwise walk to $HOME or /.
           {
-            invocation = "parent";
             key = "j";
-            execution = ":focus {initial-root}";
-          }
-          {
-            invocation = "up_tree";
-            execution = ":focus {initial-root}";
-          }
-          {
-            invocation = "focus_root";
-            execution = ":focus {initial-root}";
-          }
-          {
-            invocation = "focus_user_home";
-            execution = ":focus {initial-root}";
+            execution = ":parent";
           }
           {
             key = "k";
