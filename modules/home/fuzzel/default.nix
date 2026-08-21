@@ -21,7 +21,7 @@ in
       enable = true;
       settings = {
         main = {
-          font = "FiraCode Nerd Font Mono:size=14";
+          font = "Inter:size=14";
           dpi-aware = "no";
           terminal = "kitty";
           layer = "overlay";

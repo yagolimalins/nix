@@ -41,10 +41,10 @@ in
     "workbench.preferredDarkColorTheme" = "Tokyo Night Storm";
     "window.autoDetectColorScheme" = false;
     "editor.fontSize" = 16;
-    "editor.fontFamily" = "FiraCode Nerd Font Mono";
+    "editor.fontFamily" = "JetBrainsMono Nerd Font Mono";
     "editor.fontLigatures" = true;
     "terminal.integrated.fontSize" = 16;
-    "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
+    "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono";
     "terminal.integrated.fontLigatures.enabled" = true;
   };
 

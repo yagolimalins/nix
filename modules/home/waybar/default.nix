@@ -25,9 +25,17 @@ let
         ${lib.getExe pkgs.bottom} -b --default_widget_type ${lib.escapeShellArg widget}
     '';
 
+  # Inter has tight side bearings; Mono Nerd icons sit flush against the next
+  # glyph. Pin icons to the proportional symbols face and leave an en space.
+  # Positive rise lifts icons toward Inter digits; negative sat them too low.
+  enSpace = builtins.fromJSON ''"\u2002"'';
+  nfIcon = glyph: "<span face='Symbols Nerd Font' rise='1536'>${glyph}</span>";
+  nf = glyph: "${nfIcon glyph}${enSpace}";
+
   style = ''
     * {
-      font-family: "FiraCode Nerd Font Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", monospace;
+      font-family: "Inter", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", "Symbols Nerd Font", sans-serif;
+      font-feature-settings: "tnum";
       font-size: 14px;
       min-height: 0;
     }
@@ -79,7 +87,7 @@ let
       border-radius: 5px;
       color: ${palette.text};
       font-size: 14px;
-      font-family: "FiraCode Nerd Font Mono", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", sans-serif;
+      font-family: "Inter", "Noto Sans CJK JP", "Noto Sans CJK SC", "Noto Sans CJK TC", "Noto Sans CJK KR", "Symbols Nerd Font", sans-serif;
     }
     #mpris.paused { color: ${palette.muted}; }
 
@@ -223,8 +231,8 @@ in
           };
 
           mpris = {
-            format = "{status_icon} {position} {title} — {artist}";
-            format-paused = "{status_icon} {title} — {artist}";
+            format = "${nf "{status_icon}"}{position} {title} — {artist}";
+            format-paused = "${nf "{status_icon}"}{title} — {artist}";
             format-stopped = "";
             status-icons = {
               playing = "󰐊";
@@ -255,8 +263,8 @@ in
           };
 
           pulseaudio = {
-            format = "{icon} {volume}%";
-            format-muted = "󰸈";
+            format = "${nf "{icon}"}{volume}%";
+            format-muted = nfIcon "󰸈";
             format-icons = {
               default = [
                 "󰕿"
@@ -273,9 +281,9 @@ in
 
           network = {
             interface = "wlp*";
-            format-wifi = "󰤨 {signalStrength}%";
-            format-ethernet = "󰈀";
-            format-disconnected = "󰤭";
+            format-wifi = "${nf "󰤨"}{signalStrength}%";
+            format-ethernet = nfIcon "󰈀";
+            format-disconnected = nfIcon "󰤭";
             tooltip-format-wifi = "{essid}  {ipaddr}";
             tooltip-format-ethernet = "{ifname}  {ipaddr}";
             tooltip-format-disconnected = "Disconnected";
@@ -294,9 +302,9 @@ in
               warning = 30;
               critical = 15;
             };
-            format = "{icon} {capacity}%";
-            format-charging = "󰂄 {capacity}%";
-            format-full = "󰁹";
+            format = "${nf "{icon}"}{capacity}%";
+            format-charging = "${nf "󰂄"}{capacity}%";
+            format-full = nfIcon "󰁹";
             format-icons = [
               "󰂎"
               "󰁺"
@@ -319,9 +327,9 @@ in
               warning = 30;
               critical = 15;
             };
-            format = "{icon} {capacity}%";
-            format-charging = "󰂄 {capacity}%";
-            format-full = "󰁹";
+            format = "${nf "{icon}"}{capacity}%";
+            format-charging = "${nf "󰂄"}{capacity}%";
+            format-full = nfIcon "󰁹";
             format-icons = [
               "󰂎"
               "󰁺"
@@ -340,7 +348,7 @@ in
 
           disk = {
             interval = 30;
-            format = "󰋊 {percentage_used}%";
+            format = "${nf "󰋊"}{percentage_used}%";
             path = "/";
             states = {
               warning = 80;
@@ -351,14 +359,14 @@ in
           };
 
           cpu = {
-            format = "󰻠 {usage}%";
+            format = "${nf "󰻠"}{usage}%";
             interval = 2;
             on-click = "${openBtm "cpu"}";
           };
 
           temperature = {
             thermal-zone = 5;
-            format = "{icon} {temperatureC}°C";
+            format = "${nf "{icon}"}{temperatureC}°C";
             format-icons = [
               "󰜗"
               "󰜗"

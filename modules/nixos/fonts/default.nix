@@ -1,8 +1,8 @@
 #
 # fonts.nix — System fonts
 #
-# Noto for UI/sans-serif, Fira Code Nerd Font Mono for monospace/terminal,
-# Noto CJK + emoji as fallbacks.
+# Inter for Waybar/Fuzzel, Noto for GTK/CJK/emoji, Fira Code + JetBrains
+# Mono Nerd Fonts for terminal/IDEs, Symbols Nerd Font for bar icons.
 #
 {
   config,
@@ -17,16 +17,19 @@ let
 in
 {
   options.${namespace}.fonts.enable =
-    lib.mkEnableOption "system fonts (Noto, Fira Code Nerd Font, CJK)";
+    lib.mkEnableOption "system fonts (Inter, Noto, Nerd Fonts, CJK)";
 
   config = lib.mkIf cfg.enable {
     fonts = {
       enableDefaultPackages = true;
       packages = with pkgs; [
+        inter
         noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-color-emoji
         nerd-fonts.fira-code
+        nerd-fonts.jetbrains-mono
+        nerd-fonts.symbols-only
       ];
       fontconfig.defaultFonts = {
         sansSerif = [
