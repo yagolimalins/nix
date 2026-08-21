@@ -191,6 +191,7 @@ in
         reaper
         qpwgraph
         carla
+        lsp-plugins
         alsa-utils
       ];
     })

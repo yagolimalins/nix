@@ -262,6 +262,9 @@ in
           "center on,  match:class REAPER, match:title Customize menus/toolbars"
           "center on,  match:class REAPER, match:title .*About REAPER.*"
           "center on,  match:class REAPER, match:title Insert Virtual Instrument on New Track..."
+
+          "float on,   match:class lsp-plugins, match:title Plugin launcher"
+          "center on,  match:class lsp-plugins, match:title Plugin launcher"
         ];
       };
     };

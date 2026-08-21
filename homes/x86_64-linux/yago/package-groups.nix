@@ -40,8 +40,8 @@ let
 
     # media
     media = true;
-    creator = false;
-    audio = false;
+    creator = true;
+    audio = true;
   };
 in
 {
