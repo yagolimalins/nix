@@ -56,6 +56,11 @@ let
   waylandSettings = {
     "widget.content.glass" = false;
   };
+
+  fontSettings = {
+    "font.name.sans-serif.x-western" = "Inter";
+    "font.name.sans-serif.x-unicode" = "Inter";
+  };
 in
 {
   options.${namespace}.librewolf = {
@@ -89,7 +94,8 @@ in
           // tabSettings
           // newTabSettings
           // sessionSettings
-          // waylandSettings;
+          // waylandSettings
+          // fontSettings;
       };
     };
   };

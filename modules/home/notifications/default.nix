@@ -21,7 +21,7 @@ in
     services.mako = {
       enable = true;
       settings = {
-        font = "FiraCode Nerd Font Mono 14";
+        font = "Inter 14";
         "background-color" = palette.bg;
         "border-color" = palette.accent;
         "text-color" = palette.text;

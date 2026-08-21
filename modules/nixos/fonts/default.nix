@@ -1,8 +1,9 @@
 #
 # fonts.nix — System fonts
 #
-# Inter for Waybar/Fuzzel, Noto for GTK/CJK/emoji, Fira Code + JetBrains
-# Mono Nerd Fonts for terminal/IDEs, Symbols Nerd Font for bar icons.
+# Inter for UI (GTK/Qt/LibreWolf/Waybar/Fuzzel), Noto CJK/emoji as fallback,
+# Fira Code + JetBrains Mono Nerd Fonts for terminal/IDEs, Symbols Nerd Font
+# for bar icons.
 #
 {
   config,
@@ -33,7 +34,7 @@ in
       ];
       fontconfig.defaultFonts = {
         sansSerif = [
-          "Noto Sans"
+          "Inter"
           "Noto Sans CJK JP"
           "Noto Sans CJK SC"
           "Noto Sans CJK TC"
