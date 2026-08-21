@@ -198,6 +198,19 @@ in
         noDisplay = true;
       };
 
+      # Carla links jack2; pw-jack puts PipeWire's libjack first (same as REAPER).
+      xdg.desktopEntries.carla = {
+        name = "Carla";
+        exec = "pw-jack carla %U";
+        icon = "carla";
+        comment = "Audio plugin host";
+        categories = [
+          "AudioVideo"
+          "Audio"
+        ];
+        mimeType = [ "application/x-carla-project" ];
+      };
+
       home.packages = with pkgs; [
         reaper
         qpwgraph
