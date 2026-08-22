@@ -61,6 +61,11 @@ let
     "font.name.sans-serif.x-western" = "Inter";
     "font.name.sans-serif.x-unicode" = "Inter";
   };
+
+  searchSettings = {
+    "browser.urlbar.placeholderName" = "Google";
+    "browser.urlbar.placeholderName.private" = "Google";
+  };
 in
 {
   options.${namespace}.librewolf = {
@@ -82,11 +87,52 @@ in
     programs.librewolf = {
       enable = true;
 
+      policies = {
+        SearchEngines = {
+          Default = "Google";
+          Add = [ ];
+          Remove = [
+            "Bing"
+            "Amazon.com"
+            "eBay"
+            "Twitter"
+            "Perplexity"
+            "DuckDuckGo Lite"
+            "Searx Belgium"
+            "MetaGer"
+            "Startpage"
+            "Mojeek"
+            "Wikipedia (en)"
+            "Wikipedia (pt)"
+            "Wikipédia (pt)"
+          ];
+        };
+        ExtensionSettings = {
+          "google@search.mozilla.org" = {
+            installation_mode = "allowed";
+          };
+        };
+      };
+
       profiles.default = {
         id = 0;
         name = "default";
         path = cfg.profilePath;
         isDefault = true;
+
+        search = {
+          force = true;
+          default = "google";
+          privateDefault = "google";
+          order = [
+            "google"
+            "ddg"
+          ];
+          engines = {
+            wikipedia.metaData.hidden = true;
+            bing.metaData.hidden = true;
+          };
+        };
 
         settings =
           themeSettings
@@ -95,7 +141,8 @@ in
           // newTabSettings
           // sessionSettings
           // waylandSettings
-          // fontSettings;
+          // fontSettings
+          // searchSettings;
       };
     };
   };
