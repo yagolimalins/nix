@@ -34,11 +34,8 @@ let
     "browser.sessionstore.privacy_level" = 0;
   };
 
-  # Vertical tabs without expand-on-hover (LibreWolf 153+).
   tabSettings = {
-    "sidebar.verticalTabs" = true;
-    "sidebar.visibility" = "always-show";
-    "sidebar.expandOnHover" = false;
+    "sidebar.verticalTabs" = false;
     "browser.ctrlTab.sortByRecentlyUsed" = true;
     "browser.toolbars.bookmarks.visibility" = "newtab";
   };
