@@ -73,6 +73,8 @@ in
       enable = true;
       settings = {
         add_newline = false;
+        # Home and other large trees exceed the default 30ms directory scan.
+        scan_timeout = 100;
 
         directory = {
           style = "bold ${palette.accent}";
