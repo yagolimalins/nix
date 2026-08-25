@@ -26,6 +26,8 @@ in
         btop
         bottom
         fastfetch
+        s-tui
+        stress-ng
       ];
     })
   ];
