@@ -216,7 +216,10 @@ in
             };
             completion.postfix.enable = true;
             rust.analyzerTargetDir = true;
-            procMacro.enable = true;
+            procMacro = {
+              enable = true;
+              attributes.enable = true;
+            };
             cargo = {
               buildScripts.enable = true;
               allFeatures = true;
