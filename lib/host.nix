@@ -25,6 +25,39 @@
       };
     };
 
+  # Match the external panel by EDID description so connector names (HDMI-A-2 vs
+  # DP-3 on a USB-C dock) do not break layout or workspace assignment.
+  dualMonitorHostModuleDesc =
+    monitorDesc:
+    {
+      namespace,
+      ...
+    }:
+    let
+      monitorId = "desc:${monitorDesc}";
+    in
+    {
+      ${namespace}.host = {
+        monitors = [
+          "${monitorId}, 2560x1080@60, 0x0, 1"
+          "eDP-1, 1920x1080@60, 320x1080, 1"
+        ];
+        workspaces =
+          map (
+            n:
+            if n == 1 then
+              "1, monitor:${monitorId}, default:true"
+            else
+              "${toString n}, monitor:${monitorId}"
+          ) (lib.range 1 9)
+          ++ [ "10, monitor:eDP-1, default:true" ];
+        # USB-C docks (e.g. ThinkPad 40AJ) enumerate DisplayPort after link-up.
+        hyprExecOnce = [
+          "bash -c 'sleep 4; hyprctl reload'"
+        ];
+      };
+    };
+
   # Stock gtk.portal is UseIn=gnome only; Hyprland sessions need this sibling.
   mkGtkHyprlandPortal =
     pkgs:

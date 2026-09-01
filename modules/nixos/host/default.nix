@@ -14,5 +14,13 @@
       default = [ ];
       description = "Hyprland `workspace=` lines (empty = Hyprland defaults).";
     };
+
+    hyprExecOnce = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Extra Hyprland `exec-once` lines for this host (e.g. delayed monitor relayout).
+      '';
+    };
   };
 }

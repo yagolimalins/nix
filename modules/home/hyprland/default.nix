@@ -48,16 +48,18 @@ in
         workspace = hostCfg.workspaces;
 
         # Session bootstrap only — feature modules append their own exec-once.
-        exec-once = [
-          "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
-          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
-          "bash -c 'systemctl --user start xdg-desktop-portal-gtk.service; sleep 1; systemctl --user restart xdg-desktop-portal.service'"
-          "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
-          "swaybg -i ${userCfg.wallpaper} -m fill"
-          "fcitx5 -d"
-          "nm-applet --indicator"
-          "blueman-applet"
-        ];
+        exec-once =
+          [
+            "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+            "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP DISPLAY"
+            "bash -c 'systemctl --user start xdg-desktop-portal-gtk.service; sleep 1; systemctl --user restart xdg-desktop-portal.service'"
+            "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
+            "swaybg -i ${userCfg.wallpaper} -m fill"
+            "fcitx5 -d"
+            "nm-applet --indicator"
+            "blueman-applet"
+          ]
+          ++ hostCfg.hyprExecOnce;
 
         env = [
           "QT_IM_MODULE,fcitx"
