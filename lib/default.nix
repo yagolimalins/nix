@@ -8,6 +8,7 @@ let
     (import ./apps.nix { inherit lib; })
     (import ./theme.nix { inherit lib; })
     (import ./host.nix { inherit lib; })
+    (import ./audio.nix { inherit lib; })
   ];
 in
 # Plain `//` would let a redefined helper silently shadow an earlier one.

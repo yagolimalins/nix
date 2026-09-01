@@ -51,9 +51,10 @@
               "${toString n}, monitor:${monitorId}"
           ) (lib.range 1 9)
           ++ [ "10, monitor:eDP-1, default:true" ];
-        # USB-C docks (e.g. ThinkPad 40AJ) enumerate DisplayPort after link-up.
+        # USB-C docks enumerate DisplayPort after link-up; pick HDMI monitor audio.
         hyprExecOnce = [
           "bash -c 'sleep 4; hyprctl reload'"
+          "bash -c 'sleep 6; switch-usb-audio'"
         ];
       };
     };

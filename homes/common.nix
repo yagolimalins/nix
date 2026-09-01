@@ -25,6 +25,7 @@
       "input-remapper"
     ])
     {
+      usbAudio.enable = true;
       user.wallpaper = "${pkgs.nixos-artwork.wallpapers.binary-blue}/share/backgrounds/nixos/nix-wallpaper-binary-blue.png";
     }
   ];

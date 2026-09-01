@@ -111,21 +111,124 @@ in
         ];
       };
 
-      wireplumber.extraConfig."11-usb-audio-priority" = {
+      wireplumber.extraConfig."12-usb-interface-priority" = {
         "monitor.alsa.rules" = [
           {
-            matches = [ { "device.name" = "~alsa_card.usb-.*"; } ];
+            matches = [
+              { "device.bus" = "usb"; }
+              { "device.name" = "~alsa_card.usb-.*"; }
+            ];
             actions.update-props = {
-              "device.profile" = "pro-audio";
+              "priority.session" = 2300;
+              "priority.driver" = 2300;
+            };
+          }
+          {
+            matches = [ { "node.name" = "~alsa_output.usb-.*"; } ];
+            actions.update-props = {
+              "priority.session" = 2300;
+              "priority.driver" = 2300;
+            };
+          }
+          {
+            matches = [ { "node.name" = "~alsa_input.usb-.*"; } ];
+            actions.update-props = {
+              "priority.session" = 2300;
+              "priority.driver" = 2300;
+            };
+          }
+        ];
+      };
+
+      # M-Vave BlackBox (Jieli 4c4a:c755) — ALSA reports "USB Composite Device".
+      wireplumber.extraConfig."12-mvave-blackbox" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [
+              { "device.vendor.id" = "0x4c4a"; }
+              { "device.product.id" = "0xc755"; }
+            ];
+            actions.update-props = {
+              "device.description" = "M-Vave BlackBox";
+              "device.nick" = "M-Vave BlackBox";
             };
           }
           {
             matches = [
+              { "device.vendor.id" = "0x4c4a"; }
+              { "device.product.id" = "0xc755"; }
               { "node.name" = "~alsa_output.usb-.*"; }
+            ];
+            actions.update-props = {
+              "node.description" = "M-Vave BlackBox";
+              "node.nick" = "M-Vave BlackBox";
+            };
+          }
+          {
+            matches = [
+              { "device.vendor.id" = "0x4c4a"; }
+              { "device.product.id" = "0xc755"; }
               { "node.name" = "~alsa_input.usb-.*"; }
             ];
             actions.update-props = {
-              "priority.session" = 2000;
+              "node.description" = "M-Vave BlackBox";
+              "node.nick" = "M-Vave BlackBox";
+            };
+          }
+        ];
+      };
+
+      # After 12-usb-interface-priority — dock must stay below HDMI/interfaces.
+      wireplumber.extraConfig."14-thinkpad-dock-audio" = {
+        "monitor.alsa.rules" = [
+          {
+            # 40AJ dock USB audio is the analog jack; monitor speakers use Intel HDMI.
+            matches = [
+              { "device.vendor.id" = "0x17ef"; }
+              { "device.product.id" = "0x306f"; }
+            ];
+            actions.update-props = {
+              "device.profile" = "output:analog-stereo+input:analog-stereo";
+              "priority.driver" = 100;
+              "priority.session" = 100;
+            };
+          }
+          {
+            matches = [ { "node.description" = "ThinkPad Dock USB Audio"; } ];
+            actions.update-props = {
+              "priority.session" = 100;
+              "priority.driver" = 100;
+            };
+          }
+        ];
+      };
+
+      wireplumber.extraConfig."11-pci-acp-auto-profile" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [ { "device.name" = "~alsa_card.pci-.*"; } ];
+            actions.update-props = {
+              "api.acp.auto-profile" = true;
+              "api.acp.auto-port" = true;
+            };
+          }
+        ];
+      };
+
+      wireplumber.extraConfig."15-stream-follow-default" = {
+        wireplumber.settings = {
+          linking.follow-default-target = true;
+          linking.allow-moving-streams = true;
+        };
+      };
+
+      wireplumber.extraConfig."13-hdmi-output-priority" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [ { "node.name" = "~alsa_output.pci.*hdmi.*"; } ];
+            actions.update-props = {
+              "priority.session" = 2100;
+              "priority.driver" = 2100;
             };
           }
         ];
