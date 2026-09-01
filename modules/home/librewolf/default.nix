@@ -87,7 +87,16 @@ in
       policies = {
         SearchEngines = {
           Default = "Google";
-          Add = [ ];
+          Add = [
+            {
+              Name = "Google";
+              URLTemplate = "https://www.google.com/search?q={searchTerms}";
+              Method = "GET";
+              IconURL = "https://www.google.com/favicon.ico";
+              Alias = "@g";
+              SuggestURLTemplate = "https://www.google.com/complete/search?client=firefox&q={searchTerms}";
+            }
+          ];
           Remove = [
             "Bing"
             "Amazon.com"
@@ -95,6 +104,7 @@ in
             "Twitter"
             "Perplexity"
             "DuckDuckGo Lite"
+            "DuckDuckGo No-AI"
             "Searx Belgium"
             "MetaGer"
             "Startpage"
@@ -126,6 +136,23 @@ in
             "ddg"
           ];
           engines = {
+            # Custom, not app-provided — LibreWolf no longer ships Google.
+            google = {
+              name = "Google";
+              urls = [
+                {
+                  template = "https://www.google.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              icon = "https://www.google.com/favicon.ico";
+              definedAliases = [ "@g" ];
+            };
             wikipedia.metaData.hidden = true;
             bing.metaData.hidden = true;
           };
