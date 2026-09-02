@@ -33,6 +33,7 @@ in
       xh
       duf
       dust
+      ngrok
     ];
   };
 }
