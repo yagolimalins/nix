@@ -2,7 +2,7 @@
 # virtualisation.nix — Containers, VMs and local AI
 #
 # Docker as the container runtime (also the OCI-containers backend used by
-# postgresql.nix), libvirt/QEMU/KVM + virt-manager for VMs, plus a local
+# postgresql.nix and sqlserver.nix), libvirt/QEMU/KVM + virt-manager for VMs, plus a local
 # Ollama service. Docker + Postgres both start at boot. Ollama: start with
 # `sudo systemctl start ollama`.
 #

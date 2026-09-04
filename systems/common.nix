@@ -18,6 +18,7 @@
     "nh"
     "nix"
     "postgresql"
+    "sqlserver"
     "power"
     "printing"
     "programs"
