@@ -24,7 +24,7 @@ let
     jvm = "JVM tooling";
     rust = "Rust toolchain (stable + wasm32-unknown-unknown + trunk)";
     dioxus = "Dioxus CLI + web/desktop native deps";
-    tauri = "Tauri CLI, create-tauri-app, + Linux WebKit/GTK deps";
+    tauri = "Tauri CLI (cargo-tauri) + Linux WebKit/GTK deps";
     gtk = "GTK4/Libadwaita (Relm4, …)";
     dotnet = ".NET SDK";
 

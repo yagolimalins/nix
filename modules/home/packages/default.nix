@@ -2,7 +2,7 @@
 # `enable` is set; override toggles in homes/x86_64-linux/<user>/package-groups.nix.
 #
 # Group names and descriptions: lib.mine.packageGroups (lib/packages.nix).
-# Custom flake derivations (dioxus-cli, numix-square-storm, …): top-level packages/.
+# Custom flake derivations (numix-square-storm, …): top-level packages/.
 {
   config,
   lib,

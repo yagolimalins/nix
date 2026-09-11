@@ -22,30 +22,6 @@ let
     CLAP_PATH = "${profileLib}/clap:${home}/.clap:/usr/lib/clap:/usr/local/lib/clap";
     LADSPA_PATH = "${profileLib}/ladspa:${home}/.ladspa:/usr/lib/ladspa:/usr/local/lib/ladspa";
   };
-
-  # nixos-26.05 ships 0.23.0, which drops Spotify refresh tokens
-  # (https://github.com/aome510/spotify-player/issues/1040). Pin 0.24.1.
-  spotify-player = pkgs.spotify-player.overrideAttrs (
-    old:
-    let
-      version = "0.24.1";
-      src = pkgs.fetchFromGitHub {
-        owner = "aome510";
-        repo = "spotify-player";
-        tag = "v${version}";
-        hash = "sha256-+GADmRl4XMwV8TfYZjEeyKDDfda3bDPzeerhYryX6vA=";
-      };
-      cargoHash = "sha256-CSZ5sZ+d7Jhi43ipaWXKupYPFgWCbCx4RMTQN8emu9o=";
-    in
-    {
-      inherit version src cargoHash;
-      cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
-        inherit src;
-        name = "${old.pname}-${version}";
-        hash = cargoHash;
-      };
-    }
-  );
 in
 {
   config = lib.mkMerge [
@@ -57,7 +33,6 @@ in
 
       programs.spotify-player = {
         enable = true;
-        package = spotify-player;
         settings = {
           theme = "mine";
           border_type = "Rounded";

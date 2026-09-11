@@ -350,11 +350,10 @@ in
     ))
 
     (lib.mkIf (on "dioxus") {
-      # Local dx 0.7.10 + wasm-bindgen 0.2.127 (nixpkgs dx is 0.7.9 / older bindgen).
       # dioxus-cli and deno both ship `bin/dx` — prefer Dioxus.
       home.packages = [
-        (lib.hiPrio pkgs.${namespace}.dioxus-cli)
-        (lib.hiPrio pkgs.${namespace}.wasm-bindgen-cli_0_2_127)
+        (lib.hiPrio pkgs.dioxus-cli)
+        pkgs.wasm-bindgen-cli
         pkgs.binaryen
         pkgs.lld
         pkgs.gsettings-desktop-schemas
@@ -374,7 +373,6 @@ in
       # putting librsvg in home.packages conflicts with gdk-pixbuf's loaders.cache.
       home.packages = [
         pkgs.cargo-tauri
-        pkgs.${namespace}.create-tauri-app
         pkgs.xdotool
         pkgs.gsettings-desktop-schemas
       ];
