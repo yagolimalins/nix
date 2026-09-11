@@ -31,7 +31,7 @@ let
         export XCURSOR_SIZE=${toString cursor.size}
         export XDG_DATA_DIRS="${gtkTheme}/share:${iconTheme}/share''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
         if [ "$(id -u)" -ne 0 ]; then
-          ${pkgs.xorg.xhost}/bin/xhost +SI:localuser:root >/dev/null 2>&1 || true
+          ${pkgs.xhost}/bin/xhost +SI:localuser:root >/dev/null 2>&1 || true
           self=$(${pkgs.coreutils}/bin/readlink -f "$0")
           exec ${lib.getExe' pkgs.polkit "pkexec"} env \
             DISPLAY="''${DISPLAY:-}" \
