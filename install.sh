@@ -8,7 +8,8 @@
 #   2. Generate hardware-configuration.nix (strips Docker/Podman overlays)
 #   3. Scaffold systems/<arch>/<host>/ and homes/<arch>/<user>/ if missing
 #   4. Enable flakes; create Secure Boot keys when appropriate
-#   5. nixos-rebuild switch --flake .#<host>
+#   5. Clear the installing user's nix profile (avoids HM activation clashes)
+#   6. nixos-rebuild switch --flake .#<host>
 #
 # What it does NOT do:
 #   - Rewrite an existing systems/.../default.nix (edit boot options yourself)
@@ -533,9 +534,25 @@ fi
 
 require_boot_config "$DEFAULT_FILE"
 
+clear_user_nix_profile() {
+    local user="$1"
+    info "Clearing Nix user profile for ${BOLD}${user}${RESET} (Home Manager will own it)..."
+    if sudo -u "$user" -H env NIX_CONFIG="${NIX_CONFIG:-}" nix profile remove --all; then
+        success "Cleared nix profile."
+        return
+    fi
+    if sudo -u "$user" -H nix-env -e '*'; then
+        success "Cleared nix-env profile."
+        return
+    fi
+    warn "No user Nix profile to clear."
+}
+
 # ── 6. Rebuild ───────────────────────────────────────────────────────────────
 
 step "6 — Apply configuration"
+
+clear_user_nix_profile "$OWNER_USER"
 
 info "sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake .#${HOST}"
 sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake ".#${HOST}"
