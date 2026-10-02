@@ -4,6 +4,7 @@
 {
   config,
   lib,
+  pkgs,
   namespace,
   ...
 }:
@@ -16,5 +17,13 @@ in
 
   config = lib.mkIf cfg.enable {
     services.printing.enable = true;
+    services.printing.drivers = [ pkgs.hplip ];
+    programs.system-config-printer.enable = true;
+
+    services.avahi = {
+      enable = true;
+      nssmdns4 = true;
+      openFirewall = true;
+    };
   };
 }
