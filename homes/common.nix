@@ -16,6 +16,7 @@
       "notifications"
       "lockscreen"
       "nightshift"
+      "nh"
       "thunar"
       "theme"
       "helix"
