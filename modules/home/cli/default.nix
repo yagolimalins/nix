@@ -34,6 +34,7 @@ in
       duf
       dust
       ngrok
+      plantuml
     ];
   };
 }
