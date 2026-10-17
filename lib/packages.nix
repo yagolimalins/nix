@@ -18,7 +18,6 @@ let
     cli = "CLI essentials (fzf, bat, broot, yazi, …)";
     c = "C toolchain (gcc)";
     python = "Python tooling (uv)";
-    ruby = "Ruby and Rails";
     ai = "AI CLI tools";
     vcs = "version control";
     js = "JavaScript / TypeScript";

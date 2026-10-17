@@ -260,14 +260,6 @@ in
       home.packages = [ pkgs.uv ];
     })
 
-    (lib.mkIf (on "ruby") {
-      # ruby already ships bundler; a second bundler collides in buildEnv.
-      home.packages = with pkgs; [
-        ruby
-        rubyPackages.rails
-      ];
-    })
-
     (lib.mkIf (on "ai") {
       home.packages = [
         pkgs.claude-code
