@@ -79,6 +79,7 @@ package_group_toggle_lines() {
     cli = true;
     c = true;
     python = true;
+    ruby = true;
     ai = true;
     vcs = true;
     js = true;

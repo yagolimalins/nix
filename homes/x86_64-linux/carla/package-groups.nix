@@ -17,6 +17,7 @@ let
     cli = true;
     c = true;
     python = true;
+    ruby = true;
     ai = true;
     vcs = true;
     js = true;
