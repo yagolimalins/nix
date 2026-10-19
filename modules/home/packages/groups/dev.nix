@@ -315,6 +315,7 @@ in
           trunk
           sqlx-cli
           sea-orm-cli
+          loco
           pkg-config
           openssl
           mold
