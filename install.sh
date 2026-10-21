@@ -88,6 +88,7 @@ package_group_toggle_lines() {
     tauri = true;
     gtk = true;
     dotnet = true;
+    go = true;
     databases = true;
     api = true;
     office = true;

@@ -27,6 +27,7 @@ let
     tauri = "Tauri CLI (cargo-tauri) + Linux WebKit/GTK deps";
     gtk = "GTK4/Libadwaita (Relm4, …)";
     dotnet = ".NET SDK";
+    go = "Go toolchain";
 
     databases = "database GUIs";
     api = "API clients";

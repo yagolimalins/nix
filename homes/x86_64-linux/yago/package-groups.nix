@@ -26,6 +26,7 @@ let
     tauri = true;
     gtk = true;
     dotnet = true;
+    go = true;
 
     # apps
     databases = true;

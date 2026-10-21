@@ -394,6 +394,10 @@ in
       ];
     })
 
+    (lib.mkIf (on "go") {
+      home.packages = [ pkgs.go ];
+    })
+
     # Single assignments so rust/gtk/wayland/dioxus/tauri groups don't clash under mkMerge.
     (lib.mkIf
       (cfg.enable && (cfg.rust.enable || cfg.gtk.enable || cfg.dioxus.enable || cfg.tauri.enable))
