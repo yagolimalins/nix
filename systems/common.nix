@@ -3,6 +3,7 @@
 
 {
   ${namespace} = lib.${namespace}.enable-modules [
+    "adb"
     "audio"
     "bluetooth"
     "boot"
