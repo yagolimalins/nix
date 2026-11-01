@@ -64,13 +64,6 @@ in
           before_sleep_cmd = "hyprlock";
           after_sleep_cmd = "hyprctl dispatch dpms on";
         };
-
-        listener = [
-          {
-            timeout = 300;
-            on-timeout = "hyprlock";
-          }
-        ];
       };
     };
   };
