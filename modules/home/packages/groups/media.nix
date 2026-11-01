@@ -33,9 +33,11 @@ in
 
       programs.spotify-player = {
         enable = true;
+        package = pkgs.${namespace}.spotify-player;
         settings = {
           theme = "mine";
           border_type = "Rounded";
+          login_redirect_uri = "http://127.0.0.1:8989/ncspot_login";
         };
         themes = [
           {
