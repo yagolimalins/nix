@@ -80,6 +80,7 @@ in
         zoom-us
         discord
         telegram-desktop
+        anydesk
       ];
     })
   ];
