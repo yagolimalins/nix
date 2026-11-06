@@ -25,33 +25,12 @@ in
 {
   config = lib.mkMerge [
     (lib.mkIf (on "media") {
-      home.packages = with pkgs; [
-        vlc
-        popcorntime
-        pkgs.${namespace}.spotifast
+      home.packages = [
+        pkgs.vlc
+        pkgs.popcorntime
+        # Official client, patched with the pinyin lyrics extension.
+        pkgs.${namespace}.spotify
       ];
-
-      # Same entry the package ships, but with the Spotify icon instead of spotifast's own.
-      xdg.desktopEntries.spotifast = {
-        name = "Spotifast";
-        genericName = "Music Player";
-        comment = "A native Spotify client";
-        exec = "spotifast %u";
-        icon = "spotify";
-        terminal = false;
-        startupNotify = true;
-        categories = [
-          "AudioVideo"
-          "Audio"
-          "Player"
-          "Music"
-        ];
-        mimeType = [ "x-scheme-handler/spotify" ];
-        settings = {
-          StartupWMClass = "spotifast";
-          Keywords = "spotify;music;player;streaming;spotifast;";
-        };
-      };
     })
 
     (lib.mkIf (on "creator") {
