@@ -2,7 +2,7 @@
 # usb-audio.nix — USB interface hotplug routing (Home Manager)
 #
 # Watches ALSA card changes and switches PipeWire defaults to a non-dock USB
-# interface, moving active playback streams (LibreWolf, spotify_player, etc.).
+# interface, moving active playback streams (LibreWolf, spotifast, etc.).
 #
 {
   config,

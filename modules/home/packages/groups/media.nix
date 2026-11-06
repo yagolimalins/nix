@@ -10,7 +10,6 @@
 let
   cfg = config.${namespace}.packages;
   on = lib.${namespace}.packageGroupOn cfg;
-  p = lib.${namespace}.palette;
   profileLib = "${config.home.profileDirectory}/lib";
   home = config.home.homeDirectory;
 
@@ -29,124 +28,29 @@ in
       home.packages = with pkgs; [
         vlc
         popcorntime
+        pkgs.${namespace}.spotifast
       ];
 
-      programs.spotify-player = {
-        enable = true;
-        package = pkgs.${namespace}.spotify-player;
-        settings = {
-          theme = "mine";
-          border_type = "Rounded";
-          login_redirect_uri = "http://127.0.0.1:8989/ncspot_login";
-        };
-        themes = [
-          {
-            name = "mine";
-            palette = {
-              background = p.bg;
-              foreground = p.text;
-              black = p.border;
-              red = p.urgent;
-              green = p.ok;
-              yellow = p.warning;
-              blue = p.accent;
-              magenta = p.purple;
-              cyan = p.cyan;
-              white = p.text;
-              bright_black = p.muted;
-              bright_red = p.urgent;
-              bright_green = p.ok;
-              bright_yellow = p.warning;
-              bright_blue = p.accent;
-              bright_magenta = p.purple;
-              bright_cyan = p.cyan;
-              bright_white = p.text;
-            };
-            component_style = {
-              block_title = {
-                fg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-              border = {
-                fg = p.border;
-              };
-              playback_status = {
-                fg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-              playback_track = {
-                fg = p.text;
-                modifiers = [ "Bold" ];
-              };
-              playback_artists = {
-                fg = p.muted;
-              };
-              playback_album = {
-                fg = p.warning;
-              };
-              playback_genres = {
-                fg = p.muted;
-                modifiers = [ "Italic" ];
-              };
-              playback_metadata = {
-                fg = p.muted;
-              };
-              playback_progress_bar = {
-                fg = p.bg;
-                bg = p.accent;
-              };
-              playback_progress_bar_unfilled = {
-                bg = p.surface;
-              };
-              current_playing = {
-                fg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-              page_desc = {
-                fg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-              playlist_desc = {
-                fg = p.muted;
-                modifiers = [ "Dim" ];
-              };
-              table_header = {
-                fg = p.muted;
-              };
-              selection = {
-                fg = p.onAccent;
-                bg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-              secondary_row = {
-                bg = p.surface;
-              };
-              like = {
-                fg = p.urgent;
-              };
-              lyrics_played = {
-                fg = p.muted;
-                modifiers = [ "Dim" ];
-              };
-              lyrics_playing = {
-                fg = p.accent;
-                modifiers = [ "Bold" ];
-              };
-            };
-          }
-        ];
-      };
-
-      xdg.desktopEntries.spotify-player = {
-        name = "Spotify";
-        exec = "kitty spotify_player";
+      # Same entry the package ships, but with the Spotify icon instead of spotifast's own.
+      xdg.desktopEntries.spotifast = {
+        name = "Spotifast";
+        genericName = "Music Player";
+        comment = "A native Spotify client";
+        exec = "spotifast %u";
         icon = "spotify";
-        comment = "Terminal Spotify client";
+        terminal = false;
+        startupNotify = true;
         categories = [
+          "AudioVideo"
           "Audio"
-          "Music"
           "Player"
+          "Music"
         ];
+        mimeType = [ "x-scheme-handler/spotify" ];
+        settings = {
+          StartupWMClass = "spotifast";
+          Keywords = "spotify;music;player;streaming;spotifast;";
+        };
       };
     })
 

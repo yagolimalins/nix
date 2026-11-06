@@ -39,7 +39,7 @@ let
     mail = "mail client";
     communication = "communication apps";
 
-    media = "media playback (VLC, Popcorn Time, spotify-player)";
+    media = "media playback (VLC, Popcorn Time, spotifast)";
     creator = "recording / editing";
     audio = "audio production";
   };
