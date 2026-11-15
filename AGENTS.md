@@ -34,7 +34,7 @@ Put a new helper in the file matching its concern; no manual wiring is needed.
 | Package group names, `packageGroupOn` | [lib/packages.nix](lib/packages.nix) |
 | Terminal / Thunar / Yazi launch commands | [lib/apps.nix](lib/apps.nix) |
 | Palette and hex converters | [lib/theme.nix](lib/theme.nix) |
-| Monitor layout, Hyprland portal | [lib/host.nix](lib/host.nix) |
+| Monitor layout (Umbriel outputs) | [lib/host.nix](lib/host.nix) |
 
 Everything else:
 

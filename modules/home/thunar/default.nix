@@ -32,7 +32,7 @@ in
       };
     };
 
-    wayland.windowManager.hyprland.settings.exec-once = [
+    ${namespace}.umbriel.extraAutostart = [
       "${hideRecentScript}"
       "tumblerd"
     ];

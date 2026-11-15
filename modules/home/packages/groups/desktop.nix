@@ -15,22 +15,15 @@ in
   config = lib.mkMerge [
     (lib.mkIf (on "wayland") {
       home.packages = with pkgs; [
-        playerctl
         brightnessctl
-        networkmanagerapplet
-        blueman
         pwvucontrol
         seahorse
         tumbler
       ];
-
-      xdg.dataFile."icons/hicolor/scalable/apps/blueman-device.svg".source =
-        "${pkgs.blueman}/share/icons/hicolor/scalable/devices/blueman-device.svg";
     })
 
     (lib.mkIf (on "clipboard") {
       home.packages = with pkgs; [
-        grimblast
         wl-clipboard
       ];
     })

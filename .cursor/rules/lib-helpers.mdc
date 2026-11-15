@@ -15,7 +15,7 @@ its concern — no manual wiring, no new import to register.
 | Package group names, `packageGroupOn`, toggles | `packages.nix` |
 | Terminal / Thunar / Yazi launch commands | `apps.nix` |
 | Palette, hex converters, theme string builders | `theme.nix` |
-| Monitor layout, Hyprland portal | `host.nix` |
+| Monitor layout (Umbriel outputs) | `host.nix` |
 
 ## Rules
 
@@ -34,6 +34,6 @@ packages = import ${repo_root}/lib/packages.nix { lib = pkgs.lib; };
   Changing the signature or dropping `packageGroupNames` breaks fresh installs silently, because
   the script falls back to a hardcoded group list.
 
-- **Use the existing hex converters** from `theme.nix` — `hexBare`, `hexToRgba`, `hexToRgbFunc`.
+- **Use the existing hex converters** from `theme.nix` — `hexBare`, `hexToRgbFunc`.
   Do not inline `builtins.substring` or `lib.removePrefix` on palette colors in a module.
 - Do not add a helper with no consumer. Dead helpers were removed deliberately.

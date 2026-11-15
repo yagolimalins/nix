@@ -6,8 +6,8 @@ alwaysApply: false
 
 # Module conventions
 
-One concern per directory. **Folder name must equal the option name** — `modules/home/fuzzel/`
-declares `mine.fuzzel.enable`. Enable it in `systems/common.nix` (NixOS) or `homes/common.nix`
+One concern per directory. **Folder name must equal the option name** — `modules/home/kitty/`
+declares `mine.kitty.enable`. Enable it in `systems/common.nix` (NixOS) or `homes/common.nix`
 (Home Manager); a module with no toggle there is dead code.
 
 ## Skeleton

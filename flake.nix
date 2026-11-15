@@ -7,6 +7,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Noctalia ecosystem — no nixpkgs.follows so Cachix hashes match.
+    noctalia.url = "github:noctalia-dev/noctalia/cachix";
+    noctalia-greeter.url = "github:noctalia-dev/noctalia-greeter";
+    umbriel.url = "github:noctalia-dev/umbriel/cachix";
+
     snowfall-lib = {
       url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -49,9 +54,15 @@
 
       systems.modules.nixos = [
         inputs.lanzaboote.nixosModules.lanzaboote
+        inputs.umbriel.nixosModules.default
+        inputs.noctalia-greeter.nixosModules.default
         ./systems/common.nix
       ];
-      homes.modules = [ ./homes/common.nix ];
+      homes.modules = [
+        inputs.umbriel.homeModules.default
+        inputs.noctalia.homeModules.default
+        ./homes/common.nix
+      ];
 
       # Replace Snowfall's default alejandra formatter.
       outputs-builder = channels: {

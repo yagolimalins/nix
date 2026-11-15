@@ -81,10 +81,6 @@ in
 
       home.sessionVariables = pluginPathVars;
 
-      wayland.windowManager.hyprland.settings.env = lib.mapAttrsToList (
-        name: value: "${name},${value}"
-      ) pluginPathVars;
-
       # Carla and REAPER scan ~/.lv2 ~/.vst ~/.vst3, not the Nix profile.
       home.file = {
         ".lv2/lsp-plugins.lv2".source = "${pkgs.lsp-plugins}/lib/lv2/lsp-plugins.lv2";

@@ -1,6 +1,6 @@
 # ❄ NixOS Multi-Host Configuration
 
-Personal [NixOS](https://nixos.org) flake with [Home Manager](https://github.com/nix-community/home-manager) on [Snowfall Lib](https://snowfall.org). NixOS 26.05, Hyprland, Tokyo Night Storm theme. Namespace: `mine`.
+Personal [NixOS](https://nixos.org) flake with [Home Manager](https://github.com/nix-community/home-manager) on [Snowfall Lib](https://snowfall.org). NixOS 26.05, Umbriel + Noctalia, Tokyo Night Storm app theme. Namespace: `mine`.
 
 One rebuild applies system and user config together — no separate `home-manager switch`.
 
@@ -24,7 +24,6 @@ Toggle installed software in `homes/x86_64-linux/<user>/package-groups.nix`. Gro
 ## Screenshots
 
 ![Desktop](screenshots/desktop.png)
-![Fuzzel](screenshots/fuzzel.png)
 ![btop](screenshots/btop.png)
 ![Spotify](screenshots/spotify.png)
 
@@ -77,7 +76,7 @@ lib/                               lib.mine.* helpers (collision-checked merge)
   packages.nix                     package group names + gating
   apps.nix                         Thunar / Yazi folder-open commands
   theme.nix                        Tokyo Night Storm palette + hex converters
-  host.nix                         dual-monitor layout, Hyprland portal
+  host.nix                         dual-monitor Umbriel outputs
 systems/common.nix                 shared NixOS mine.* toggles
 systems/x86_64-linux/<host>/       hostname, hardware, mine.host facts
 homes/common.nix                   shared HM mine.* toggles

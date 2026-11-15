@@ -1,7 +1,7 @@
 #
-# desktop — Session integration (not the WM; see display + hyprland)
+# desktop — Session integration (not the WM; see display + umbriel)
 #
-# Power stats, GVFS/Thunar system bits, GNOME keyring (tuigreet unlock),
+# Power stats, GVFS/Thunar system bits, GNOME keyring (greetd unlock),
 # dconf, archives, GParted.
 #
 {
@@ -68,7 +68,7 @@ in
     services.gvfs.enable = true; # trash, MTP, network mounts for Thunar
 
     services.gnome.gnome-keyring.enable = true;
-    security.pam.services.tuigreet.enableGnomeKeyring = true;
+    security.pam.services.greetd.enableGnomeKeyring = true;
 
     programs.dconf.enable = true; # GTK apps persist settings here
     programs.xfconf.enable = true; # Thunar sidebar prefs (hidden-bookmarks)

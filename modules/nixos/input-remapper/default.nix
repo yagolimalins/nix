@@ -6,7 +6,7 @@
 # each user's ~/.config/input-remapper-2 (HM) and are applied by
 # `input-remapper-control --command autoload`:
 #
-#   - login: Hyprland exec-once
+#   - login: Umbriel sessionAutostart
 #   - hotplug: upstream udev rules
 #   - nixos-rebuild: ExecStartPost below (runuser — not root/--config-dir)
 #

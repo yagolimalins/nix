@@ -1,8 +1,8 @@
 #
 # bluetooth.nix — Bluetooth stack
 #
-# BlueZ powered on at boot with experimental features and the Blueman
-# applet for tray management. Codec/autoswitch tuning lives in audio.nix.
+# BlueZ powered on at boot with experimental features. Tray/UI via Noctalia
+# bluetooth widget — no Blueman applet. Codec/autoswitch in audio.nix.
 #
 {
   config,
@@ -15,7 +15,7 @@ let
   cfg = config.${namespace}.bluetooth;
 in
 {
-  options.${namespace}.bluetooth.enable = lib.mkEnableOption "Bluetooth (BlueZ + Blueman)";
+  options.${namespace}.bluetooth.enable = lib.mkEnableOption "Bluetooth (BlueZ)";
 
   config = lib.mkIf cfg.enable {
     hardware.bluetooth = {
@@ -29,7 +29,5 @@ in
         };
       };
     };
-
-    services.blueman.enable = true;
   };
 }

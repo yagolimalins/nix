@@ -18,14 +18,11 @@ let
     purple = "#bb9af7"; # terminal ANSI magenta only
   };
 
-  # #rrggbb → rrggbb (hyprland, hyprlock)
+  # #rrggbb → rrggbb (console, etc.)
   hexBare = lib.removePrefix "#";
 in
 {
   inherit palette hexBare;
-
-  # #rrggbb → rrggbbaa (fuzzel)
-  hexToRgba = color: alpha: "${hexBare color}${alpha}";
 
   # #rrggbb → rgb(r, g, b) with decimal channels (broot)
   hexToRgbFunc =

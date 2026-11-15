@@ -21,7 +21,7 @@ let
     package = gtkTheme;
   };
 
-  # Storm GTK uses cyan for selection; force accent to match Waybar/Kitty/Fuzzel.
+  # Storm GTK uses cyan for selection; force accent to match Kitty/palette.
   gtkSelectionCss = ''
     @define-color theme_selected_bg_color ${palette.accent};
     @define-color theme_selected_fg_color ${palette.onAccent};
@@ -63,11 +63,6 @@ in
       XCURSOR_THEME = cursor.name;
       XCURSOR_SIZE = toString cursor.size;
     };
-
-    wayland.windowManager.hyprland.settings.env = [
-      "XCURSOR_THEME,${cursor.name}"
-      "XCURSOR_SIZE,${toString cursor.size}"
-    ];
 
     qt = {
       enable = true;

@@ -11,7 +11,7 @@
     wallpaper = lib.mkOption {
       type = lib.types.path;
       default = "${pkgs.nixos-artwork.wallpapers.nineish-dark-gray}/share/backgrounds/nixos/nix-wallpaper-nineish-dark-gray.png";
-      description = "Wallpaper path used by Hyprland and hyprlock.";
+      description = "Wallpaper path used by Noctalia (and the greeter when synced).";
     };
   };
 }

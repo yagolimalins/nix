@@ -1,7 +1,7 @@
 #
 # fonts.nix — System fonts
 #
-# Inter for UI (GTK/Qt/LibreWolf/Waybar/Fuzzel), Noto CJK/emoji as fallback,
+# Inter for UI (GTK/Qt/LibreWolf), Noto CJK/emoji as fallback,
 # Fira Code + JetBrains Mono Nerd Fonts for terminal/IDEs, Symbols Nerd Font
 # for bar icons.
 #

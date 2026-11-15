@@ -51,7 +51,7 @@ in
 
         window_padding_width = 8;
 
-        # Wayland/Hyprland: reduce glyph flicker during open + resize.
+        # Wayland: reduce glyph flicker during open + resize.
         sync_to_monitor = "no";
         resize_debounce_time = 0;
         repaint_delay = 4;

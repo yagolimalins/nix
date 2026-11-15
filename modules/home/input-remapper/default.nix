@@ -1,5 +1,5 @@
 #
-# input-remapper — Declarative presets + Hyprland login autoload
+# input-remapper — Declarative presets + session login autoload
 #
 # Presets are store symlinks (GUI can't save). Rebuild reload:
 # NixOS mine.input-remapper ExecStartPost (runuser). Avoid HM oneshots —
@@ -52,7 +52,7 @@ in
     lib.mkEnableOption "declarative input-remapper presets";
 
   config = lib.mkIf cfg.enable {
-    wayland.windowManager.hyprland.settings.exec-once = [
+    ${namespace}.umbriel.extraAutostart = [
       "input-remapper-control --command autoload"
     ];
 

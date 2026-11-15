@@ -68,7 +68,7 @@ in
       // lib.genAttrs vlcMimeTypes (_: [ "vlc.desktop" ]);
     };
 
-    # CLI/demos/helpers that clutter fuzzel — keep Spotify, Blueman Manager, etc.
+    # CLI/demos/helpers that clutter the launcher — keep Spotify, etc.
     xdg.desktopEntries = hideFromLauncher [
       "btop"
       "bottom"
@@ -78,7 +78,6 @@ in
       "org.gtk.PrintEditor4"
       "org.gtk.gtk4.NodeEditor"
       "org.gtk.Shaper"
-      "blueman-adapters"
       "org.fcitx.Fcitx5"
       "org.fcitx.fcitx5-migrator"
       "kbd-layout-viewer5"

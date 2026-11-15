@@ -4,7 +4,8 @@
   imports = [
     ./hardware-configuration.nix
     ./custom.nix
-    (lib.${namespace}.dualMonitorHostModuleDesc "LG Electronics LG HDR WFHD")
+    # Must match `umbriel outputs` Config name (includes serial) or position is ignored.
+    (lib.${namespace}.dualMonitorHostModuleDesc "LG Electronics LG HDR WFHD 0x0001372E")
   ];
 
   networking.hostName = "thinkpad";

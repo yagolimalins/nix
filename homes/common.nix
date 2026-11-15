@@ -1,6 +1,6 @@
 # Shared Home Manager toggles (wired via homes.modules).
 # Literal `mine` required — `${namespace}` hits an HM freeformType cycle here.
-{ lib, pkgs, ... }:
+{ lib, ... }:
 
 {
   home.stateVersion = "26.05";
@@ -8,13 +8,10 @@
   mine = lib.mkMerge [
     (lib.mine.enable-modules [
       "xdg"
-      "hyprland"
-      "waybar"
-      "fuzzel"
+      "umbriel"
+      "noctalia"
       "kitty"
       "shell"
-      "notifications"
-      "lockscreen"
       "nightshift"
       "nh"
       "thunar"
@@ -27,7 +24,6 @@
     ])
     {
       usbAudio.enable = true;
-      user.wallpaper = "${pkgs.nixos-artwork.wallpapers.binary-blue}/share/backgrounds/nixos/nix-wallpaper-binary-blue.png";
     }
   ];
 }

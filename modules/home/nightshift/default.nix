@@ -1,8 +1,8 @@
 #
-# nightshift.nix — hyprsunset colour temperature
+# nightshift.nix — gammastep colour temperature
 #
 # Warms the screen to 3000 K at 18:00 and reverts at 06:00 via systemd
-# user timers. Can also be toggled manually from the Waybar button.
+# user timers. (hyprsunset was Hyprland-only; Umbriel uses gammastep.)
 #
 {
   config,
@@ -17,20 +17,20 @@ let
 in
 {
   options.${namespace}.nightshift.enable =
-    lib.mkEnableOption "hyprsunset colour-temperature schedule";
+    lib.mkEnableOption "gammastep colour-temperature schedule";
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ pkgs.hyprsunset ];
+    home.packages = [ pkgs.gammastep ];
 
-    systemd.user.services.hyprsunset-night = {
+    systemd.user.services.gammastep-night = {
       Unit.Description = "Activate night shift";
       Service = {
         Type = "oneshot";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'pkill hyprsunset || true; ${pkgs.hyprsunset}/bin/hyprsunset -t 3000 &'";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'pkill gammastep || true; ${pkgs.gammastep}/bin/gammastep -O 3000 &'";
       };
     };
 
-    systemd.user.timers.hyprsunset-night = {
+    systemd.user.timers.gammastep-night = {
       Unit.Description = "Activate night shift at 18:00";
       Timer = {
         OnCalendar = "*-*-* 18:00:00";
@@ -39,15 +39,15 @@ in
       Install.WantedBy = [ "timers.target" ];
     };
 
-    systemd.user.services.hyprsunset-day = {
+    systemd.user.services.gammastep-day = {
       Unit.Description = "Deactivate night shift";
       Service = {
         Type = "oneshot";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'pkill hyprsunset || true'";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'pkill gammastep || true'";
       };
     };
 
-    systemd.user.timers.hyprsunset-day = {
+    systemd.user.timers.gammastep-day = {
       Unit.Description = "Deactivate night shift at 06:00";
       Timer = {
         OnCalendar = "*-*-* 06:00:00";
