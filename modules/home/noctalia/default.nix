@@ -166,11 +166,18 @@ in
 
         widget = {
           # Pills without outer capsule — contrast with the right-side clusters.
+          # Dynamic inventory: hide empties; labels only when occupied/active.
           workspaces = {
             capsule = false;
             style = "regular";
             label_source = "id";
             labels_only_when_occupied = true;
+            hide_when_empty = true;
+            show_tooltip = false;
+            focused_color = "primary";
+            occupied_color = "secondary";
+            empty_color = "outline_variant";
+            change_color_on_hover = true;
           };
 
           clock = {
