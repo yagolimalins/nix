@@ -28,24 +28,23 @@ in
           polkit_agent = true;
           font_family = "Inter";
           corner_radius_scale = 0.6;
-          # Bar panels dock near the click; session + wallhaven float centered.
+          # Bar panels dock near the click; launcher/session/wallhaven float centered.
           panel = {
             control_center_placement = "attached";
             wallpaper_placement = "attached";
             clipboard_placement = "attached";
-            # Session/power menu floats centered; other panels stay bar-attached.
             session_placement = "floating";
-            launcher_placement = "attached";
+            launcher_placement = "floating";
             control_center_position = "auto";
             wallpaper_position = "auto";
             clipboard_position = "auto";
             session_position = "center";
-            launcher_position = "auto";
+            launcher_position = "center";
             open_near_click_control_center = true;
             open_near_click_wallpaper = true;
             open_near_click_clipboard = true;
             open_near_click_session = false;
-            open_near_click_launcher = true;
+            open_near_click_launcher = false;
           };
           # Simple launcher: search + apps only (no category chips / Providers view).
           launcher = {
