@@ -8,6 +8,8 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Noctalia ecosystem — no nixpkgs.follows so Cachix hashes match.
+    # noctalia/umbriel publish on branch `cachix`; greeter has no such branch but
+    # its package is still substituted from noctalia.cachix.org when keys match.
     noctalia.url = "github:noctalia-dev/noctalia/cachix";
     noctalia-greeter.url = "github:noctalia-dev/noctalia-greeter";
     umbriel.url = "github:noctalia-dev/umbriel/cachix";

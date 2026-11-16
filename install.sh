@@ -7,9 +7,9 @@
 #   1. Detect EFI+ESP vs BIOS/VM boot needs
 #   2. Generate hardware-configuration.nix (strips Docker/Podman overlays)
 #   3. Scaffold systems/<arch>/<host>/ and homes/<arch>/<user>/ if missing
-#   4. Enable flakes; create Secure Boot keys when appropriate
+#   4. Enable flakes + Noctalia/Umbriel Cachix (before first compile)
 #   5. Clear the installing user's nix profile (avoids HM activation clashes)
-#   6. nixos-rebuild switch --flake .#<host>
+#   6. nixos-rebuild switch --flake .#<host> (with cache --option flags)
 #
 # What it does NOT do:
 #   - Rewrite an existing systems/.../default.nix (edit boot options yourself)
@@ -485,27 +485,50 @@ fi
 
 git_stage "$HOST_DIR" "$USER_DIR"
 
-# ── 4. Flakes + hooks ────────────────────────────────────────────────────────
+# ── 4. Flakes + binary caches ────────────────────────────────────────────────
 
-step "4 — Flakes"
+step "4 — Flakes + Cachix"
 
 CONFIG_DIR="${OWNER_HOME}/.config/nix"
 CONFIG_FILE="${CONFIG_DIR}/nix.conf"
 FLAKES_LINE="experimental-features = nix-command flakes"
+# Same keys as modules/nixos/nix — needed before the first switch so noctalia /
+# umbriel / greeter substitute instead of compiling from the GitHub flakes.
+NOCTALIA_CACHE="https://noctalia.cachix.org"
+UMBRIEL_CACHE="https://umbriel.cachix.org"
+NOCTALIA_KEY="noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+UMBRIEL_KEY="umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
+CACHE_NIXOS_KEY="cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
 
-if grep -Fxq "$FLAKES_LINE" "$CONFIG_FILE" 2>/dev/null; then
-    success "Flakes already enabled (${CONFIG_FILE})."
-else
-    if mkdir -p "$CONFIG_DIR" 2>/dev/null && [[ -w "$CONFIG_DIR" ]]; then
-        echo "$FLAKES_LINE" >>"$CONFIG_FILE"
+ensure_nix_conf_line() {
+    local file="$1" line="$2"
+    grep -Fxq "$line" "$file" 2>/dev/null && return 0
+    if [[ -w "$(dirname "$file")" ]] 2>/dev/null || [[ -w "$file" ]]; then
+        mkdir -p "$(dirname "$file")"
+        echo "$line" >>"$file"
     else
-        sudo mkdir -p "$CONFIG_DIR"
-        echo "$FLAKES_LINE" | sudo tee -a "$CONFIG_FILE" >/dev/null
-        sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$CONFIG_DIR"
+        sudo mkdir -p "$(dirname "$file")"
+        echo "$line" | sudo tee -a "$file" >/dev/null
+        sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$(dirname "$file")" 2>/dev/null || true
     fi
-    success "Enabled flakes in ${CONFIG_FILE}."
+}
+
+if mkdir -p "$CONFIG_DIR" 2>/dev/null && [[ -w "$CONFIG_DIR" ]]; then
+    :
+else
+    sudo mkdir -p "$CONFIG_DIR"
+    sudo chown -R "${OWNER_USER}:${OWNER_GROUP}" "$CONFIG_DIR"
 fi
-export NIX_CONFIG="experimental-features = nix-command flakes"
+
+ensure_nix_conf_line "$CONFIG_FILE" "$FLAKES_LINE"
+ensure_nix_conf_line "$CONFIG_FILE" "extra-substituters = ${NOCTALIA_CACHE} ${UMBRIEL_CACHE}"
+ensure_nix_conf_line "$CONFIG_FILE" "extra-trusted-public-keys = ${NOCTALIA_KEY} ${UMBRIEL_KEY}"
+success "Flakes + Noctalia/Umbriel Cachix in ${CONFIG_FILE}."
+
+# Client-side for this install run (sudo --preserve-env=NIX_CONFIG below).
+export NIX_CONFIG="experimental-features = nix-command flakes
+extra-substituters = ${NOCTALIA_CACHE} ${UMBRIEL_CACHE} https://cache.nixos.org
+extra-trusted-public-keys = ${NOCTALIA_KEY} ${UMBRIEL_KEY} ${CACHE_NIXOS_KEY}"
 
 if [[ -d .githooks ]]; then
     if [[ "$(git config --get core.hooksPath 2>/dev/null || true)" == ".githooks" ]]; then
@@ -556,7 +579,11 @@ step "6 — Apply configuration"
 clear_user_nix_profile "$OWNER_USER"
 
 info "sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake .#${HOST}"
-sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake ".#${HOST}"
+# Pass caches as --option too: the nix daemon may ignore NIX_CONFIG for
+# trusted settings until the flake's nix.settings land after this switch.
+sudo --preserve-env=NIX_CONFIG nixos-rebuild switch --flake ".#${HOST}" \
+    --option extra-substituters "${NOCTALIA_CACHE} ${UMBRIEL_CACHE} https://cache.nixos.org" \
+    --option extra-trusted-public-keys "${NOCTALIA_KEY} ${UMBRIEL_KEY} ${CACHE_NIXOS_KEY}"
 success "Applied .#${HOST}"
 
 # ── 7. Enrollment notes ──────────────────────────────────────────────────────

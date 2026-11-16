@@ -153,4 +153,58 @@ in
 
   gtkStormThemeName = "Tokyonight-Dark-Storm";
   numixSquareThemeName = "Numix-Square";
+
+  # Noctalia custom palette (version 2) from the Storm colors above.
+  # https://docs.noctalia.dev/noctalia/theming/palette/
+  mkNoctaliaStormPalette =
+    p:
+    {
+      version = 2;
+      dark = {
+        primary = p.accent;
+        on_primary = p.onAccent;
+        secondary = p.cyan;
+        on_secondary = p.onAccent;
+        tertiary = p.purple;
+        on_tertiary = p.onAccent;
+        error = p.urgent;
+        on_error = p.onAccent;
+        surface = p.bg;
+        on_surface = p.text;
+        surface_container = p.surface;
+        on_surface_variant = p.muted;
+        outline_variant = p.border;
+        shadow = p.surface;
+        hover = p.border;
+        on_hover = p.text;
+        terminal = {
+          background = p.bg;
+          foreground = p.text;
+          cursor = p.text;
+          cursor_text = p.bg;
+          selection_bg = p.accent;
+          selection_fg = p.onAccent;
+          normal = {
+            black = p.bg;
+            red = p.urgent;
+            green = p.ok;
+            yellow = p.warning;
+            blue = p.accent;
+            magenta = p.purple;
+            cyan = p.cyan;
+            white = p.text;
+          };
+          bright = {
+            black = p.muted;
+            red = p.urgent;
+            green = p.ok;
+            yellow = p.warning;
+            blue = p.accent;
+            magenta = p.purple;
+            cyan = p.cyan;
+            white = p.text;
+          };
+        };
+      };
+    };
 }

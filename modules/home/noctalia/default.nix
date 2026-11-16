@@ -23,6 +23,10 @@ in
       enable = true;
       # Autostart from Umbriel general.autostart — not a systemd user unit.
       systemd.enable = false;
+
+      # Same Storm colors as mine.theme / Umbriel chrome.
+      customPalettes.mine-storm = lib.${namespace}.mkNoctaliaStormPalette palette;
+
       settings = {
         shell = {
           polkit_agent = true;
@@ -60,11 +64,10 @@ in
           };
         };
 
-        # Closest builtin to Tokyo Night Storm (mine.theme palette).
         theme = {
           mode = "dark";
-          source = "builtin";
-          builtin = "Tokyo-Night";
+          source = "custom";
+          custom_palette = "mine-storm";
         };
 
         wallpaper = {
