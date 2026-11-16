@@ -12,7 +12,7 @@
       "noctalia"
       "kitty"
       "shell"
-      "nightshift"
+      # nightshift (gammastep) replaced by Noctalia nightlight widget/service
       "nh"
       "thunar"
       "theme"

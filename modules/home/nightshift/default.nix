@@ -1,8 +1,9 @@
 #
-# nightshift.nix — gammastep colour temperature
+# nightshift.nix — gammastep colour temperature (opt-in; off in homes/common.nix)
 #
-# Warms the screen to 3000 K at 18:00 and reverts at 06:00 via systemd
-# user timers. (hyprsunset was Hyprland-only; Umbriel uses gammastep.)
+# Superseded on the Umbriel/Noctalia desktop by programs.noctalia nightlight
+# (bar widget + location schedule). Keep this module for hosts that want
+# gammastep timers instead: 3000 K at 18:00, off at 06:00.
 #
 {
   config,

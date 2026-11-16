@@ -111,6 +111,17 @@ in
           };
         };
 
+        # Night light schedule needs coordinates (also used by weather if re-enabled).
+        location.auto_locate = true;
+
+        # Replaces mine.nightshift (gammastep). Bar widget toggles on/force.
+        nightlight = {
+          enabled = true;
+          force = false;
+          temperature_day = 6500;
+          temperature_night = 3000;
+        };
+
         # Full-width bar: workspaces + media on the left; system cluster on the right.
         bar.default = {
           margin_ends = 0;
@@ -126,6 +137,7 @@ in
           capsule_padding = 8;
           capsule_radius = 8.0;
           # Left: workspaces → now-playing; center clock; right system cluster.
+          # Brightness cluster: volume → brightness → nightlight → caffeine.
           start = [
             "workspaces"
             "media"
@@ -152,6 +164,8 @@ in
               members = [
                 "volume"
                 "brightness"
+                "nightlight"
+                "caffeine"
               ];
             }
             {
