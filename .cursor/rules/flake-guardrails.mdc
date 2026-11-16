@@ -22,8 +22,13 @@ for architecture and [README.md](../../README.md) for the layout.
 
 - `git add` new files. Flakes ignore untracked paths, so a new module does not exist as far as
   `nix flake check` is concerned until it is staged.
-- Finish with `nh os switch`. Do **not** run `nix fmt` or `nix flake check` unless the user
-  asks — they format and check locally.
+
+## Never run unprompted
+
+- `nh os switch`, `nixos-rebuild`, or any command that builds or activates a system generation.
+  The user rebuilds and switches locally. Run one only when the user explicitly asks in the
+  current turn.
+- `nix fmt` or `nix flake check` — the user formats and checks locally.
 
 ## Verification gotcha
 

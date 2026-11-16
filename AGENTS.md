@@ -72,14 +72,14 @@ plus the options declaration, and each submodule owns one concern and repeats th
 
 ## Verifying a change
 
-Agents finish with:
+Do **not** run `nh os switch`, `nixos-rebuild`, `nix fmt`, or `nix flake check` unless the user
+explicitly asks in the current turn. The user rebuilds, switches, formats, and checks locally.
+
+When the user does ask for a switch:
 
 ```bash
 nh os switch
 ```
-
-Do **not** run `nix fmt` or `nix flake check` unless the user asks. The user formats and checks
-locally when ready.
 
 When you want a full build without switching (e.g. to compare closures after a refactor):
 
