@@ -32,7 +32,7 @@ in
           polkit_agent = true;
           font_family = "Inter";
           corner_radius_scale = 0.6;
-          # Bar panels dock near the click; launcher/session/wallhaven float centered.
+          # Bar panels dock near the click; launcher/session float centered.
           panel = {
             control_center_placement = "attached";
             wallpaper_placement = "attached";
@@ -50,7 +50,8 @@ in
             open_near_click_session = false;
             open_near_click_launcher = false;
           };
-          # Simple launcher: search + apps only (no category chips / Providers view).
+          # Simple launcher: search + apps only (no category chips). The panels
+          # provider stays on, so the Wallhaven browser opens via /pan.
           launcher = {
             layout = "simple";
             categories = false;
@@ -110,13 +111,6 @@ in
           };
         };
 
-        # Weather tab needs this + location coordinates.
-        weather = {
-          enabled = true;
-          unit = "celsius";
-        };
-        location.auto_locate = true;
-
         # Full-width bar: workspaces + media on the left; system cluster on the right.
         bar.default = {
           margin_ends = 0;
@@ -141,10 +135,7 @@ in
             "tray"
             "group:net"
             "group:audio"
-            "weather"
-            "wallhaven"
-            "sysmon"
-            "battery"
+            "group:metrics"
             "notifications"
             "session"
           ];
@@ -161,6 +152,14 @@ in
               members = [
                 "volume"
                 "brightness"
+              ];
+            }
+            {
+              id = "metrics";
+              members = [
+                "sysmon"
+                "power-profile"
+                "battery"
               ];
             }
           ];
@@ -198,19 +197,6 @@ in
           brightness = {
             show_label = false;
             show_when_unavailable = true;
-          };
-
-          # Glyph only — no temperature/condition text or hover peek.
-          weather = {
-            peek = false;
-            show_condition = false;
-            show_temperature = false;
-            show_tooltip = false;
-          };
-
-          # Official Wallhaven browser panel.
-          wallhaven = {
-            type = "noctalia/wallhaven:wallhaven";
           };
 
           sysmon = {
