@@ -158,7 +158,6 @@ in
               id = "metrics";
               members = [
                 "sysmon"
-                "power-profile"
                 "battery"
               ];
             }

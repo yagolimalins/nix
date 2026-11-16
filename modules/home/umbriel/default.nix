@@ -148,6 +148,11 @@ in
             action = "window-toggle-pinned";
             repeat = false;
           };
+          # CPU governor: powersave <-> performance (modules/nixos/power).
+          "Mod+Shift+P" = {
+            action = "spawn sudo /etc/cpugov-toggle";
+            repeat = false;
+          };
           "Mod+J" = "layout-toggle-split";
 
           # Focus (arrows — Mod+L is lock)
