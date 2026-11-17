@@ -2,6 +2,10 @@
 { ... }:
 
 {
+  # The IdeaPad EC keeps restoring a soft block on Bluetooth, so BlueZ fails
+  # to power the adapter on boot (mgmt status 0x03). Skip that platform rfkill.
+  boot.kernelParams = [ "ideapad_laptop.no_bt_rfkill=1" ];
+
   services.xserver.videoDrivers = [ "amdgpu" ];
 
   hardware.graphics = {
