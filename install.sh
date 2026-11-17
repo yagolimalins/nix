@@ -89,6 +89,7 @@ package_group_toggle_lines() {
     gtk = true;
     dotnet = true;
     go = true;
+    flutter = true;
     databases = true;
     api = true;
     office = true;

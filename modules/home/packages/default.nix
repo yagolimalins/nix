@@ -20,6 +20,7 @@ in
     ./groups/system.nix
     ./groups/desktop.nix
     ./groups/dev.nix
+    ./groups/flutter.nix
     ./groups/apps.nix
     ./groups/media.nix
   ];

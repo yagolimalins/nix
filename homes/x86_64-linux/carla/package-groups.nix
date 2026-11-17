@@ -27,6 +27,7 @@ let
     gtk = true;
     dotnet = true;
     go = true;
+    flutter = false;
 
     # apps
     databases = true;

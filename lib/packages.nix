@@ -28,6 +28,7 @@ let
     gtk = "GTK4/Libadwaita (Relm4, …)";
     dotnet = ".NET SDK";
     go = "Go toolchain";
+    flutter = "Flutter stable + Android SDK (device, no emulator)";
 
     databases = "database GUIs";
     api = "API clients";
