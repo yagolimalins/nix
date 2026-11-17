@@ -113,6 +113,7 @@ in
           enabled = true;
           widget_order = [
             "lockscreen-login-box@DP-3"
+            "lockscreen-login-box@HDMI-A-1"
             "lockscreen-login-box@eDP-1"
           ];
           widget = {
@@ -120,6 +121,33 @@ in
             "lockscreen-login-box@DP-3" = {
               type = "login_box";
               output = "DP-3";
+              cx = 1280.0;
+              cy = 540.0; # geometric center of 2560x1080
+              box_width = 0.0;
+              box_height = 0.0;
+              placement_width = 2560.0;
+              placement_height = 1080.0;
+              rotation = 0.0;
+              settings = {
+                background_color = "surface_container";
+                background_opacity = 0.88;
+                background_radius = 12.0;
+                layout = "compact";
+                show_keyboard_layout = true;
+                show_caps_lock = false;
+                show_password_reveal = false;
+                show_login_button = false;
+                show_unlock_hint = false;
+                show_media = false;
+                show_media_controls = false;
+                show_weather = false;
+                show_session_buttons = false;
+              };
+            };
+            # Laptop ultrawide is HDMI-A-1; an unmatched output gets a regular box.
+            "lockscreen-login-box@HDMI-A-1" = {
+              type = "login_box";
+              output = "HDMI-A-1";
               cx = 1280.0;
               cy = 540.0; # geometric center of 2560x1080
               box_width = 0.0;
