@@ -92,9 +92,84 @@ in
         lockscreen = {
           enabled = true;
           lock_before_suspend = true;
-          blur_intensity = 0.4;
+          dnd = true;
+          fingerprint = true;
+          grace_period_seconds = 0;
+          allow_empty_password = false;
+          # Desktop freeze when screencopy works; else falls back to wallpaper.
+          blurred_desktop = true;
+          blur_intensity = 0.55;
           tint_intensity = 0.4;
           tint_color = "surface";
+          transition = [ "fade" ];
+          transition_duration = 800;
+          edge_smoothness = 0.4;
+          # Empty = lock UI on every output (ultrawide + laptop).
+          monitors = [ ];
+        };
+
+        # Minimal login boxes: centered password field, Enter to unlock.
+        lockscreen_widgets = {
+          enabled = true;
+          widget_order = [
+            "lockscreen-login-box@DP-3"
+            "lockscreen-login-box@eDP-1"
+          ];
+          widget = {
+            # compact layout; 0 = Noctalia default size (~400px width cap).
+            "lockscreen-login-box@DP-3" = {
+              type = "login_box";
+              output = "DP-3";
+              cx = 1280.0;
+              cy = 540.0; # geometric center of 2560x1080
+              box_width = 0.0;
+              box_height = 0.0;
+              placement_width = 2560.0;
+              placement_height = 1080.0;
+              rotation = 0.0;
+              settings = {
+                background_color = "surface_container";
+                background_opacity = 0.88;
+                background_radius = 12.0;
+                layout = "compact";
+                show_keyboard_layout = true;
+                show_caps_lock = false;
+                show_password_reveal = false;
+                show_login_button = false;
+                show_unlock_hint = false;
+                show_media = false;
+                show_media_controls = false;
+                show_weather = false;
+                show_session_buttons = false;
+              };
+            };
+            "lockscreen-login-box@eDP-1" = {
+              type = "login_box";
+              output = "eDP-1";
+              cx = 960.0;
+              cy = 540.0; # geometric center of 1920x1080
+              box_width = 0.0;
+              box_height = 0.0;
+              placement_width = 1920.0;
+              placement_height = 1080.0;
+              rotation = 0.0;
+              settings = {
+                background_color = "surface_container";
+                background_opacity = 0.88;
+                background_radius = 12.0;
+                layout = "compact";
+                show_keyboard_layout = true;
+                show_caps_lock = false;
+                show_password_reveal = false;
+                show_login_button = false;
+                show_unlock_hint = false;
+                show_media = false;
+                show_media_controls = false;
+                show_weather = false;
+                show_session_buttons = false;
+              };
+            };
+          };
         };
 
         # Idle: lock after 10m, screen off shortly after.

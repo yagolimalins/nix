@@ -60,6 +60,8 @@ in
           theme_mode = "dark";
           font_family = "Inter";
           corner_radius_scale = 0.6;
+          hide_logo = true;
+          scheme_selector_position = "hidden";
           palette = {
             primary = palette.accent;
             on_primary = palette.onAccent;
