@@ -4,6 +4,7 @@
 {
   ${namespace} = lib.${namespace}.enable-modules [
     "adb"
+    "artcraft"
     "audio"
     "bluetooth"
     "boot"

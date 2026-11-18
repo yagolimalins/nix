@@ -125,7 +125,11 @@ let
   # modules (https://github.com/tauri-apps/tauri/issues/7354).
   webkitGtkSessionVars = {
     GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules";
+    # Flatpak exports are not on the default search path, so the launcher
+    # never sees user-installed apps or their icons. Nonexistent dirs are ignored.
     XDG_DATA_DIRS = lib.concatStringsSep ":" [
+      "${config.home.homeDirectory}/.local/share/flatpak/exports/share"
+      "/var/lib/flatpak/exports/share"
       "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}"
       "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}"
       "${config.home.profileDirectory}/share"
@@ -362,12 +366,22 @@ in
       ++ wryDesktopLibs;
     })
 
-    (lib.mkIf (cfg.enable && (cfg.dioxus.enable || cfg.tauri.enable)) {
-      home.sessionVariables = webkitGtkSessionVars // {
-        # mold/cc need this at link time for -lxdo (libxdo ships inside xdotool).
-        LIBRARY_PATH = lib.makeSearchPath "lib" (if cfg.tauri.enable then tauriLibs else wryDesktopLibs);
-      };
-    })
+    (lib.mkIf
+      (cfg.enable && (cfg.dioxus.enable || cfg.tauri.enable || config.${namespace}.artcraft.enable))
+      {
+        home.sessionVariables =
+          {
+            XDG_DATA_DIRS = webkitGtkSessionVars.XDG_DATA_DIRS;
+          }
+          // lib.optionalAttrs (cfg.dioxus.enable || cfg.tauri.enable) (
+            removeAttrs webkitGtkSessionVars [ "XDG_DATA_DIRS" ]
+            // {
+              # mold/cc need this at link time for -lxdo (libxdo ships inside xdotool).
+              LIBRARY_PATH = lib.makeSearchPath "lib" (if cfg.tauri.enable then tauriLibs else wryDesktopLibs);
+            }
+          );
+      }
+    )
 
     (lib.mkIf (on "tauri") {
       # Native libs stay on PKG_CONFIG_PATH / LD_LIBRARY_PATH only —

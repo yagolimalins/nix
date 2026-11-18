@@ -3,4 +3,6 @@
 
 {
   imports = [ ./package-groups.nix ];
+
+  mine.artcraft.enable = true;
 }

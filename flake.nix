@@ -38,6 +38,9 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # v0.7.0 has no flake inputs; do not set nixpkgs.follows.
+    nix-flatpak.url = "github:gmodena/nix-flatpak/v0.7.0";
   };
 
   outputs =
@@ -63,6 +66,7 @@
       homes.modules = [
         inputs.umbriel.homeModules.default
         inputs.noctalia.homeModules.default
+        inputs.nix-flatpak.homeManagerModules.nix-flatpak
         ./homes/common.nix
       ];
 
