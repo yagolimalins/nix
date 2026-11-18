@@ -289,8 +289,11 @@ in
             style = "regular";
             label_source = "id";
             labels_only_when_occupied = true;
-            hide_when_empty = true;
+            hide_when_empty = false;
             show_tooltip = false;
+            # Same size for active/inactive — only color marks focus.
+            active_pill_size = 1.0;
+            inactive_pill_size = 1.0;
             focused_color = "primary";
             occupied_color = "secondary";
             empty_color = "outline_variant";

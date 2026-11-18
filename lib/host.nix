@@ -14,8 +14,8 @@ let
           0
         ];
         scale = 1.0;
-        # Dynamic inventory (fixed count was only latent until monitor identity matched).
-        workspaces = "dynamic";
+        # Fixed inventory so empty workspaces keep their numbers (dynamic prunes/renumbers).
+        workspaces = 5;
         workspace_axis = "horizontal";
         focus_at_startup = true;
         layout.mode = "dwindle";
@@ -28,7 +28,7 @@ let
         ];
         scale = 1.0;
         # Built-in panel: connector name is stable (identity is "LG Display 0x0521 Unknown").
-        workspaces = "dynamic";
+        workspaces = 5;
         workspace_axis = "horizontal";
         layout.mode = "dwindle";
       };
