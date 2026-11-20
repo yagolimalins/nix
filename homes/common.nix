@@ -21,6 +21,7 @@
       "librewolf"
       "packages"
       "input-remapper"
+      "input-method"
     ])
     {
       usbAudio.enable = true;
