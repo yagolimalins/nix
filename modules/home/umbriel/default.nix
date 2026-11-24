@@ -162,7 +162,7 @@ in
           "Mod+Shift+Up" = "window-modify-secondary-extent -0.05";
           "Mod+Shift+Down" = "window-modify-secondary-extent +0.05";
 
-          # Workspaces 1–9 (external), 0 → internal panel workspace
+          # Workspaces 1–10 (Mod+0 → 10)
           "Mod+1" = "workspace-switch 1";
           "Mod+2" = "workspace-switch 2";
           "Mod+3" = "workspace-switch 3";
@@ -172,7 +172,7 @@ in
           "Mod+7" = "workspace-switch 7";
           "Mod+8" = "workspace-switch 8";
           "Mod+9" = "workspace-switch 9";
-          "Mod+0" = "workspace-switch 1 --output eDP-1";
+          "Mod+0" = "workspace-switch 10";
 
           "Mod+Shift+1" = "window-move-to-workspace 1";
           "Mod+Shift+2" = "window-move-to-workspace 2";
@@ -183,9 +183,17 @@ in
           "Mod+Shift+7" = "window-move-to-workspace 7";
           "Mod+Shift+8" = "window-move-to-workspace 8";
           "Mod+Shift+9" = "window-move-to-workspace 9";
-          "Mod+Shift+0" = "window-move-to-workspace 1 --output eDP-1";
+          "Mod+Shift+0" = "window-move-to-workspace 10";
 
           # Media / volume / brightness via Noctalia OSD
+          "Mod+bracketleft" = {
+            action = "spawn noctalia msg volume-up";
+            allow_when_locked = true;
+          };
+          "Mod+bracketright" = {
+            action = "spawn noctalia msg volume-down";
+            allow_when_locked = true;
+          };
           "Mod+semicolon" = {
             action = "spawn noctalia msg media toggle";
             allow_when_locked = true;
